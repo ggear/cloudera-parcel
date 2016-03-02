@@ -44,12 +44,12 @@ To perform a release:
 
 ```bash
 # Change the following variables to appropriate values for your target environment
-export CP_VERSION_RELEASE=0.2.0
-export CP_VERSION_HEAD=0.3.0
+export CP_VERSION_RELEASE=0.3.0
+export CP_VERSION_HEAD=0.4.0
 mvn clean install
 mvn release:prepare -B -DreleaseVersion=$CP_VERSION_RELEASE -DdevelopmentVersion=$CP_VERSION_HEAD-SNAPSHOT
 mvn release:clean clean
-find . -type f -name pom.xml | xargs sed -i "" 's/'$CP_VERSION_RELEASE'-SNAPSHOT/'$CP_VERSION_HEAD'-SNAPHSOT/g';
+find . -type f -name pom.xml | xargs sed -i "" 's/'$CP_VERSION_RELEASE'-SNAPSHOT/'$CP_VERSION_HEAD'-SNAPSHOT/g';
 git add -A
 git commit -m "[maven-release-plugin] prepare sub modules for next development iteration"
 git push --all
