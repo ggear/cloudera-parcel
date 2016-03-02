@@ -104,7 +104,7 @@
 
 	<modules>
 		<module>cloudera-parcel-plugin</module>
-	</modules>		
+	</modules>
 
 	<dependencies>
 		<dependency>

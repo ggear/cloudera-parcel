@@ -3,10 +3,10 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>com.cloudera.framework.parcel</groupId>
-	<artifactId>cloudera-parcel-repository-kudu-sn-osx</artifactId>
+	<groupId>com.cloudera.parcel</groupId>
+	<artifactId>KUDU_SINGLE_NODE</artifactId>
 	<packaging>parcel</packaging>
-	<version>cdh5.5.1</version>
+	<version>0.6.0.cdh5.5.1</version>
 
 	<parent>
 		<groupId>com.cloudera.parcel</groupId>
@@ -15,7 +15,7 @@
 	</parent>
 
 	<properties>
-		<parcel.classifier>0.6.0</parcel.classifier>
+		<parcel.classifier>osx</parcel.classifier>
 	</properties>
 
 	<build>
@@ -24,7 +24,7 @@
 				<groupId>com.cloudera.parcel</groupId>
 				<artifactId>cloudera-parcel-plugin</artifactId>
 				<version>0.1.0-SNAPSHOT</version>
-				<extensions>true</extensions>				
+				<extensions>true</extensions>
 			</plugin>
 		</plugins>
 	</build>
