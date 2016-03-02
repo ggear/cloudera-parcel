@@ -51,5 +51,4 @@ mvn release:prepare -B -DreleaseVersion=$CP_VERSION_RELEASE -DdevelopmentVersion
 mvn release:clean
 git push --all
 git tag
-git branch --all
 ```
