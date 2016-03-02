@@ -48,7 +48,10 @@ export CP_VERSION_RELEASE=0.1.0
 export CP_VERSION_HEAD=0.2.0
 mvn clean install
 mvn release:prepare -B -DreleaseVersion=$CP_VERSION_RELEASE -DdevelopmentVersion=$CP_VERSION_HEAD-SNAPSHOT
-mvn release:clean
+mvn release:clean clean
+find . -type f -name pom.xml | xargs sed -i "" 's/'$CP_VERSION_RELEASE'-SNAPSHOT/'$CP_VERSION_HEAD'-SNAPHSOT/g';
+git add -A
+git commit -m "[maven-release-plugin] prepare sub modules for next development iteration"
 git push --all
 git tag
 ```

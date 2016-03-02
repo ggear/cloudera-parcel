@@ -6,7 +6,13 @@
 	<groupId>com.cloudera.parcel</groupId>
 	<artifactId>cloudera-parcel-repository</artifactId>
 	<packaging>pom</packaging>
-	<version>0.1.0-SNAPSHOT</version>
+	<version>0.2.0-SNAPHSOT</version>
+
+	<parent>
+		<groupId>com.cloudera</groupId>
+		<artifactId>cloudera-parcel</artifactId>
+		<version>0.2.0-SNAPHSOT</version>
+	</parent>
 
 	<modules>
 		<module>cloudera-parcel-repository-kudu-sn-osx</module>

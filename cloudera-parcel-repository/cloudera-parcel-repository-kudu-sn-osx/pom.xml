@@ -11,7 +11,7 @@
 	<parent>
 		<groupId>com.cloudera.parcel</groupId>
 		<artifactId>cloudera-parcel-repository</artifactId>
-		<version>0.1.0-SNAPSHOT</version>
+		<version>0.2.0-SNAPHSOT</version>
 	</parent>
 
 	<properties>
@@ -23,7 +23,7 @@
 			<plugin>
 				<groupId>com.cloudera.parcel</groupId>
 				<artifactId>cloudera-parcel-plugin</artifactId>
-				<version>0.1.0-SNAPSHOT</version>
+				<version>0.2.0-SNAPHSOT</version>
 				<extensions>true</extensions>
 			</plugin>
 		</plugins>
