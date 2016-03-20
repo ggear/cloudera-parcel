@@ -46,7 +46,7 @@ To perform a release:
 # Change the following variables to appropriate values for your target environment
 export CP_VERSION_RELEASE=0.5.0
 export CP_VERSION_HEAD=0.6.0
-mvn clean install
+mvn clean install -PCMP
 mvn release:prepare -B -DreleaseVersion=$CP_VERSION_RELEASE -DdevelopmentVersion=$CP_VERSION_HEAD-SNAPSHOT
 mvn release:clean clean
 find . -type f -name pom.xml | xargs sed -i "" 's/'$CP_VERSION_RELEASE'-SNAPSHOT/'$CP_VERSION_HEAD'-SNAPSHOT/g';
