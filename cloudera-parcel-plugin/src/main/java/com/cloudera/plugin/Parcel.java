@@ -102,25 +102,27 @@ public class Parcel {
         localPath.delete();
         localPathSha1.delete();
       }
-    } else if (localPath.exists() && !localPathSha1.exists()) {
+    } else if (localPath.exists() && !localPathSha1.exists() && assertHash) {
       localPath.delete();
     } else if (!localPath.exists() && localPathSha1.exists()) {
       localPathSha1.delete();
     }
-    if (!localPath.exists() && !localPathSha1.exists()) {
+    if (!localPath.exists()) {
       log.info("Downloding: " + remoteUrl);
-      if (downloaded = downloadHttpResource(remoteUrl, localPath)
-          && downloadHttpResource(remoteUrlSha1, localPathSha1)) {
-        if (!assertSha1(localPath, localPathSha1)) {
+      if ((downloaded = downloadHttpResource(remoteUrl, localPath)) && assertHash) {
+        if ((downloaded = downloadHttpResource(remoteUrlSha1, localPathSha1))
+            && !assertSha1(localPath, localPathSha1)) {
           localPath.delete();
           localPathSha1.delete();
           throw new MojoExecutionException(
               "Downloaded file from (" + remoteUrl + ") failed to match checksum (" + remoteUrlSha1 + ")");
         }
-        log.info("Downloded: " + remoteUrl);
       }
     }
-    return downloaded && localPath.exists() && localPathSha1.exists();
+    if (downloaded) {
+      log.info("Downloded: " + remoteUrl);
+    }
+    return downloaded;
   }
 
   public boolean explode(Log log, String dirRepository) throws MojoExecutionException {
@@ -312,10 +314,13 @@ public class Parcel {
   private String classifier = getOsDescriptor();
 
   @Parameter(required = false, defaultValue = "")
-  private String outputDirectory;
+  private String outputDirectory = "";
 
   @Parameter(required = false, defaultValue = "")
-  private String linkDirectory;
+  private String linkDirectory = "";
+
+  @Parameter(required = false, defaultValue = "true")
+  private Boolean assertHash = Boolean.TRUE;
 
   @Parameter(required = false, defaultValue = "parcel")
   private String type = "parcel";
@@ -324,7 +329,7 @@ public class Parcel {
   }
 
   public Parcel(String repositoryUrl, String groupId, String artifactId, String version, String classifier,
-      String outputDirectory, String linkDirectory, String type) {
+      String outputDirectory, String linkDirectory, Boolean assertHash, String type) {
     this.repositoryUrl = repositoryUrl;
     this.groupId = groupId;
     this.artifactId = artifactId;
@@ -332,6 +337,7 @@ public class Parcel {
     this.classifier = classifier;
     this.outputDirectory = outputDirectory;
     this.linkDirectory = linkDirectory;
+    this.assertHash = assertHash;
     this.type = type;
   }
 
@@ -397,6 +403,14 @@ public class Parcel {
 
   public void setLinkDirectory(String linkDirectory) {
     this.linkDirectory = linkDirectory;
+  }
+
+  public Boolean getAssertHash() {
+    return assertHash;
+  }
+
+  public void setAssertHash(Boolean assertHash) {
+    this.assertHash = assertHash;
   }
 
   public String getType() {

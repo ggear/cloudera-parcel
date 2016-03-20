@@ -89,26 +89,26 @@ public class ParcelTest {
 
   @Test(expected = MojoExecutionException.class)
   public void testIsValidEmpty() throws MojoExecutionException {
-    Assert.assertTrue(new Parcel("", "", "", "", "", "", "", "").isValid());
+    Assert.assertTrue(new Parcel("", "", "", "", "", "", "", true, "").isValid());
   }
 
   @Test()
   public void testIsValid() throws MojoExecutionException {
-    Assert.assertTrue(new Parcel("a", "a", "a", "a", "a", "a", "a", "a").isValid());
+    Assert.assertTrue(new Parcel("a", "a", "a", "a", "a", "a", "a", true, "a").isValid());
   }
 
   @Test
   public void testGetArtifactName() throws MojoExecutionException {
     Assert.assertEquals(PARCEL_ARTIFACT_ID + "-" + PARCEL_VERSION + "-" + PARCEL_CLASSIFIER + "." + PARCEL_TYPE,
         new Parcel(PARCEL_REPO_URL, PARCEL_GROUP_ID, PARCEL_ARTIFACT_ID, PARCEL_VERSION, PARCEL_CLASSIFIER,
-            PATH_EXPLODE, PATH_EXPLODE_LINK, PARCEL_TYPE).getArtifactName());
+            PATH_EXPLODE, PATH_EXPLODE_LINK, true, PARCEL_TYPE).getArtifactName());
   }
 
   @Test
   public void testGetArtifactNameSansClassifierType() throws MojoExecutionException {
     Assert.assertEquals(PARCEL_ARTIFACT_ID + "-" + PARCEL_VERSION,
         new Parcel(PARCEL_REPO_URL, PARCEL_GROUP_ID, PARCEL_ARTIFACT_ID, PARCEL_VERSION, PARCEL_CLASSIFIER,
-            PATH_EXPLODE, PATH_EXPLODE_LINK, PARCEL_TYPE).getArtifactNameSansClassifierType());
+            PATH_EXPLODE, PATH_EXPLODE_LINK, true, PARCEL_TYPE).getArtifactNameSansClassifierType());
   }
 
   @Test
@@ -116,17 +116,17 @@ public class ParcelTest {
     Assert.assertEquals(
         PARCEL_GROUP_ID + ":" + PARCEL_ARTIFACT_ID + ":" + PARCEL_TYPE + ":" + PARCEL_CLASSIFIER + ":" + PARCEL_VERSION,
         new Parcel(PARCEL_REPO_URL, PARCEL_GROUP_ID, PARCEL_ARTIFACT_ID, PARCEL_VERSION, PARCEL_CLASSIFIER,
-            PATH_EXPLODE, PATH_EXPLODE_LINK, PARCEL_TYPE).getArtifactNamespace());
+            PATH_EXPLODE, PATH_EXPLODE_LINK, true, PARCEL_TYPE).getArtifactNamespace());
   }
 
   @Test
   public void testGetVersionShort() throws MojoExecutionException {
     Assert.assertEquals(PARCEL_VERSION_SHORT, new Parcel(PARCEL_REPO_URL, PARCEL_GROUP_ID, PARCEL_ARTIFACT_ID,
-        PARCEL_VERSION_SHORT, PARCEL_CLASSIFIER, PATH_EXPLODE, PATH_EXPLODE_LINK, PARCEL_TYPE).getVersionShort());
+        PARCEL_VERSION_SHORT, PARCEL_CLASSIFIER, PATH_EXPLODE, PATH_EXPLODE_LINK, true, PARCEL_TYPE).getVersionShort());
     Assert.assertEquals(PARCEL_VERSION_SHORT, new Parcel(PARCEL_REPO_URL, PARCEL_GROUP_ID, PARCEL_ARTIFACT_ID,
-        PARCEL_VERSION, PARCEL_CLASSIFIER, PATH_EXPLODE, PATH_EXPLODE_LINK, PARCEL_TYPE).getVersionShort());
+        PARCEL_VERSION, PARCEL_CLASSIFIER, PATH_EXPLODE, PATH_EXPLODE_LINK, true, PARCEL_TYPE).getVersionShort());
     Assert.assertEquals(PARCEL_VERSION_SHORT, new Parcel(PARCEL_REPO_URL, PARCEL_GROUP_ID, PARCEL_ARTIFACT_ID,
-        PARCEL_VERSION_LONG, PARCEL_CLASSIFIER, PATH_EXPLODE, PATH_EXPLODE_LINK, PARCEL_TYPE).getVersionShort());
+        PARCEL_VERSION_LONG, PARCEL_CLASSIFIER, PATH_EXPLODE, PATH_EXPLODE_LINK, true, PARCEL_TYPE).getVersionShort());
   }
 
   @Test
@@ -135,7 +135,7 @@ public class ParcelTest {
         PARCEL_REPO_URL + "/" + PARCEL_VERSION_SHORT + "/" + PARCEL_ARTIFACT_ID + "-" + PARCEL_VERSION + "-"
             + PARCEL_CLASSIFIER + "." + PARCEL_TYPE,
         new Parcel(PARCEL_REPO_URL, PARCEL_GROUP_ID, PARCEL_ARTIFACT_ID, PARCEL_VERSION, PARCEL_CLASSIFIER,
-            PATH_EXPLODE, PATH_EXPLODE_LINK, PARCEL_TYPE).getRemoteUrl());
+            PATH_EXPLODE, PATH_EXPLODE_LINK, true, PARCEL_TYPE).getRemoteUrl());
   }
 
   @Test
@@ -144,89 +144,132 @@ public class ParcelTest {
         "/" + PARCEL_GROUP_ID.replaceAll("\\.", "/") + "/" + PARCEL_ARTIFACT_ID + "/" + PARCEL_VERSION + "/"
             + PARCEL_ARTIFACT_ID + "-" + PARCEL_VERSION + "-" + PARCEL_CLASSIFIER + "." + PARCEL_TYPE,
         new Parcel(PARCEL_REPO_URL, PARCEL_GROUP_ID, PARCEL_ARTIFACT_ID, PARCEL_VERSION, PARCEL_CLASSIFIER,
-            PATH_EXPLODE, PATH_EXPLODE_LINK, PARCEL_TYPE).getLocalPath());
+            PATH_EXPLODE, PATH_EXPLODE_LINK, true, PARCEL_TYPE).getLocalPath());
   }
 
   @Test(expected = MojoExecutionException.class)
   public void testDownloadSquattingHost() throws MojoExecutionException, IOException {
     Assert.assertFalse(new Parcel("http://some.non.existant.host.com/sqoop-connectors/parcels", PARCEL_GROUP_ID,
-        PARCEL_ARTIFACT_ID, PARCEL_VERSION, PARCEL_CLASSIFIER, PATH_EXPLODE, PATH_EXPLODE_LINK, PARCEL_TYPE)
+        PARCEL_ARTIFACT_ID, PARCEL_VERSION, PARCEL_CLASSIFIER, PATH_EXPLODE, PATH_EXPLODE_LINK, true, PARCEL_TYPE)
             .download(new SystemStreamLog(), PATH_MAVEN_REPO));
   }
 
   @Test(expected = MojoExecutionException.class)
   public void testDownloadBadHost() throws MojoExecutionException, IOException {
     Assert.assertFalse(new Parcel("http://KHAsdalj123lljasd/sqoop-connectors/parcels", PARCEL_GROUP_ID,
-        PARCEL_ARTIFACT_ID, PARCEL_VERSION, PARCEL_CLASSIFIER, PATH_EXPLODE, PATH_EXPLODE_LINK, PARCEL_TYPE)
+        PARCEL_ARTIFACT_ID, PARCEL_VERSION, PARCEL_CLASSIFIER, PATH_EXPLODE, PATH_EXPLODE_LINK, true, PARCEL_TYPE)
             .download(new SystemStreamLog(), PATH_MAVEN_REPO));
   }
 
   @Test(expected = MojoExecutionException.class)
   public void testDownloadBadPath() throws MojoExecutionException, IOException {
     Assert.assertFalse(new Parcel(PARCEL_REPO_URL, PARCEL_GROUP_ID, PARCEL_ARTIFACT_ID,
-        "1.4c5.some.nonexistant.version", PARCEL_CLASSIFIER, PATH_EXPLODE, PATH_EXPLODE_LINK, PARCEL_TYPE)
+        "1.4c5.some.nonexistant.version", PARCEL_CLASSIFIER, PATH_EXPLODE, PATH_EXPLODE_LINK, true, PARCEL_TYPE)
             .download(new SystemStreamLog(), PATH_MAVEN_REPO));
   }
 
   @Test
   @SuppressWarnings("resource")
-  public void testDownload() throws MojoExecutionException, IOException {
+  public void testDownloadHash() throws MojoExecutionException, IOException {
     Assert
         .assertTrue(new Parcel(PARCEL_REPO_URL, PARCEL_GROUP_ID, PARCEL_ARTIFACT_ID, PARCEL_VERSION, PARCEL_CLASSIFIER,
-            PATH_EXPLODE, PATH_EXPLODE_LINK, PARCEL_TYPE).download(new SystemStreamLog(), PATH_MAVEN_REPO));
+            PATH_EXPLODE, PATH_EXPLODE_LINK, true, PARCEL_TYPE).download(new SystemStreamLog(), PATH_MAVEN_REPO));
     Assert
         .assertFalse(new Parcel(PARCEL_REPO_URL, PARCEL_GROUP_ID, PARCEL_ARTIFACT_ID, PARCEL_VERSION, PARCEL_CLASSIFIER,
-            PATH_EXPLODE, PATH_EXPLODE_LINK, PARCEL_TYPE).download(new SystemStreamLog(), PATH_MAVEN_REPO));
+            PATH_EXPLODE, PATH_EXPLODE_LINK, true, PARCEL_TYPE).download(new SystemStreamLog(), PATH_MAVEN_REPO));
     FileUtils.listFiles(new File(PATH_MAVEN_REPO), null, true).iterator().next().delete();
     Assert
         .assertTrue(new Parcel(PARCEL_REPO_URL, PARCEL_GROUP_ID, PARCEL_ARTIFACT_ID, PARCEL_VERSION, PARCEL_CLASSIFIER,
-            PATH_EXPLODE, PATH_EXPLODE_LINK, PARCEL_TYPE).download(new SystemStreamLog(), PATH_MAVEN_REPO));
+            PATH_EXPLODE, PATH_EXPLODE_LINK, true, PARCEL_TYPE).download(new SystemStreamLog(), PATH_MAVEN_REPO));
     Assert
         .assertFalse(new Parcel(PARCEL_REPO_URL, PARCEL_GROUP_ID, PARCEL_ARTIFACT_ID, PARCEL_VERSION, PARCEL_CLASSIFIER,
-            PATH_EXPLODE, PATH_EXPLODE_LINK, PARCEL_TYPE).download(new SystemStreamLog(), PATH_MAVEN_REPO));
+            PATH_EXPLODE, PATH_EXPLODE_LINK, true, PARCEL_TYPE).download(new SystemStreamLog(), PATH_MAVEN_REPO));
     FileUtils.listFiles(new File(PATH_MAVEN_REPO), null, true).toArray(new File[2])[1].delete();
     Assert
         .assertTrue(new Parcel(PARCEL_REPO_URL, PARCEL_GROUP_ID, PARCEL_ARTIFACT_ID, PARCEL_VERSION, PARCEL_CLASSIFIER,
-            PATH_EXPLODE, PATH_EXPLODE_LINK, PARCEL_TYPE).download(new SystemStreamLog(), PATH_MAVEN_REPO));
+            PATH_EXPLODE, PATH_EXPLODE_LINK, true, PARCEL_TYPE).download(new SystemStreamLog(), PATH_MAVEN_REPO));
     Assert
         .assertFalse(new Parcel(PARCEL_REPO_URL, PARCEL_GROUP_ID, PARCEL_ARTIFACT_ID, PARCEL_VERSION, PARCEL_CLASSIFIER,
-            PATH_EXPLODE, PATH_EXPLODE_LINK, PARCEL_TYPE).download(new SystemStreamLog(), PATH_MAVEN_REPO));
+            PATH_EXPLODE, PATH_EXPLODE_LINK, true, PARCEL_TYPE).download(new SystemStreamLog(), PATH_MAVEN_REPO));
     new FileOutputStream(FileUtils.listFiles(new File(PATH_MAVEN_REPO), null, true).iterator().next(), true)
         .getChannel().truncate(0).close();
     Assert
         .assertTrue(new Parcel(PARCEL_REPO_URL, PARCEL_GROUP_ID, PARCEL_ARTIFACT_ID, PARCEL_VERSION, PARCEL_CLASSIFIER,
-            PATH_EXPLODE, PATH_EXPLODE_LINK, PARCEL_TYPE).download(new SystemStreamLog(), PATH_MAVEN_REPO));
+            PATH_EXPLODE, PATH_EXPLODE_LINK, true, PARCEL_TYPE).download(new SystemStreamLog(), PATH_MAVEN_REPO));
     Assert
         .assertFalse(new Parcel(PARCEL_REPO_URL, PARCEL_GROUP_ID, PARCEL_ARTIFACT_ID, PARCEL_VERSION, PARCEL_CLASSIFIER,
-            PATH_EXPLODE, PATH_EXPLODE_LINK, PARCEL_TYPE).download(new SystemStreamLog(), PATH_MAVEN_REPO));
+            PATH_EXPLODE, PATH_EXPLODE_LINK, true, PARCEL_TYPE).download(new SystemStreamLog(), PATH_MAVEN_REPO));
     new FileOutputStream(FileUtils.listFiles(new File(PATH_MAVEN_REPO), null, true).toArray(new File[2])[1], true)
         .getChannel().truncate(0).close();
     Assert
         .assertTrue(new Parcel(PARCEL_REPO_URL, PARCEL_GROUP_ID, PARCEL_ARTIFACT_ID, PARCEL_VERSION, PARCEL_CLASSIFIER,
-            PATH_EXPLODE, PATH_EXPLODE_LINK, PARCEL_TYPE).download(new SystemStreamLog(), PATH_MAVEN_REPO));
+            PATH_EXPLODE, PATH_EXPLODE_LINK, true, PARCEL_TYPE).download(new SystemStreamLog(), PATH_MAVEN_REPO));
     Assert
         .assertFalse(new Parcel(PARCEL_REPO_URL, PARCEL_GROUP_ID, PARCEL_ARTIFACT_ID, PARCEL_VERSION, PARCEL_CLASSIFIER,
-            PATH_EXPLODE, PATH_EXPLODE_LINK, PARCEL_TYPE).download(new SystemStreamLog(), PATH_MAVEN_REPO));
+            PATH_EXPLODE, PATH_EXPLODE_LINK, true, PARCEL_TYPE).download(new SystemStreamLog(), PATH_MAVEN_REPO));
+  }
+
+  @Test
+  @SuppressWarnings("resource")
+  public void testDownloadNoHash() throws MojoExecutionException, IOException {
+    Assert
+        .assertTrue(new Parcel(PARCEL_REPO_URL, PARCEL_GROUP_ID, PARCEL_ARTIFACT_ID, PARCEL_VERSION, PARCEL_CLASSIFIER,
+            PATH_EXPLODE, PATH_EXPLODE_LINK, false, PARCEL_TYPE).download(new SystemStreamLog(), PATH_MAVEN_REPO));
+    Assert
+        .assertFalse(new Parcel(PARCEL_REPO_URL, PARCEL_GROUP_ID, PARCEL_ARTIFACT_ID, PARCEL_VERSION, PARCEL_CLASSIFIER,
+            PATH_EXPLODE, PATH_EXPLODE_LINK, false, PARCEL_TYPE).download(new SystemStreamLog(), PATH_MAVEN_REPO));
+    FileUtils.listFiles(new File(PATH_MAVEN_REPO), null, true).iterator().next().delete();
+    Assert
+        .assertTrue(new Parcel(PARCEL_REPO_URL, PARCEL_GROUP_ID, PARCEL_ARTIFACT_ID, PARCEL_VERSION, PARCEL_CLASSIFIER,
+            PATH_EXPLODE, PATH_EXPLODE_LINK, false, PARCEL_TYPE).download(new SystemStreamLog(), PATH_MAVEN_REPO));
+    Assert
+        .assertFalse(new Parcel(PARCEL_REPO_URL, PARCEL_GROUP_ID, PARCEL_ARTIFACT_ID, PARCEL_VERSION, PARCEL_CLASSIFIER,
+            PATH_EXPLODE, PATH_EXPLODE_LINK, false, PARCEL_TYPE).download(new SystemStreamLog(), PATH_MAVEN_REPO));
+    Assert
+        .assertTrue(new Parcel(PARCEL_REPO_URL, PARCEL_GROUP_ID, PARCEL_ARTIFACT_ID, PARCEL_VERSION, PARCEL_CLASSIFIER,
+            PATH_EXPLODE, PATH_EXPLODE_LINK, true, PARCEL_TYPE).download(new SystemStreamLog(), PATH_MAVEN_REPO));
+    Assert
+        .assertFalse(new Parcel(PARCEL_REPO_URL, PARCEL_GROUP_ID, PARCEL_ARTIFACT_ID, PARCEL_VERSION, PARCEL_CLASSIFIER,
+            PATH_EXPLODE, PATH_EXPLODE_LINK, false, PARCEL_TYPE).download(new SystemStreamLog(), PATH_MAVEN_REPO));
+    Assert
+        .assertFalse(new Parcel(PARCEL_REPO_URL, PARCEL_GROUP_ID, PARCEL_ARTIFACT_ID, PARCEL_VERSION, PARCEL_CLASSIFIER,
+            PATH_EXPLODE, PATH_EXPLODE_LINK, false, PARCEL_TYPE).download(new SystemStreamLog(), PATH_MAVEN_REPO));
+    new FileOutputStream(FileUtils.listFiles(new File(PATH_MAVEN_REPO), null, true).iterator().next(), true)
+        .getChannel().truncate(0).close();
+    Assert
+        .assertTrue(new Parcel(PARCEL_REPO_URL, PARCEL_GROUP_ID, PARCEL_ARTIFACT_ID, PARCEL_VERSION, PARCEL_CLASSIFIER,
+            PATH_EXPLODE, PATH_EXPLODE_LINK, false, PARCEL_TYPE).download(new SystemStreamLog(), PATH_MAVEN_REPO));
+    Assert
+        .assertFalse(new Parcel(PARCEL_REPO_URL, PARCEL_GROUP_ID, PARCEL_ARTIFACT_ID, PARCEL_VERSION, PARCEL_CLASSIFIER,
+            PATH_EXPLODE, PATH_EXPLODE_LINK, false, PARCEL_TYPE).download(new SystemStreamLog(), PATH_MAVEN_REPO));
+    new File(FileUtils.listFiles(new File(PATH_MAVEN_REPO), null, true).iterator().next().getAbsolutePath() + ".sha1")
+        .createNewFile();
+    Assert
+        .assertTrue(new Parcel(PARCEL_REPO_URL, PARCEL_GROUP_ID, PARCEL_ARTIFACT_ID, PARCEL_VERSION, PARCEL_CLASSIFIER,
+            PATH_EXPLODE, PATH_EXPLODE_LINK, false, PARCEL_TYPE).download(new SystemStreamLog(), PATH_MAVEN_REPO));
+    Assert
+        .assertFalse(new Parcel(PARCEL_REPO_URL, PARCEL_GROUP_ID, PARCEL_ARTIFACT_ID, PARCEL_VERSION, PARCEL_CLASSIFIER,
+            PATH_EXPLODE, PATH_EXPLODE_LINK, false, PARCEL_TYPE).download(new SystemStreamLog(), PATH_MAVEN_REPO));
   }
 
   @Test(expected = MojoExecutionException.class)
   public void testExplodeSquattingHost() throws MojoExecutionException, IOException {
     Assert.assertFalse(new Parcel("http://some.non.existant.host.com/sqoop-connectors/parcels", PARCEL_GROUP_ID,
-        PARCEL_ARTIFACT_ID, PARCEL_VERSION, PARCEL_CLASSIFIER, PATH_EXPLODE, PATH_EXPLODE_LINK, PARCEL_TYPE)
+        PARCEL_ARTIFACT_ID, PARCEL_VERSION, PARCEL_CLASSIFIER, PATH_EXPLODE, PATH_EXPLODE_LINK, true, PARCEL_TYPE)
             .explode(new SystemStreamLog(), PATH_MAVEN_REPO));
   }
 
   @Test(expected = MojoExecutionException.class)
   public void testExplodeBadHost() throws MojoExecutionException, IOException {
     Assert.assertFalse(new Parcel("http://KHAsdalj123lljasd/sqoop-connectors/parcels", PARCEL_GROUP_ID,
-        PARCEL_ARTIFACT_ID, PARCEL_VERSION, PARCEL_CLASSIFIER, PATH_EXPLODE, PATH_EXPLODE_LINK, PARCEL_TYPE)
+        PARCEL_ARTIFACT_ID, PARCEL_VERSION, PARCEL_CLASSIFIER, PATH_EXPLODE, PATH_EXPLODE_LINK, true, PARCEL_TYPE)
             .explode(new SystemStreamLog(), PATH_MAVEN_REPO));
   }
 
   @Test(expected = MojoExecutionException.class)
   public void testExplodeBadPath() throws MojoExecutionException, IOException {
     Assert.assertFalse(new Parcel(PARCEL_REPO_URL, PARCEL_GROUP_ID, PARCEL_ARTIFACT_ID,
-        "1.4c5.some.nonexistant.version", PARCEL_CLASSIFIER, PATH_EXPLODE, PATH_EXPLODE_LINK, PARCEL_TYPE)
+        "1.4c5.some.nonexistant.version", PARCEL_CLASSIFIER, PATH_EXPLODE, PATH_EXPLODE_LINK, true, PARCEL_TYPE)
             .explode(new SystemStreamLog(), PATH_MAVEN_REPO));
   }
 
@@ -235,40 +278,40 @@ public class ParcelTest {
   public void testExplode() throws MojoExecutionException, IOException {
     Assert
         .assertTrue(new Parcel(PARCEL_REPO_URL, PARCEL_GROUP_ID, PARCEL_ARTIFACT_ID, PARCEL_VERSION, PARCEL_CLASSIFIER,
-            PATH_EXPLODE, PATH_EXPLODE_LINK, PARCEL_TYPE).explode(new SystemStreamLog(), PATH_MAVEN_REPO));
+            PATH_EXPLODE, PATH_EXPLODE_LINK, true, PARCEL_TYPE).explode(new SystemStreamLog(), PATH_MAVEN_REPO));
     Assert
         .assertTrue(new Parcel(PARCEL_REPO_URL, PARCEL_GROUP_ID, PARCEL_ARTIFACT_ID, PARCEL_VERSION, PARCEL_CLASSIFIER,
-            PATH_EXPLODE, PATH_EXPLODE_LINK, PARCEL_TYPE).explode(new SystemStreamLog(), PATH_MAVEN_REPO));
+            PATH_EXPLODE, PATH_EXPLODE_LINK, true, PARCEL_TYPE).explode(new SystemStreamLog(), PATH_MAVEN_REPO));
     FileUtils.listFiles(new File(PATH_MAVEN_REPO), null, true).iterator().next().delete();
     Assert
         .assertTrue(new Parcel(PARCEL_REPO_URL, PARCEL_GROUP_ID, PARCEL_ARTIFACT_ID, PARCEL_VERSION, PARCEL_CLASSIFIER,
-            PATH_EXPLODE, PATH_EXPLODE_LINK, PARCEL_TYPE).explode(new SystemStreamLog(), PATH_MAVEN_REPO));
+            PATH_EXPLODE, PATH_EXPLODE_LINK, true, PARCEL_TYPE).explode(new SystemStreamLog(), PATH_MAVEN_REPO));
     Assert
         .assertTrue(new Parcel(PARCEL_REPO_URL, PARCEL_GROUP_ID, PARCEL_ARTIFACT_ID, PARCEL_VERSION, PARCEL_CLASSIFIER,
-            PATH_EXPLODE, PATH_EXPLODE_LINK, PARCEL_TYPE).explode(new SystemStreamLog(), PATH_MAVEN_REPO));
+            PATH_EXPLODE, PATH_EXPLODE_LINK, true, PARCEL_TYPE).explode(new SystemStreamLog(), PATH_MAVEN_REPO));
     FileUtils.listFiles(new File(PATH_MAVEN_REPO), null, true).toArray(new File[2])[1].delete();
     Assert
         .assertTrue(new Parcel(PARCEL_REPO_URL, PARCEL_GROUP_ID, PARCEL_ARTIFACT_ID, PARCEL_VERSION, PARCEL_CLASSIFIER,
-            PATH_EXPLODE, PATH_EXPLODE_LINK, PARCEL_TYPE).explode(new SystemStreamLog(), PATH_MAVEN_REPO));
+            PATH_EXPLODE, PATH_EXPLODE_LINK, true, PARCEL_TYPE).explode(new SystemStreamLog(), PATH_MAVEN_REPO));
     Assert
         .assertTrue(new Parcel(PARCEL_REPO_URL, PARCEL_GROUP_ID, PARCEL_ARTIFACT_ID, PARCEL_VERSION, PARCEL_CLASSIFIER,
-            PATH_EXPLODE, PATH_EXPLODE_LINK, PARCEL_TYPE).explode(new SystemStreamLog(), PATH_MAVEN_REPO));
+            PATH_EXPLODE, PATH_EXPLODE_LINK, true, PARCEL_TYPE).explode(new SystemStreamLog(), PATH_MAVEN_REPO));
     new FileOutputStream(FileUtils.listFiles(new File(PATH_MAVEN_REPO), null, true).iterator().next(), true)
         .getChannel().truncate(0).close();
     Assert
         .assertTrue(new Parcel(PARCEL_REPO_URL, PARCEL_GROUP_ID, PARCEL_ARTIFACT_ID, PARCEL_VERSION, PARCEL_CLASSIFIER,
-            PATH_EXPLODE, PATH_EXPLODE_LINK, PARCEL_TYPE).explode(new SystemStreamLog(), PATH_MAVEN_REPO));
+            PATH_EXPLODE, PATH_EXPLODE_LINK, true, PARCEL_TYPE).explode(new SystemStreamLog(), PATH_MAVEN_REPO));
     Assert
         .assertTrue(new Parcel(PARCEL_REPO_URL, PARCEL_GROUP_ID, PARCEL_ARTIFACT_ID, PARCEL_VERSION, PARCEL_CLASSIFIER,
-            PATH_EXPLODE, PATH_EXPLODE_LINK, PARCEL_TYPE).explode(new SystemStreamLog(), PATH_MAVEN_REPO));
+            PATH_EXPLODE, PATH_EXPLODE_LINK, true, PARCEL_TYPE).explode(new SystemStreamLog(), PATH_MAVEN_REPO));
     new FileOutputStream(FileUtils.listFiles(new File(PATH_MAVEN_REPO), null, true).toArray(new File[2])[1], true)
         .getChannel().truncate(0).close();
     Assert
         .assertTrue(new Parcel(PARCEL_REPO_URL, PARCEL_GROUP_ID, PARCEL_ARTIFACT_ID, PARCEL_VERSION, PARCEL_CLASSIFIER,
-            PATH_EXPLODE, PATH_EXPLODE_LINK, PARCEL_TYPE).explode(new SystemStreamLog(), PATH_MAVEN_REPO));
+            PATH_EXPLODE, PATH_EXPLODE_LINK, true, PARCEL_TYPE).explode(new SystemStreamLog(), PATH_MAVEN_REPO));
     Assert
         .assertTrue(new Parcel(PARCEL_REPO_URL, PARCEL_GROUP_ID, PARCEL_ARTIFACT_ID, PARCEL_VERSION, PARCEL_CLASSIFIER,
-            PATH_EXPLODE, PATH_EXPLODE_LINK, PARCEL_TYPE).explode(new SystemStreamLog(), PATH_MAVEN_REPO));
+            PATH_EXPLODE, PATH_EXPLODE_LINK, true, PARCEL_TYPE).explode(new SystemStreamLog(), PATH_MAVEN_REPO));
   }
 
   @Before
