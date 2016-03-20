@@ -48,6 +48,9 @@ public class Parcel {
     if (StringUtils.isEmpty(version)) {
       paramaters.add("version");
     }
+    if (StringUtils.isEmpty(classifier)) {
+      classifier = getOsDescriptor();
+    }
     if (StringUtils.isEmpty(type)) {
       paramaters.add("type");
     }
@@ -292,10 +295,11 @@ public class Parcel {
           return osVersionDescriptor.get(versionRegEx);
         }
     }
-    throw new RuntimeException("Could not determine OS Descritor from system property os.name ["
+    throw new RuntimeException("Could not determine OS descritor from system property os.name ["
         + System.getProperty("os.name") + "] and os.version [" + System.getProperty("os.version")
-        + "] from OS name, version regular expression and descriptor mapping " + OS_NAME_VERSION_DESCRIPTOR
-        + ", it is suggested you overirde this parcels [calssifier] on the command line.");
+        + "] from the regexp mapping " + OS_NAME_VERSION_DESCRIPTOR
+        + ". If your OS looks like a supported platform, you can overide this parcels [classifier]"
+        + " on the command line.");
   }
 
   @Parameter(required = false, defaultValue = "http://archive.cloudera.com/cdh5/parcels/latest")
@@ -311,7 +315,7 @@ public class Parcel {
   private String version;
 
   @Parameter(required = false, defaultValue = "")
-  private String classifier = getOsDescriptor();
+  private String classifier = "";
 
   @Parameter(required = false, defaultValue = "")
   private String outputDirectory = "";
@@ -329,7 +333,7 @@ public class Parcel {
   }
 
   public Parcel(String repositoryUrl, String groupId, String artifactId, String version, String classifier,
-      String outputDirectory, String linkDirectory, Boolean assertHash, String type) {
+      String outputDirectory, String linkDirectory, Boolean assertHash, String type) throws MojoExecutionException {
     this.repositoryUrl = repositoryUrl;
     this.groupId = groupId;
     this.artifactId = artifactId;
@@ -339,14 +343,17 @@ public class Parcel {
     this.linkDirectory = linkDirectory;
     this.assertHash = assertHash;
     this.type = type;
+    isValid();
   }
 
-  public Parcel(String groupId, String artifactId, String version, String classifier, String type) {
+  public Parcel(String groupId, String artifactId, String version, String classifier, String type)
+      throws MojoExecutionException {
     this.groupId = groupId;
     this.artifactId = artifactId;
     this.version = version;
     this.classifier = classifier;
     this.type = type;
+    isValid();
   }
 
   public String getRepositoryUrl() {
