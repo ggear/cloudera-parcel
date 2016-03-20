@@ -4,8 +4,8 @@
 
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.cloudera.parcel.build</groupId>
-	<artifactId>SQOOP_NETEZZA_CONNECTOR</artifactId>
-	<version>1.3c5</version>
+	<artifactId>SQOOP_TERADATA_CONNECTOR</artifactId>
+	<version>1.4c5</version>
 	<packaging>parcel</packaging>
 
 	<properties>

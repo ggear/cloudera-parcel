@@ -22,7 +22,7 @@ public class Deploy extends AbstractMojo {
   @Override
   public void execute() throws MojoExecutionException {
     Parcel parcel = new Parcel(project.getGroupId(), project.getArtifactId(), project.getVersion(),
-        StringUtils.isEmpty(parcelClassifier) ? "" : parcelClassifier, project.getPackaging());
+        StringUtils.isEmpty(parcelClassifier) ? Parcel.getOsDescriptor() : parcelClassifier, project.getPackaging());
     if (parcel.isValid()) {
       // TODO
     }

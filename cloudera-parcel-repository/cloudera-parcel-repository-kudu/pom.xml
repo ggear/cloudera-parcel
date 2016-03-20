@@ -4,9 +4,9 @@
 
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.cloudera.parcel</groupId>
-	<artifactId>KUDU_SINGLE_NODE</artifactId>
+	<artifactId>KUDU</artifactId>
 	<packaging>parcel</packaging>
-	<version>0.6.0-1.kudu0.6.0.p0.000</version>
+	<version>0.7.0-1.kudu0.7.0.p0.27</version>
 
 	<parent>
 		<groupId>com.cloudera.parcel</groupId>
@@ -15,7 +15,7 @@
 	</parent>
 
 	<properties>
-		<parcel.classifier>osx</parcel.classifier>
+		<parcel.executables>/*/bin/*</parcel.executables>
 	</properties>
 
 	<build>

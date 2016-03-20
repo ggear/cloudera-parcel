@@ -4,9 +4,13 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.LinkOption;
+import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
 
@@ -18,12 +22,15 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.codehaus.plexus.archiver.tar.TarArchiver;
 import org.codehaus.plexus.archiver.tar.TarArchiver.TarCompressionMethod;
 import org.codehaus.plexus.archiver.tar.TarGZipUnArchiver;
+import org.codehaus.plexus.archiver.util.DefaultFileSet;
+import org.codehaus.plexus.logging.Logger;
 import org.codehaus.plexus.logging.console.ConsoleLogger;
 import org.codehaus.plexus.util.StringUtils;
 
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpResponse;
 import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.common.collect.ImmutableMap;
 
 public class Parcel {
 
@@ -44,9 +51,6 @@ public class Parcel {
     if (StringUtils.isEmpty(type)) {
       paramaters.add("type");
     }
-    if (StringUtils.isEmpty(outputDirectory)) {
-      paramaters.add("outputDirectory");
-    }
     if (!paramaters.isEmpty()) {
       throw new MojoExecutionException("The required parameters " + paramaters + " are missing or invalid");
     }
@@ -55,17 +59,31 @@ public class Parcel {
 
   public String getArtifactName() throws MojoExecutionException {
     return isValid()
-        ? artifactId + "-" + version + (StringUtils.isEmpty(classifier) ? "" : ("-" + classifier)) + "." + type : null;
+        ? artifactId + "-" + version + (StringUtils.isEmpty(classifier) ? "" : "-" + classifier) + "." + type : null;
+  }
+
+  public String getArtifactNameSansClassifierType() throws MojoExecutionException {
+    return isValid() ? artifactId + "-" + version : null;
   }
 
   public String getArtifactNamespace() throws MojoExecutionException {
     return isValid() ? groupId + ":" + artifactId + ":" + type
-        + (StringUtils.isEmpty(classifier) ? "" : (":" + classifier)) + ":" + version : null;
+        + (StringUtils.isEmpty(classifier) ? "" : ":" + classifier) + ":" + version : null;
+  }
+
+  public String getVersionShort() {
+    int index = 0;
+    for (index = 0; index < version.length(); index++) {
+      if (!Character.isDigit(version.charAt(index)) && version.charAt(index) != '.') {
+        break;
+      }
+    }
+    return version.substring(0, index);
   }
 
   public String getRemoteUrl() throws MojoExecutionException {
-    return isValid() ? repositoryUrl + "/" + artifactId + "-" + version
-        + (StringUtils.isEmpty(classifier) ? "" : ("-" + classifier)) + "." + type : null;
+    return isValid() ? repositoryUrl + "/" + getVersionShort() + "/" + artifactId + "-" + version
+        + (StringUtils.isEmpty(classifier) ? "" : "-" + classifier) + "." + type : null;
   }
 
   public String getLocalPath() throws MojoExecutionException {
@@ -105,41 +123,76 @@ public class Parcel {
     return downloaded && localPath.exists() && localPathSha1.exists();
   }
 
-  public boolean explode(Log log, String dirRepository, String dirBuild) throws MojoExecutionException {
+  public boolean explode(Log log, String dirRepository) throws MojoExecutionException {
     download(log, dirRepository);
-    boolean exploded = false;
-    File localPath = new File(dirRepository, getLocalPath());
-    File explodedPath = outputDirectory.charAt(0) == '/' ? new File(outputDirectory)
-        : new File(dirBuild, outputDirectory);
+    File explodedPath = StringUtils.isEmpty(outputDirectory) ? new File(dirRepository, getLocalPath()).getParentFile()
+        : new File(outputDirectory);
+    String explodedPathRoot = explodedPath.toString() + File.separator + getArtifactNameSansClassifierType();
+    boolean exploded = new File(explodedPath, getArtifactNameSansClassifierType()).exists();
+    if (!exploded) {
+      File localPath = new File(dirRepository, getLocalPath());
+      log.info("Exploding: " + getArtifactNamespace());
+      try {
+        explodedPath.mkdirs();
+        TarGZipUnArchiver unarchiver = new TarGZipUnArchiver();
+        unarchiver.enableLogging(new ConsoleLogger(Logger.LEVEL_DISABLED, "Logger"));
+        unarchiver.setSourceFile(localPath);
+        unarchiver.setDestDirectory(explodedPath);
+        unarchiver.extract();
+        exploded = true;
+        log.info("Exploded: " + getArtifactNamespace());
+      } catch (Exception exception) {
+        throw new MojoExecutionException("Failed to explode artifact [" + getArtifactNamespace() + "] from ["
+            + localPath + "] to [" + explodedPath + "]", exception);
+      }
+    }
     try {
-      FileUtils.deleteDirectory(explodedPath);
-      explodedPath.mkdirs();
-      TarGZipUnArchiver unarchiver = new TarGZipUnArchiver();
-      unarchiver.enableLogging(new ConsoleLogger(ConsoleLogger.LEVEL_DISABLED, "Logger"));
-      unarchiver.setSourceFile(localPath);
-      unarchiver.setDestDirectory(explodedPath);
-      unarchiver.extract();
-      exploded = true;
+      if (StringUtils.isNotEmpty(linkDirectory)
+          && Files.notExists(Paths.get(linkDirectory), LinkOption.NOFOLLOW_LINKS)) {
+        new File(linkDirectory).getParentFile().mkdirs();
+        Files.createSymbolicLink(Paths.get(linkDirectory), Paths.get(explodedPathRoot));
+      }
     } catch (Exception exception) {
-      throw new MojoExecutionException("Failed to explode artifact " + getArtifactNamespace() + " from (" + localPath
-          + ") to (" + explodedPath + ")", exception);
+      throw new MojoExecutionException("Failed to sym link to exploded artifact [" + getArtifactNamespace() + "] from ["
+          + explodedPathRoot + "] to [" + linkDirectory + "]", exception);
     }
     return exploded;
   }
 
-  public boolean build(Log log, String dirBuild, String dirOutput) throws MojoExecutionException {
+  public boolean build(Log log, String dirBuild, String dirOutput, String dirExecutable) throws MojoExecutionException {
     File buildPath = new File(dirBuild, getArtifactName());
     File buildPathSha1 = new File(dirBuild, getArtifactName() + SUFFIX_SHA1);
     File ouputPath = new File(dirOutput);
     buildPath.delete();
     buildPathSha1.delete();
+    File parcelRepoRootPath = new File(dirBuild, DIR_PARCEL_REPO + File.separator + artifactId.toLowerCase()
+        + File.separator + DIR_PARCEL_REPO_TYPE + File.separator + getVersionShort());
+    File parcelRepoPath = new File(parcelRepoRootPath, buildPath.getName());
+    File parcelRepoPathSha1 = new File(parcelRepoRootPath, buildPathSha1.getName());
+    parcelRepoRootPath.mkdirs();
+    parcelRepoPath.delete();
+    parcelRepoPathSha1.delete();
     try {
       TarArchiver archiver = new TarArchiver();
       archiver.setCompression(TarCompressionMethod.gzip);
-      archiver.addDirectory(ouputPath);
+      DefaultFileSet fileSet = new DefaultFileSet();
+      fileSet.setDirectory(ouputPath);
+      if (dirExecutable != null) {
+        fileSet.setExcludes(new String[] { dirExecutable, });
+      }
+      archiver.addFileSet(fileSet);
+      if (dirExecutable != null) {
+        archiver.setFileMode(0755);
+        fileSet = new DefaultFileSet();
+        fileSet.setDirectory(ouputPath);
+        fileSet.setIncludes(new String[] { dirExecutable, });
+        archiver.addFileSet(fileSet);
+      }
       archiver.setDestFile(buildPath);
       archiver.createArchive();
       FileUtils.writeStringToFile(buildPathSha1, calculateSha1(buildPath) + "\n");
+      FileUtils.copyFile(buildPath, parcelRepoPath);
+      FileUtils.copyFile(buildPathSha1, parcelRepoPathSha1);
       return true;
     } catch (Exception exception) {
       throw new MojoExecutionException(
@@ -213,6 +266,36 @@ public class Parcel {
 
   private static final String SUFFIX_SHA1 = ".sha1";
 
+  private static final String DIR_PARCEL_REPO = "parcel-repo";
+  private static final String DIR_PARCEL_REPO_TYPE = "parcels";
+
+  private static final Map<String, ImmutableMap<String, String>> OS_NAME_VERSION_DESCRIPTOR = ImmutableMap.of(//
+      "Mac OS X", //
+      ImmutableMap.of(//
+          "10\\.11.*", "elcapitan"//
+  ), //
+      "Linux", //
+      ImmutableMap.of(//
+          ".*\\.el6\\..*", "el6", //
+          ".*\\.el7\\..*", "el7", //
+          "4\\.2\\.0.*-generic", "trusty"//
+  )//
+  );
+
+  public static String getOsDescriptor() {
+    Map<String, String> osVersionDescriptor = OS_NAME_VERSION_DESCRIPTOR.get(System.getProperty("os.name"));
+    if (osVersionDescriptor != null) {
+      for (String versionRegEx : osVersionDescriptor.keySet())
+        if (System.getProperty("os.version").matches(versionRegEx)) {
+          return osVersionDescriptor.get(versionRegEx);
+        }
+    }
+    throw new RuntimeException("Could not determine OS Descritor from system property os.name ["
+        + System.getProperty("os.name") + "] and os.version [" + System.getProperty("os.version")
+        + "] from OS name, version regular expression and descriptor mapping " + OS_NAME_VERSION_DESCRIPTOR
+        + ", it is suggested you overirde this parcels [calssifier] on the command line.");
+  }
+
   @Parameter(required = false, defaultValue = "http://archive.cloudera.com/cdh5/parcels/latest")
   private String repositoryUrl = "http://archive.cloudera.com/cdh5/parcels/latest";
 
@@ -226,34 +309,38 @@ public class Parcel {
   private String version;
 
   @Parameter(required = false, defaultValue = "")
-  private String classifier = "";
+  private String classifier = getOsDescriptor();
+
+  @Parameter(required = false, defaultValue = "")
+  private String outputDirectory;
+
+  @Parameter(required = false, defaultValue = "")
+  private String linkDirectory;
 
   @Parameter(required = false, defaultValue = "parcel")
   private String type = "parcel";
 
-  @Parameter(required = false, defaultValue = "test-parcels")
-  private String outputDirectory = "test-parcels";
-
   public Parcel() {
   }
 
-  public Parcel(String repositoryUrl, String groupId, String artifactId, String version, String classifier, String type,
-      String outputDirectory) {
+  public Parcel(String repositoryUrl, String groupId, String artifactId, String version, String classifier,
+      String outputDirectory, String linkDirectory, String type) {
     this.repositoryUrl = repositoryUrl;
     this.groupId = groupId;
     this.artifactId = artifactId;
     this.version = version;
-    this.type = type;
     this.classifier = classifier;
     this.outputDirectory = outputDirectory;
+    this.linkDirectory = linkDirectory;
+    this.type = type;
   }
 
   public Parcel(String groupId, String artifactId, String version, String classifier, String type) {
     this.groupId = groupId;
     this.artifactId = artifactId;
     this.version = version;
-    this.type = type;
     this.classifier = classifier;
+    this.type = type;
   }
 
   public String getRepositoryUrl() {
@@ -288,14 +375,6 @@ public class Parcel {
     this.version = version;
   }
 
-  public String getType() {
-    return type;
-  }
-
-  public void setType(String type) {
-    this.type = type;
-  }
-
   public String getClassifier() {
     return classifier;
   }
@@ -310,6 +389,22 @@ public class Parcel {
 
   public void setOutputDirectory(String outputDirectory) {
     this.outputDirectory = outputDirectory;
+  }
+
+  public String getLinkDirectory() {
+    return linkDirectory;
+  }
+
+  public void setLinkDirectory(String linkDirectory) {
+    this.linkDirectory = linkDirectory;
+  }
+
+  public String getType() {
+    return type;
+  }
+
+  public void setType(String type) {
+    this.type = type;
   }
 
 }

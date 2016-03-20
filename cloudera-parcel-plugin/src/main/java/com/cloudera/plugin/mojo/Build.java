@@ -10,7 +10,7 @@ import org.codehaus.plexus.util.StringUtils;
 
 import com.cloudera.plugin.Parcel;
 
-@Mojo(name = "build", requiresProject = true,  defaultPhase = LifecyclePhase.PACKAGE)
+@Mojo(name = "build", requiresProject = true, defaultPhase = LifecyclePhase.PACKAGE)
 public class Build extends AbstractMojo {
 
   @Parameter(defaultValue = "${project}", required = true, readonly = true)
@@ -25,12 +25,15 @@ public class Build extends AbstractMojo {
   @Parameter(defaultValue = "${project.build.outputDirectory}", required = true, readonly = true)
   private String outputDirectory;
 
+  @Parameter(defaultValue = "${parcel.executables}", required = false, readonly = true)
+  private String parcelExecutables;
+
   @Override
   public void execute() throws MojoExecutionException {
     Parcel parcel = new Parcel(project.getGroupId(), project.getArtifactId(), project.getVersion(),
-        StringUtils.isEmpty(parcelClassifier) ? "" : parcelClassifier, project.getPackaging());
+        StringUtils.isEmpty(parcelClassifier) ? Parcel.getOsDescriptor() : parcelClassifier, project.getPackaging());
     if (parcel.isValid()) {
-      parcel.build(getLog(), buildDirectory, outputDirectory);
+      parcel.build(getLog(), buildDirectory, outputDirectory, parcelExecutables);
     }
   }
 

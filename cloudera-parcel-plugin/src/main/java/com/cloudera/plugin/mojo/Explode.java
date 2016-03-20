@@ -17,9 +17,6 @@ public class Explode extends AbstractMojo {
   @Parameter(defaultValue = "${localRepository}", required = true, readonly = true)
   private ArtifactRepository localRepository;
 
-  @Parameter(defaultValue = "${project.build.directory}", required = true, readonly = true)
-  private String buildDirectory;
-
   @Parameter(required = true)
   private List<Parcel> parcels;
 
@@ -27,7 +24,7 @@ public class Explode extends AbstractMojo {
   public void execute() throws MojoExecutionException {
     for (Parcel parcel : parcels) {
       if (parcel.isValid()) {
-        parcel.explode(getLog(), localRepository.getBasedir(), buildDirectory);
+        parcel.explode(getLog(), localRepository.getBasedir());
       }
     }
   }

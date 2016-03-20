@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.cloudera</groupId>
@@ -45,6 +46,7 @@
 
 		<commons-io.version>2.4</commons-io.version>
 		<google-http.version>1.21.0</google-http.version>
+		<google-guava.version>19.0</google-guava.version>
 		<maven-plugin-api.version>3.3.3</maven-plugin-api.version>
 		<maven-plugin-annotations.version>3.3</maven-plugin-annotations.version>
 		<maven-project.version>2.2.1</maven-project.version>

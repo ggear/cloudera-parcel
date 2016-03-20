@@ -15,7 +15,7 @@
 	</parent>
 
 	<modules>
-		<module>cloudera-parcel-repository-kudu-sn-osx</module>
+		<module>cloudera-parcel-repository-kudu</module>
 	</modules>
 
 </project>
