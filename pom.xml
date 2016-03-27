@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.cloudera</groupId>
@@ -24,17 +25,6 @@
 		</site>
 	</distributionManagement>
 
-	<repositories>
-		<repository>
-			<id>central.repo</id>
-			<url>https://repo1.maven.org/maven2</url>
-			<name>Central Repository</name>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-		</repository>
-	</repositories>
-
 	<properties>
 
 		<maven.test.skip>false</maven.test.skip>
@@ -43,6 +33,7 @@
 		<maven.data-download.skip>true</maven.data-download.skip>
 		<maven.assembly.skip>false</maven.assembly.skip>
 
+		<jsch.version>0.1.53</jsch.version>
 		<commons-io.version>2.4</commons-io.version>
 		<google-http.version>1.21.0</google-http.version>
 		<google-guava.version>19.0</google-guava.version>
@@ -69,6 +60,7 @@
 				<maven.system-test.skip>true</maven.system-test.skip>
 				<maven.data-download.skip>true</maven.data-download.skip>
 				<maven.assembly.skip>true</maven.assembly.skip>
+				<maven.parcel-compile.skip>true</maven.parcel-compile.skip>
 			</properties>
 		</profile>
 		<profile>
@@ -78,6 +70,7 @@
 				<maven.system-test.skip>false</maven.system-test.skip>
 				<maven.data-download.skip>true</maven.data-download.skip>
 				<maven.assembly.skip>true</maven.assembly.skip>
+				<maven.parcel-compile.skip>false</maven.parcel-compile.skip>
 			</properties>
 			<activation>
 				<activeByDefault>true</activeByDefault>
@@ -90,6 +83,7 @@
 				<maven.system-test.skip>true</maven.system-test.skip>
 				<maven.data-download.skip>true</maven.data-download.skip>
 				<maven.assembly.skip>false</maven.assembly.skip>
+				<maven.parcel-compile.skip>false</maven.parcel-compile.skip>
 			</properties>
 		</profile>
 		<profile>
@@ -99,6 +93,7 @@
 				<maven.system-test.skip>false</maven.system-test.skip>
 				<maven.data-download.skip>false</maven.data-download.skip>
 				<maven.assembly.skip>false</maven.assembly.skip>
+				<maven.parcel-compile.skip>false</maven.parcel-compile.skip>
 			</properties>
 		</profile>
 	</profiles>
@@ -157,6 +152,11 @@
 	<build>
 		<pluginManagement>
 			<plugins>
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>build-helper-maven-plugin</artifactId>
+					<version>1.9.1</version>
+				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-antrun-plugin</artifactId>

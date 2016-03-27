@@ -1,5 +1,6 @@
 package com.cloudera.plugin.mojo;
 
+import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
@@ -19,12 +20,18 @@ public class Deploy extends AbstractMojo {
   @Parameter(defaultValue = "${parcel.classifier}", required = false, readonly = true)
   private String parcelClassifier;
 
+  @Parameter(defaultValue = "${localRepository}", required = true, readonly = true)
+  private ArtifactRepository localRepository;
+
+  @Parameter(defaultValue = "${project.build.directory}", required = true, readonly = true)
+  private String buildDirectory;
+
   @Override
   public void execute() throws MojoExecutionException {
     Parcel parcel = new Parcel(project.getGroupId(), project.getArtifactId(), project.getVersion(),
         StringUtils.isEmpty(parcelClassifier) ? Parcel.getOsDescriptor() : parcelClassifier, project.getPackaging());
     if (parcel.isValid()) {
-      // TODO
+      parcel.deploy(getLog(), buildDirectory, project.getDistributionManagement().getRepository().getUrl());
     }
   }
 

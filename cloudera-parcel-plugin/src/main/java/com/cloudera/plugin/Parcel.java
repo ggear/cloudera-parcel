@@ -3,6 +3,7 @@ package com.cloudera.plugin;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
@@ -11,6 +12,9 @@ import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
 
@@ -23,6 +27,8 @@ import org.codehaus.plexus.archiver.tar.TarArchiver;
 import org.codehaus.plexus.archiver.tar.TarArchiver.TarCompressionMethod;
 import org.codehaus.plexus.archiver.tar.TarGZipUnArchiver;
 import org.codehaus.plexus.archiver.util.DefaultFileSet;
+import org.codehaus.plexus.components.io.fileselectors.FileInfo;
+import org.codehaus.plexus.components.io.fileselectors.FileSelector;
 import org.codehaus.plexus.logging.Logger;
 import org.codehaus.plexus.logging.console.ConsoleLogger;
 import org.codehaus.plexus.util.StringUtils;
@@ -31,14 +37,14 @@ import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpResponse;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.common.collect.ImmutableMap;
+import com.jcraft.jsch.ChannelSftp;
+import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.Session;
 
 public class Parcel {
 
   public boolean isValid() throws MojoExecutionException {
     List<String> paramaters = new ArrayList<>();
-    if (StringUtils.isEmpty(repositoryUrl)) {
-      paramaters.add("repositoryUrl");
-    }
     if (StringUtils.isEmpty(groupId)) {
       paramaters.add("groupId");
     }
@@ -84,7 +90,7 @@ public class Parcel {
     return version.substring(0, index);
   }
 
-  public String getRemoteUrl() throws MojoExecutionException {
+  public String getRemoteUrl(String repositoryUrl) throws MojoExecutionException {
     return isValid() ? repositoryUrl + "/" + getVersionShort() + "/" + artifactId + "-" + version
         + (StringUtils.isEmpty(classifier) ? "" : "-" + classifier) + "." + type : null;
   }
@@ -94,49 +100,62 @@ public class Parcel {
         : null;
   }
 
-  public boolean download(Log log, String dirRepository) throws MojoExecutionException {
+  public boolean download(Log log, String dirRepository, List<String> urlRepositories) throws MojoExecutionException {
     boolean downloaded = false;
-    GenericUrl remoteUrl = new GenericUrl(getRemoteUrl());
-    GenericUrl remoteUrlSha1 = new GenericUrl(getRemoteUrl() + SUFFIX_SHA1);
     File localPath = new File(dirRepository, getLocalPath());
     File localPathSha1 = new File(dirRepository, getLocalPath() + SUFFIX_SHA1);
     if (localPath.exists() && localPathSha1.exists()) {
-      if (!assertSha1(localPath, localPathSha1)) {
+      if (!assertSha1(localPath, localPathSha1, true)) {
         localPath.delete();
         localPathSha1.delete();
       }
-    } else if (localPath.exists() && !localPathSha1.exists() && assertHash) {
+    } else if (localPath.exists() && !localPathSha1.exists()) {
       localPath.delete();
     } else if (!localPath.exists() && localPathSha1.exists()) {
       localPathSha1.delete();
     }
-    if (!localPath.exists()) {
-      log.info("Downloding: " + remoteUrl);
-      if ((downloaded = downloadHttpResource(remoteUrl, localPath)) && assertHash) {
-        if ((downloaded = downloadHttpResource(remoteUrlSha1, localPathSha1))
-            && !assertSha1(localPath, localPathSha1)) {
-          localPath.delete();
-          localPathSha1.delete();
-          throw new MojoExecutionException(
-              "Downloaded file from (" + remoteUrl + ") failed to match checksum (" + remoteUrlSha1 + ")");
+    if (!localPath.exists() && !localPathSha1.exists()) {
+      for (String repository : urlRepositories) {
+        System.out.println("Downloading: " + getRemoteUrl(repository));
+        try {
+          GenericUrl remoteUrl = new GenericUrl(getRemoteUrl(repository));
+          GenericUrl remoteUrlSha1 = new GenericUrl(getRemoteUrl(repository) + SUFFIX_SHA1);
+          long time = System.currentTimeMillis();
+          if (downloaded = (downloadHttpResource(remoteUrl, localPath)
+              && downloadHttpResource(remoteUrlSha1, localPathSha1))) {
+            if (!(downloaded = assertSha1(localPath, localPathSha1, true))) {
+              localPath.delete();
+              localPathSha1.delete();
+              throw new MojoExecutionException(
+                  "Downloaded file from [" + remoteUrl + "] failed to match checksum [" + remoteUrlSha1 + "]");
+            }
+            System.out.println("Downloaded: " + remoteUrl + " ("
+                + FileUtils.byteCountToDisplaySize(localPath.length() + localPathSha1.length()) + " at "
+                + String.format("%.2f",
+                    (localPath.length() + localPathSha1.length()) / ((System.currentTimeMillis() - time) * 1000D))
+                + " MB/sec)");
+            break;
+          }
+        } catch (Exception exception) {
         }
       }
-    }
-    if (downloaded) {
-      log.info("Downloded: " + remoteUrl);
+      if (!downloaded) {
+        throw new MojoExecutionException(
+            "Could not find parcel [" + getArtifactName() + "] in remote repositories, see above for download attemps");
+      }
     }
     return downloaded;
   }
 
-  public boolean explode(Log log, String dirRepository) throws MojoExecutionException {
-    download(log, dirRepository);
+  public boolean explode(Log log, String dirRepository, List<String> urlRepositories) throws MojoExecutionException {
+    download(log, dirRepository, urlRepositories);
     File explodedPath = StringUtils.isEmpty(outputDirectory) ? new File(dirRepository, getLocalPath()).getParentFile()
         : new File(outputDirectory);
     String explodedPathRoot = explodedPath.toString() + File.separator + getArtifactNameSansClassifierType();
     boolean exploded = new File(explodedPath, getArtifactNameSansClassifierType()).exists();
     if (!exploded) {
       File localPath = new File(dirRepository, getLocalPath());
-      log.info("Exploding: " + getArtifactNamespace());
+      log.info("Exploding " + localPath.getAbsolutePath());
       try {
         explodedPath.mkdirs();
         TarGZipUnArchiver unarchiver = new TarGZipUnArchiver();
@@ -145,7 +164,6 @@ public class Parcel {
         unarchiver.setDestDirectory(explodedPath);
         unarchiver.extract();
         exploded = true;
-        log.info("Exploded: " + getArtifactNamespace());
       } catch (Exception exception) {
         throw new MojoExecutionException("Failed to explode artifact [" + getArtifactNamespace() + "] from ["
             + localPath + "] to [" + explodedPath + "]", exception);
@@ -164,7 +182,8 @@ public class Parcel {
     return exploded;
   }
 
-  public boolean build(Log log, String dirBuild, String dirOutput, String dirExecutable) throws MojoExecutionException {
+  public boolean build(Log log, final String dirSource, String dirBuild, String dirOutput)
+      throws MojoExecutionException {
     File buildPath = new File(dirBuild, getArtifactName());
     File buildPathSha1 = new File(dirBuild, getArtifactName() + SUFFIX_SHA1);
     File ouputPath = new File(dirOutput);
@@ -182,42 +201,98 @@ public class Parcel {
       archiver.setCompression(TarCompressionMethod.gzip);
       DefaultFileSet fileSet = new DefaultFileSet();
       fileSet.setDirectory(ouputPath);
-      if (dirExecutable != null) {
-        fileSet.setExcludes(new String[] { dirExecutable, });
-      }
+      fileSet.setFileSelectors(new FileSelector[] { new FileSelector() {
+        @Override
+        public boolean isSelected(FileInfo fileInfo) throws IOException {
+          return !fileInfo.isFile() || !new File(dirSource, fileInfo.getName()).canExecute();
+        }
+      } });
       archiver.addFileSet(fileSet);
-      if (dirExecutable != null) {
-        archiver.setFileMode(0755);
-        fileSet = new DefaultFileSet();
-        fileSet.setDirectory(ouputPath);
-        fileSet.setIncludes(new String[] { dirExecutable, });
-        archiver.addFileSet(fileSet);
-      }
+      archiver.setFileMode(0755);
+      fileSet = new DefaultFileSet();
+      fileSet.setDirectory(ouputPath);
+      fileSet.setFileSelectors(new FileSelector[] { new FileSelector() {
+        @Override
+        public boolean isSelected(FileInfo fileInfo) throws IOException {
+          return fileInfo.isFile() && new File(dirSource, fileInfo.getName()).canExecute();
+        }
+      } });
+      archiver.addFileSet(fileSet);
       archiver.setDestFile(buildPath);
       archiver.createArchive();
       FileUtils.writeStringToFile(buildPathSha1, calculateSha1(buildPath) + "\n");
       FileUtils.copyFile(buildPath, parcelRepoPath);
       FileUtils.copyFile(buildPathSha1, parcelRepoPathSha1);
-      return true;
     } catch (Exception exception) {
       throw new MojoExecutionException(
-          "Failed to build artifact " + getArtifactNamespace() + " from (" + ouputPath + ") to (" + buildPath + ")",
+          "Failed to build artifact [" + getArtifactNamespace() + "] from [" + ouputPath + "] to [" + buildPath + "]",
           exception);
     }
+    return assertSha1(buildPath, buildPathSha1, false);
   }
 
   public boolean install(Log log, String dirBuild, String dirRepository) throws MojoExecutionException {
     File buildPath = new File(dirBuild, getArtifactName());
     File buildPathSha1 = new File(dirBuild, getArtifactName() + SUFFIX_SHA1);
-    File repositoryPath = new File(dirRepository, getLocalPath()).getParentFile();
+    File repositoryRootPath = new File(dirRepository, getLocalPath()).getParentFile();
+    File repositoryPath = new File(repositoryRootPath, getArtifactName());
+    File repositoryPathSha1 = new File(repositoryRootPath, getArtifactName() + SUFFIX_SHA1);
     try {
-      FileUtils.copyFileToDirectory(buildPath, repositoryPath);
-      FileUtils.copyFileToDirectory(buildPathSha1, repositoryPath);
+      if (assertSha1(buildPath, buildPathSha1, false)) {
+        log.info("Installing " + buildPath + " to " + repositoryPath);
+
+        FileUtils.copyFileToDirectory(buildPath, repositoryRootPath);
+        FileUtils.copyFileToDirectory(buildPathSha1, repositoryRootPath);
+      }
     } catch (Exception exception) {
-      throw new MojoExecutionException("Failed to install artifact " + getArtifactNamespace() + " from (" + buildPath
-          + ") to (" + repositoryPath + ")", exception);
+      throw new MojoExecutionException("Failed to install artifact [" + getArtifactNamespace() + "] from [" + buildPath
+          + "] to [" + repositoryRootPath + "]", exception);
     }
-    return true;
+    return assertSha1(repositoryPath, repositoryPathSha1, false);
+  }
+
+  public boolean deploy(Log log, String dirBuild, String scpConnect) throws MojoExecutionException {
+    boolean deployed = false;
+    File buildPath = new File(dirBuild, getArtifactName());
+    File buildPathSha1 = new File(dirBuild, getArtifactName() + SUFFIX_SHA1);
+    Matcher sshConnectMatcher = REGEXP_SCP_CONNECT
+        .matcher(scpConnect + (scpConnect.endsWith("/") ? "" : "/") + getVersionShort());
+    if (!sshConnectMatcher.matches()) {
+      throw new MojoExecutionException("Could not match [" + scpConnect + "] with regexp [" + REGEXP_SCP_CONNECT
+          + "], please check your ssh connect string and provide all values.");
+    }
+    try {
+      if (assertSha1(buildPath, buildPathSha1, false)) {
+        System.out.println("Deploying: " + buildPath + " to " + sshConnectMatcher.group(0));
+        long time = System.currentTimeMillis();
+        JSch jsch = new JSch();
+        jsch.addIdentity(sshConnectMatcher.group(2));
+        Session session = jsch.getSession(sshConnectMatcher.group(1), sshConnectMatcher.group(3),
+            Integer.parseInt(sshConnectMatcher.group(4)));
+        Properties config = new java.util.Properties();
+        config.put("StrictHostKeyChecking", "no");
+        session.setConfig(config);
+        session.connect();
+        ChannelSftp channel = (ChannelSftp) session.openChannel("sftp");
+        channel.connect();
+        channel.cd(sshConnectMatcher.group(5));
+        channel.put(buildPath.getAbsolutePath(), buildPath.getName());
+        channel.put(buildPathSha1.getAbsolutePath(), buildPathSha1.getName());
+        channel.disconnect();
+        session.disconnect();
+        System.out.println("Deployed: " + buildPath + " ("
+            + FileUtils.byteCountToDisplaySize(buildPath.length() + buildPathSha1.length()) + " at "
+            + String.format("%.2f",
+                (buildPath.length() + buildPathSha1.length()) / ((System.currentTimeMillis() - time) * 1000D))
+            + " MB/sec)");
+        deployed = true;
+      }
+    } catch (Exception exception) {
+      throw new MojoExecutionException("Failed to deploy artifact [" + getArtifactNamespace() + "] from [" + buildPath
+          + "] to [" + sshConnectMatcher.group(0) + "]", exception);
+    }
+
+    return deployed;
   }
 
   private boolean downloadHttpResource(GenericUrl remote, File local) throws MojoExecutionException {
@@ -231,8 +306,6 @@ public class Parcel {
         return true;
       }
     } catch (Exception exception) {
-      throw new MojoExecutionException("Failed to download artifact " + getArtifactNamespace() + " from repo ("
-          + repositoryUrl + ") to (" + local + ")", exception);
     } finally {
       IOUtils.closeQuietly(localStream);
     }
@@ -251,19 +324,31 @@ public class Parcel {
       }
       return new HexBinaryAdapter().marshal(messageDigest.digest());
     } catch (Exception exception) {
-      throw new MojoExecutionException("Could not create SHA1 of file (" + file + ")");
+      throw new MojoExecutionException("Could not create SHA1 of file [" + file + "]");
     } finally {
       IOUtils.closeQuietly(input);
     }
   }
 
-  private boolean assertSha1(File file, File fileSha1) throws MojoExecutionException {
+  private boolean assertSha1(File file, File fileSha1, boolean quiet) throws MojoExecutionException {
     InputStream input = null;
     try {
-      return IOUtils.toString(input = new FileInputStream(fileSha1)).trim().toUpperCase()
-          .equals(calculateSha1(file).toUpperCase());
+      if (!IOUtils.toString(input = new FileInputStream(fileSha1)).trim().toUpperCase()
+          .equals(calculateSha1(file).toUpperCase())) {
+        if (quiet) {
+          return false;
+        } else {
+          throw new MojoExecutionException("File [" + file + "] is not consistent with hash file [" + fileSha1 + "]");
+        }
+      }
+      return true;
     } catch (Exception exception) {
-      throw new MojoExecutionException("Could not load file (" + fileSha1 + ")");
+      if (quiet) {
+        return false;
+      } else {
+        throw new MojoExecutionException(
+            "Could not verify file [" + file + "] is consistent with hash file [" + fileSha1 + "]");
+      }
     } finally {
       IOUtils.closeQuietly(input);
     }
@@ -273,6 +358,8 @@ public class Parcel {
 
   private static final String DIR_PARCEL_REPO = "parcel-repo";
   private static final String DIR_PARCEL_REPO_TYPE = "parcels";
+
+  private static final Pattern REGEXP_SCP_CONNECT = Pattern.compile("^scp://(.*):(.*)@(.*):([0-9]*)(.*)");
 
   private static final Map<String, ImmutableMap<String, String>> OS_NAME_VERSION_DESCRIPTOR = ImmutableMap.of(//
       "Mac OS X", //
@@ -302,9 +389,6 @@ public class Parcel {
         + " on the command line.");
   }
 
-  @Parameter(required = false, defaultValue = "http://archive.cloudera.com/cdh5/parcels/latest")
-  private String repositoryUrl = "http://archive.cloudera.com/cdh5/parcels/latest";
-
   @Parameter(required = false, defaultValue = "com.cloudera.parcel")
   private String groupId = "com.cloudera.parcel";
 
@@ -323,25 +407,20 @@ public class Parcel {
   @Parameter(required = false, defaultValue = "")
   private String linkDirectory = "";
 
-  @Parameter(required = false, defaultValue = "true")
-  private Boolean assertHash = Boolean.TRUE;
-
   @Parameter(required = false, defaultValue = "parcel")
   private String type = "parcel";
 
   public Parcel() {
   }
 
-  public Parcel(String repositoryUrl, String groupId, String artifactId, String version, String classifier,
-      String outputDirectory, String linkDirectory, Boolean assertHash, String type) throws MojoExecutionException {
-    this.repositoryUrl = repositoryUrl;
+  public Parcel(String groupId, String artifactId, String version, String classifier, String outputDirectory,
+      String linkDirectory, String type) throws MojoExecutionException {
     this.groupId = groupId;
     this.artifactId = artifactId;
     this.version = version;
     this.classifier = classifier;
     this.outputDirectory = outputDirectory;
     this.linkDirectory = linkDirectory;
-    this.assertHash = assertHash;
     this.type = type;
     isValid();
   }
@@ -354,14 +433,6 @@ public class Parcel {
     this.classifier = classifier;
     this.type = type;
     isValid();
-  }
-
-  public String getRepositoryUrl() {
-    return repositoryUrl;
-  }
-
-  public void setRepositoryUrl(String repositoryUrl) {
-    this.repositoryUrl = repositoryUrl;
   }
 
   public String getGroupId() {
@@ -410,14 +481,6 @@ public class Parcel {
 
   public void setLinkDirectory(String linkDirectory) {
     this.linkDirectory = linkDirectory;
-  }
-
-  public Boolean getAssertHash() {
-    return assertHash;
-  }
-
-  public void setAssertHash(Boolean assertHash) {
-    this.assertHash = assertHash;
   }
 
   public String getType() {

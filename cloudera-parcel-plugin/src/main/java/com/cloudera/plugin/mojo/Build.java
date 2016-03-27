@@ -22,18 +22,18 @@ public class Build extends AbstractMojo {
   @Parameter(defaultValue = "${project.build.directory}", required = true, readonly = true)
   private String buildDirectory;
 
+  @Parameter(defaultValue = "${basedir}/src/main/resources", required = true, readonly = true)
+  private String resourcesDirectory;
+
   @Parameter(defaultValue = "${project.build.outputDirectory}", required = true, readonly = true)
   private String outputDirectory;
-
-  @Parameter(defaultValue = "${parcel.executables}", required = false, readonly = true)
-  private String parcelExecutables;
 
   @Override
   public void execute() throws MojoExecutionException {
     Parcel parcel = new Parcel(project.getGroupId(), project.getArtifactId(), project.getVersion(),
         StringUtils.isEmpty(parcelClassifier) ? Parcel.getOsDescriptor() : parcelClassifier, project.getPackaging());
     if (parcel.isValid()) {
-      parcel.build(getLog(), buildDirectory, outputDirectory, parcelExecutables);
+      parcel.build(getLog(), resourcesDirectory, buildDirectory, outputDirectory);
     }
   }
 

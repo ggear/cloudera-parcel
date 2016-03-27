@@ -7,6 +7,13 @@
 	<artifactId>explode-it</artifactId>
 	<version>1.0-SNAPSHOT</version>
 
+	<repositories>
+		<repository>
+			<id>sqoop-connectors.parcel.repo</id>
+			<url>http://archive.cloudera.com/sqoop-connectors/parcels</url>
+		</repository>
+	</repositories>
+
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
@@ -32,7 +39,6 @@
 									<version>1.4c5</version>
 									<classifier>el6</classifier>
 									<linkDirectory>${project.build.directory}/sqoop-connectors</linkDirectory>
-									<repositoryUrl>http://archive.cloudera.com/sqoop-connectors/parcels</repositoryUrl>
 								</parcel>
 								<parcel>
 									<groupId>com.cloudera.parcel.explode</groupId>
@@ -40,7 +46,6 @@
 									<version>1.4c5</version>
 									<classifier>el6</classifier>
 									<linkDirectory>${project.build.directory}/sqoop-connectors</linkDirectory>
-									<repositoryUrl>http://archive.cloudera.com/sqoop-connectors/parcels</repositoryUrl>
 								</parcel>
 							</parcels>
 						</configuration>

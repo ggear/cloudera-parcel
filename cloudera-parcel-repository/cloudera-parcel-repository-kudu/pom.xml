@@ -14,17 +14,88 @@
 		<version>0.6.1-SNAPSHOT</version>
 	</parent>
 
-	<properties>
-		<parcel.executables>/*/bin/*</parcel.executables>
-	</properties>
+	<distributionManagement>
+		<repository>
+			<id>kudu.repo</id>
+			<url>scp://root:/Users/graham/.ssh/id_rsa.pem@52.63.86.162:22/var/www/html/tmph3l7m2vv103/sbin/kudu/parcels</url>
+		</repository>
+	</distributionManagement>
 
 	<build>
 		<plugins>
 			<plugin>
-				<groupId>com.cloudera.parcel</groupId>
-				<artifactId>cloudera-parcel-plugin</artifactId>
-				<version>0.6.1-SNAPSHOT</version>
-				<extensions>true</extensions>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>build-helper-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>regex-property</id>
+						<goals>
+							<goal>regex-property</goal>
+						</goals>
+						<configuration>
+							<name>short.version</name>
+							<value>${project.version}</value>
+							<regex>^([0-9]+\.[0-9]+\.[0-9]+).*</regex>
+							<replacement>$1</replacement>
+							<failIfNoMatch>true</failIfNoMatch>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>generate-sources</phase>
+						<configuration>
+							<target>
+								<exec executable="git" dir="src/main/external" error="/dev/null">
+									<arg line="clone git@github.com:cloudera/kudu.git" />
+								</exec>
+								<exec executable="git" dir="src/main/external/kudu"
+									failonerror="true">
+									<arg line="checkout ${short.version}" />
+								</exec>
+								<exec executable="build-support/enable_devtoolset.sh" dir="src/main/external/kudu"
+									failonerror="true">
+									<arg line="thirdparty/build-if-necessary.sh" />
+								</exec>
+								<delete dir="src/main/external/kudu/build" />
+								<mkdir dir="src/main/external/kudu/build/release" />
+								<exec executable="../../build-support/enable_devtoolset.sh"
+									dir="src/main/external/kudu/build/release" failonerror="true">
+									<arg value="../../thirdparty/installed/bin/cmake" />
+									<arg value="-DCMAKE_BUILD_TYPE=release" />
+									<arg value="-DNO_TESTS=1" />
+									<arg value="../.." />
+								</exec>
+								<exec executable="make" dir="src/main/external/kudu/build/release"
+									failonerror="true">
+									<arg value="-j4" />
+								</exec>
+								<delete includeEmptyDirs="true">
+									<fileset dir="src/main/resources" includes="KUDU-*/bin/**" />
+								</delete>
+								<delete includeEmptyDirs="true">
+									<fileset dir="src/main/resources" includes="KUDU-*/lib/**" />
+								</delete>
+								<exec executable="sh" error="/dev/null">
+									<arg value="-c" />
+									<arg
+										value="cp -rvf \
+									src/main/external/kudu/build/release/bin \
+									src/main/external/kudu/build/release/lib \
+									src/main/resources/KUDU-*" />
+								</exec>
+							</target>
+							<skip>${maven.parcel-compile.skip}</skip>
+						</configuration>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>
