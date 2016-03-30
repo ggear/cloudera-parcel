@@ -55,6 +55,10 @@
 								</exec>
 								<exec executable="git" dir="src/main/external/kudu"
 									failonerror="true">
+									<arg line="pull --all" />
+								</exec>
+								<exec executable="git" dir="src/main/external/kudu"
+									failonerror="true">
 									<arg line="checkout ${short.version}" />
 								</exec>
 								<exec executable="build-support/enable_devtoolset.sh" dir="src/main/external/kudu"
