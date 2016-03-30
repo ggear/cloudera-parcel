@@ -53,26 +53,25 @@
 								<exec executable="git" dir="src/main/external" error="/dev/null">
 									<arg line="clone https://github.com/cloudera/Impala.git" />
 								</exec>
-								<exec executable="git" dir="src/main/external/Impala"
-									failonerror="true">
-									<arg line="checkout cdh5-trunk" />
+								<exec executable="sh">
+									<arg value="-c" />
+									<arg
+										value="
+										cd src/main/external/Impala; 
+										git checkout cdh5-trunk;
+										git pull --all;
+										git checkout ${short.version};
+										git checkout .;
+										git clean -df;
+										git status" />
 								</exec>
-								<exec executable="git" dir="src/main/external/Impala"
-									failonerror="true">
-									<arg line="pull --all" />
+								<exec executable="sh">
+									<arg value="-c" />
+									<arg
+										value="
+										source src/main/external/Impala/bin/impala-config.sh;
+										${IMPALA_HOME}/buildall.sh -noclean -skiptests -build_shared_libs -format" />
 								</exec>
-								<exec executable="git" dir="src/main/external/Impala"
-									failonerror="true">
-									<arg line="checkout ${short.version}" />
-								</exec>
-                                                                <exec executable="git" dir="src/main/external/Impala"
-                                                                        failonerror="true">
-                                                                        <arg line="checkout ." />
-                                                                </exec>
-                                                                <exec executable="git" dir="src/main/external/Impala"
-                                                                        failonerror="true">
-                                                                        <arg line="clean -df" />
-                                                                </exec>
 							</target>
 							<skip>${maven.parcel-compile.skip}</skip>
 						</configuration>

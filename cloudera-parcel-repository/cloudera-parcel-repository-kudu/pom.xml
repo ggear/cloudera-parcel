@@ -53,27 +53,19 @@
 								<exec executable="git" dir="src/main/external" error="/dev/null">
 									<arg line="clone git@github.com:cloudera/kudu.git" />
 								</exec>
-								<exec executable="git" dir="src/main/external/kudu"
-									failonerror="true">
-									<arg line="checkout master" />
+								<exec executable="sh">
+									<arg value="-c" />
+									<arg
+										value="
+										cd src/main/external/kudu; 
+										git checkout master;
+										git pull --all;
+										git checkout ${short.version};
+										git checkout .;
+										git clean -df;
+										git status" />
 								</exec>
-								<exec executable="git" dir="src/main/external/kudu"
-									failonerror="true">
-									<arg line="pull --all" />
-								</exec>
-								<exec executable="git" dir="src/main/external/kudu"
-									failonerror="true">
-									<arg line="checkout ." />
-								</exec>
-								<exec executable="git" dir="src/main/external/kudu"
-									failonerror="true">
-									<arg line="clean -df" />
-								</exec>
-								<exec executable="git" dir="src/main/external/kudu"
-									failonerror="true">
-									<arg line="checkout ${short.version}" />
-								</exec>
- 								<exec executable="build-support/enable_devtoolset.sh" dir="src/main/external/kudu"
+								<exec executable="build-support/enable_devtoolset.sh" dir="src/main/external/kudu"
 									failonerror="true">
 									<arg line="thirdparty/build-if-necessary.sh" />
 								</exec>
