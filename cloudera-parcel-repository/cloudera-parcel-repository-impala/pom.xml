@@ -65,7 +65,8 @@
 										git clean -df;
 										git status" />
 								</exec>
-								<exec executable="sh">
+								<!-- TODO: Provide OS-X build script -->
+								<exec executable="sh" os="Linux">
 									<arg value="-c" />
 									<arg
 										value="
