@@ -55,13 +55,25 @@
 								</exec>
 								<exec executable="git" dir="src/main/external/kudu"
 									failonerror="true">
+									<arg line="checkout master" />
+								</exec>
+								<exec executable="git" dir="src/main/external/kudu"
+									failonerror="true">
 									<arg line="pull --all" />
+								</exec>
+								<exec executable="git" dir="src/main/external/kudu"
+									failonerror="true">
+									<arg line="checkout ." />
+								</exec>
+								<exec executable="git" dir="src/main/external/kudu"
+									failonerror="true">
+									<arg line="clean -df" />
 								</exec>
 								<exec executable="git" dir="src/main/external/kudu"
 									failonerror="true">
 									<arg line="checkout ${short.version}" />
 								</exec>
-								<exec executable="build-support/enable_devtoolset.sh" dir="src/main/external/kudu"
+ 								<exec executable="build-support/enable_devtoolset.sh" dir="src/main/external/kudu"
 									failonerror="true">
 									<arg line="thirdparty/build-if-necessary.sh" />
 								</exec>
