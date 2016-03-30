@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.cloudera.parcel</groupId>
+	<artifactId>IMPALA</artifactId>
+	<packaging>parcel</packaging>
+	<version>2.3.0-cdh5.5.2</version>
+
+	<parent>
+		<groupId>com.cloudera.parcel</groupId>
+		<artifactId>cloudera-parcel-repository</artifactId>
+		<version>0.6.2-SNAPSHOT</version>
+	</parent>
+
+	<distributionManagement>
+		<repository>
+			<id>impala.repo</id>
+			<url>scp://root:/Users/graham/.ssh/id_rsa.pem@52.63.86.162:22/var/www/html/tmph3l7m2vv103/sbin/impala/parcels</url>
+		</repository>
+	</distributionManagement>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>build-helper-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>regex-property</id>
+						<goals>
+							<goal>regex-property</goal>
+						</goals>
+						<configuration>
+							<name>short.version</name>
+							<value>${project.version}</value>
+							<regex>^[0-9]+\.[0-9]+\.[0-9]+-(cdh[0-9]+\.[0-9]+\.[0-9]).*</regex>
+							<replacement>$1-release</replacement>
+							<failIfNoMatch>true</failIfNoMatch>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>generate-sources</phase>
+						<configuration>
+							<target>
+								<exec executable="git" dir="src/main/external" error="/dev/null">
+									<arg line="clone https://github.com/cloudera/Impala.git" />
+								</exec>
+								<exec executable="git" dir="src/main/external/Impala"
+									failonerror="true">
+									<arg line="checkout cdh5-trunk" />
+								</exec>
+								<exec executable="git" dir="src/main/external/Impala"
+									failonerror="true">
+									<arg line="pull --all" />
+								</exec>
+								<exec executable="git" dir="src/main/external/Impala"
+									failonerror="true">
+									<arg line="checkout ${short.version}" />
+								</exec>
+                                                                <exec executable="git" dir="src/main/external/Impala"
+                                                                        failonerror="true">
+                                                                        <arg line="checkout ." />
+                                                                </exec>
+                                                                <exec executable="git" dir="src/main/external/Impala"
+                                                                        failonerror="true">
+                                                                        <arg line="clean -df" />
+                                                                </exec>
+							</target>
+							<skip>${maven.parcel-compile.skip}</skip>
+						</configuration>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>

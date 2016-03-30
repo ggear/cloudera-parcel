@@ -20,6 +20,7 @@
 
 	<modules>
 		<module>cloudera-parcel-repository-kudu</module>
+		<module>cloudera-parcel-repository-impala</module>
 	</modules>
 
 	<build>
