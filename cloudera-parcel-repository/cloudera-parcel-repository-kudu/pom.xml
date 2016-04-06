@@ -57,13 +57,13 @@
 									<arg value="-c" />
 									<arg
 										value="
-										cd src/main/external/kudu; 
-										git checkout master;
-										git pull --all;
-										git checkout ${short.version};
-										git checkout .;
-										git clean -df;
-										git status" />
+											cd src/main/external/kudu; 
+											git checkout master;
+											git pull --all;
+											git checkout ${short.version};
+											git checkout .;
+											git clean -df;
+											git status" />
 								</exec>
 								<exec executable="build-support/enable_devtoolset.sh" dir="src/main/external/kudu"
 									failonerror="true">
@@ -83,18 +83,19 @@
 									<arg value="-j4" />
 								</exec>
 								<delete includeEmptyDirs="true">
-									<fileset dir="src/main/resources" includes="KUDU-*/bin/**" />
+									<fileset dir="src/main/resources" includes="KUDU-${project.version}/bin/**" />
 								</delete>
 								<delete includeEmptyDirs="true">
-									<fileset dir="src/main/resources" includes="KUDU-*/lib/**" />
+									<fileset dir="src/main/resources" includes="KUDU-${project.version}/lib/**" />
 								</delete>
 								<exec executable="sh" error="/dev/null">
 									<arg value="-c" />
 									<arg
-										value="cp -rvf \
-									src/main/external/kudu/build/release/bin \
-									src/main/external/kudu/build/release/lib \
-									src/main/resources/KUDU-*" />
+										value="
+											cp -rvf \
+											src/main/external/kudu/build/release/bin \
+											src/main/external/kudu/build/release/lib \
+											src/main/resources/KUDU-${project.version}" />
 								</exec>
 							</target>
 							<skip>${maven.parcel-compile.skip}</skip>

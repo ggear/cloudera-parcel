@@ -57,13 +57,13 @@
 									<arg value="-c" />
 									<arg
 										value="
-										cd src/main/external/Impala; 
-										git checkout cdh5-trunk;
-										git pull --all;
-										git checkout ${short.version};
-										git checkout .;
-										git clean -df;
-										git status" />
+											cd src/main/external/Impala; 
+											git checkout cdh5-trunk;
+											git pull --all;
+											git checkout ${short.version};
+											git checkout .;
+											git clean -df;
+											git status" />
 								</exec>
 								<!-- TODO: Provide OS-X build script -->
 								<exec executable="sh" os="Linux">
@@ -71,7 +71,21 @@
 									<arg
 										value="
 										source src/main/external/Impala/bin/impala-config.sh;
-										${IMPALA_HOME}/buildall.sh -noclean -skiptests -build_shared_libs -format" />
+										${IMPALA_HOME}/buildall.sh -noclean -notests" />
+								</exec>
+								<delete includeEmptyDirs="true">
+									<fileset dir="src/main/resources" includes="IMPALA-${project.version}/bin/**" />
+								</delete>
+								<mkdir dir="src/main/resources/IMPALA-${project.version}/bin" />
+								<exec executable="sh" error="/dev/null">
+									<arg value="-c" />
+									<arg
+										value="
+											cp -rvf \
+											src/main/external/Impala/be/build/debug/service/impalad \
+											src/main/external/Impala/be/build/debug/catalog/catalogd \
+											src/main/external/Impala/be/build/debug/statestore/statestored \
+											src/main/resources/IMPALA-${project.version}" />
 								</exec>
 							</target>
 							<skip>${maven.parcel-compile.skip}</skip>
