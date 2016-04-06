@@ -85,7 +85,7 @@
 											src/main/external/Impala/be/build/debug/service/impalad \
 											src/main/external/Impala/be/build/debug/catalog/catalogd \
 											src/main/external/Impala/be/build/debug/statestore/statestored \
-											src/main/resources/IMPALA-${project.version}" />
+											src/main/resources/IMPALA-${project.version}/bin" />
 								</exec>
 							</target>
 							<skip>${maven.parcel-compile.skip}</skip>
