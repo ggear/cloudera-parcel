@@ -105,7 +105,7 @@ public class Parcel {
     File localPath = new File(dirRepository, getLocalPath());
     File localPathSha1 = new File(dirRepository, getLocalPath() + SUFFIX_SHA1);
     if (localPath.exists() && localPathSha1.exists()) {
-      if (!assertSha1(localPath, localPathSha1, true)) {
+      if (!assertSha1(log, localPath, localPathSha1, true)) {
         localPath.delete();
         localPathSha1.delete();
       }
@@ -121,9 +121,9 @@ public class Parcel {
           GenericUrl remoteUrl = new GenericUrl(getRemoteUrl(repository));
           GenericUrl remoteUrlSha1 = new GenericUrl(getRemoteUrl(repository) + SUFFIX_SHA1);
           long time = System.currentTimeMillis();
-          if (downloaded = (downloadHttpResource(remoteUrl, localPath)
-              && downloadHttpResource(remoteUrlSha1, localPathSha1))) {
-            if (!(downloaded = assertSha1(localPath, localPathSha1, true))) {
+          if (downloaded = (downloadHttpResource(log, remoteUrl, localPath)
+              && downloadHttpResource(log, remoteUrlSha1, localPathSha1))) {
+            if (!(downloaded = assertSha1(log, localPath, localPathSha1, true))) {
               localPath.delete();
               localPathSha1.delete();
               throw new MojoExecutionException(
@@ -137,11 +137,14 @@ public class Parcel {
             break;
           }
         } catch (Exception exception) {
+          if (log.isDebugEnabled()) {
+            log.debug("Error encountered downlaoding parcel [" + getArtifactName() + "]", exception);
+          }
         }
       }
       if (!downloaded) {
-        throw new MojoExecutionException(
-            "Could not find parcel [" + getArtifactName() + "] in remote repositories, see above for download attemps");
+        throw new MojoExecutionException("Could not find parcel [" + getArtifactName() + "] in remote repositories, "
+            + "see above for download attemps and try a mvn -X invocation for DEBUG logs showing transport exceptions");
       }
     }
     return downloaded;
@@ -228,7 +231,7 @@ public class Parcel {
           "Failed to build artifact [" + getArtifactNamespace() + "] from [" + ouputPath + "] to [" + buildPath + "]",
           exception);
     }
-    return assertSha1(buildPath, buildPathSha1, false);
+    return assertSha1(log, buildPath, buildPathSha1, false);
   }
 
   public boolean install(Log log, String dirBuild, String dirRepository) throws MojoExecutionException {
@@ -238,7 +241,7 @@ public class Parcel {
     File repositoryPath = new File(repositoryRootPath, getArtifactName());
     File repositoryPathSha1 = new File(repositoryRootPath, getArtifactName() + SUFFIX_SHA1);
     try {
-      if (assertSha1(buildPath, buildPathSha1, false)) {
+      if (assertSha1(log, buildPath, buildPathSha1, false)) {
         log.info("Installing " + buildPath + " to " + repositoryPath);
 
         FileUtils.copyFileToDirectory(buildPath, repositoryRootPath);
@@ -248,7 +251,7 @@ public class Parcel {
       throw new MojoExecutionException("Failed to install artifact [" + getArtifactNamespace() + "] from [" + buildPath
           + "] to [" + repositoryRootPath + "]", exception);
     }
-    return assertSha1(repositoryPath, repositoryPathSha1, false);
+    return assertSha1(log, repositoryPath, repositoryPathSha1, false);
   }
 
   public boolean deploy(Log log, String dirBuild, String scpConnect) throws MojoExecutionException {
@@ -262,7 +265,7 @@ public class Parcel {
           + "], please check your ssh connect string and provide all values.");
     }
     try {
-      if (assertSha1(buildPath, buildPathSha1, false)) {
+      if (assertSha1(log, buildPath, buildPathSha1, false)) {
         System.out.println("Deploying: " + buildPath + " to " + sshConnectMatcher.group(0));
         long time = System.currentTimeMillis();
         JSch jsch = new JSch();
@@ -295,7 +298,7 @@ public class Parcel {
     return deployed;
   }
 
-  private boolean downloadHttpResource(GenericUrl remote, File local) throws MojoExecutionException {
+  private boolean downloadHttpResource(Log log, GenericUrl remote, File local) throws MojoExecutionException {
     local.getParentFile().mkdirs();
     FileOutputStream localStream = null;
     try {
@@ -306,6 +309,9 @@ public class Parcel {
         return true;
       }
     } catch (Exception exception) {
+      if (log.isDebugEnabled()) {
+        log.debug("Error downloading resource [" + remote + "]", exception);
+      }
     } finally {
       IOUtils.closeQuietly(localStream);
     }
@@ -330,7 +336,7 @@ public class Parcel {
     }
   }
 
-  private boolean assertSha1(File file, File fileSha1, boolean quiet) throws MojoExecutionException {
+  private boolean assertSha1(Log log, File file, File fileSha1, boolean quiet) throws MojoExecutionException {
     InputStream input = null;
     try {
       if (!IOUtils.toString(input = new FileInputStream(fileSha1)).trim().toUpperCase()
@@ -344,6 +350,9 @@ public class Parcel {
       return true;
     } catch (Exception exception) {
       if (quiet) {
+        if (log.isDebugEnabled()) {
+          log.debug("Could not verify file [" + file + "] is consistent with hash file [" + fileSha1 + "]", exception);
+        }
         return false;
       } else {
         throw new MojoExecutionException(

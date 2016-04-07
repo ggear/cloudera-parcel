@@ -21,8 +21,33 @@
 		</repository>
 	</distributionManagement>
 
+	<repositories>
+		<repository>
+			<id>cdh.repo</id>
+			<url>http://archive-primary.cloudera.com/cdh5/parcels</url>
+			<releases>
+				<enabled>false</enabled>
+				<updatePolicy>never</updatePolicy>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+		<repository>
+			<id>impala.repo</id>
+			<url>http://52.63.86.162/tmph3l7m2vv103/sbin/impala/parcels</url>
+			<releases>
+				<enabled>false</enabled>
+				<updatePolicy>never</updatePolicy>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
+
 	<properties>
-		<parcel.classifier>el6</parcel.classifier>
+		<impala.version>2.3.0</impala.version>
 	</properties>
 
 	<build>
@@ -47,6 +72,47 @@
 				</executions>
 			</plugin>
 			<plugin>
+				<groupId>com.cloudera.parcel</groupId>
+				<artifactId>cloudera-parcel-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>explode-cdh</id>
+						<phase>validate</phase>
+						<goals>
+							<goal>explode</goal>
+						</goals>
+						<configuration>
+							<parcels>
+								<parcel>
+									<groupId>com.cloudera.parcel</groupId>
+									<artifactId>CDH</artifactId>
+									<version>${project.version}</version>
+									<classifier>el7</classifier>
+									<linkDirectory>src/main/external/CDH-${project.version}</linkDirectory>
+								</parcel>
+							</parcels>
+						</configuration>
+					</execution>
+					<execution>
+						<id>explode-impala</id>
+						<phase>validate</phase>
+						<goals>
+							<goal>explode</goal>
+						</goals>
+						<configuration>
+							<parcels>
+								<parcel>
+									<groupId>com.cloudera.parcel</groupId>
+									<artifactId>IMPALA</artifactId>
+									<version>${impala.version}-cdh${short.version}</version>
+									<linkDirectory>src/main/external/IMPALA-${impala.version}-cdh${short.version}</linkDirectory>
+								</parcel>
+							</parcels>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-antrun-plugin</artifactId>
 				<executions>
@@ -54,13 +120,30 @@
 						<phase>generate-sources</phase>
 						<configuration>
 							<target>
+								<delete includeEmptyDirs="true">
+									<fileset dir="src/main/resources/CDH-${project.version}"
+										defaultexcludes="false">
+										<include name="**/*" />
+										<exclude name="meta/**" />
+										<exclude name="README" />
+										<exclude name=".gitignore" />
+									</fileset>
+								</delete>
 								<exec executable="sh" error="/dev/null">
 									<arg value="-c" />
 									<arg
 										value="
-											cp -rvfnp \
+											cp -rvf \
 											src/main/external/CDH-${project.version} \
 											src/main/resources" />
+								</exec>
+								<exec executable="sh" error="/dev/null">
+									<arg value="-c" />
+									<arg
+										value="
+											cp -rvf \
+											src/main/external/IMPALA-${impala.version}-cdh${short.version}/bin \
+											src/main/resources/CDH-${project.version}" />
 								</exec>
 							</target>
 							<skip>${maven.parcel-compile.skip}</skip>
