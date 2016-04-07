@@ -1,0 +1,458 @@
+{
+    "avro-tools": {
+      "destination": "/usr/bin/avro-tools",
+      "source": "bin/avro-tools",
+      "priority": 10,
+      "isDirectory": false
+    }
+    ,"beeline": {
+      "destination": "/usr/bin/beeline",
+      "source": "bin/beeline",
+      "priority": 10,
+      "isDirectory": false
+    }
+    ,"bigtop-detect-javahome": {
+      "destination": "/usr/bin/bigtop-detect-javahome",
+      "source": "bin/bigtop-detect-javahome",
+      "priority": 10,
+      "isDirectory": false
+    }
+    ,"catalogd": {
+      "destination": "/usr/bin/catalogd",
+      "source": "bin/catalogd",
+      "priority": 10,
+      "isDirectory": false
+    }
+    ,"cli_mt": {
+      "destination": "/usr/bin/cli_mt",
+      "source": "bin/cli_mt",
+      "priority": 10,
+      "isDirectory": false
+    }
+    ,"cli_st": {
+      "destination": "/usr/bin/cli_st",
+      "source": "bin/cli_st",
+      "priority": 10,
+      "isDirectory": false
+    }
+    ,"flume-ng": {
+      "destination": "/usr/bin/flume-ng",
+      "source": "bin/flume-ng",
+      "priority": 10,
+      "isDirectory": false
+    }
+    ,"hadoop": {
+      "destination": "/usr/bin/hadoop",
+      "source": "bin/hadoop",
+      "priority": 10,
+      "isDirectory": false
+    }
+    ,"hadoop-0.20": {
+      "destination": "/usr/bin/hadoop-0.20",
+      "source": "bin/hadoop-0.20",
+      "priority": 10,
+      "isDirectory": false
+    }
+    ,"hadoop-fuse-dfs": {
+      "destination": "/usr/bin/hadoop-fuse-dfs",
+      "source": "bin/hadoop-fuse-dfs",
+      "priority": 10,
+      "isDirectory": false
+    }
+    ,"hbase": {
+      "destination": "/usr/bin/hbase",
+      "source": "bin/hbase",
+      "priority": 10,
+      "isDirectory": false
+    }
+    ,"hbase-indexer": {
+      "destination": "/usr/bin/hbase-indexer",
+      "source": "bin/hbase-indexer",
+      "priority": 10,
+      "isDirectory": false
+    }
+    ,"hcat": {
+      "destination": "/usr/bin/hcat",
+      "source": "bin/hcat",
+      "priority": 10,
+      "isDirectory": false
+    }
+    ,"hdfs": {
+      "destination": "/usr/bin/hdfs",
+      "source": "bin/hdfs",
+      "priority": 10,
+      "isDirectory": false
+    }
+    ,"hive": {
+      "destination": "/usr/bin/hive",
+      "source": "bin/hive",
+      "priority": 10,
+      "isDirectory": false
+    }
+    ,"hiveserver2": {
+      "destination": "/usr/bin/hiveserver2",
+      "source": "bin/hiveserver2",
+      "priority": 10,
+      "isDirectory": false
+    }
+    ,"impala-shell": {
+      "destination": "/usr/bin/impala-shell",
+      "source": "bin/impala-shell",
+      "priority": 10,
+      "isDirectory": false
+    }
+    ,"impalad": {
+      "destination": "/usr/bin/impalad",
+      "source": "bin/impalad",
+      "priority": 10,
+      "isDirectory": false
+    }
+    ,"kite-dataset": {
+      "destination": "/usr/bin/kite-dataset",
+      "source": "bin/kite-dataset",
+      "priority": 10,
+      "isDirectory": false
+    }
+    ,"llama": {
+      "destination": "/usr/bin/llama",
+      "source": "bin/llama",
+      "priority": 10,
+      "isDirectory": false
+    }
+    ,"llamaadmin": {
+      "destination": "/usr/bin/llamaadmin",
+      "source": "bin/llamaadmin",
+      "priority": 10,
+      "isDirectory": false
+    }
+    ,"load_gen": {
+      "destination": "/usr/bin/load_gen",
+      "source": "bin/load_gen",
+      "priority": 10,
+      "isDirectory": false
+    }
+    ,"mahout": {
+      "destination": "/usr/bin/mahout",
+      "source": "bin/mahout",
+      "priority": 10,
+      "isDirectory": false
+    }
+    ,"mapred": {
+      "destination": "/usr/bin/mapred",
+      "source": "bin/mapred",
+      "priority": 10,
+      "isDirectory": false
+    }
+    ,"oozie": {
+      "destination": "/usr/bin/oozie",
+      "source": "bin/oozie",
+      "priority": 10,
+      "isDirectory": false
+    }
+    ,"parquet-tools": {
+      "destination": "/usr/bin/parquet-tools",
+      "source": "bin/parquet-tools",
+      "priority": 10,
+      "isDirectory": false
+    }
+    ,"pig": {
+      "destination": "/usr/bin/pig",
+      "source": "bin/pig",
+      "priority": 10,
+      "isDirectory": false
+    }
+    ,"pyspark": {
+      "destination": "/usr/bin/pyspark",
+      "source": "bin/pyspark",
+      "priority": 10,
+      "isDirectory": false
+    }
+    ,"sentry": {
+      "destination": "/usr/bin/sentry",
+      "source": "bin/sentry",
+      "priority": 10,
+      "isDirectory": false
+    }
+    ,"solrctl": {
+      "destination": "/usr/bin/solrctl",
+      "source": "bin/solrctl",
+      "priority": 10,
+      "isDirectory": false
+    }
+    ,"spark-executor": {
+      "destination": "/usr/bin/spark-executor",
+      "source": "bin/spark-executor",
+      "priority": 10,
+      "isDirectory": false
+    }
+    ,"spark-shell": {
+      "destination": "/usr/bin/spark-shell",
+      "source": "bin/spark-shell",
+      "priority": 10,
+      "isDirectory": false
+    }
+    ,"spark-submit": {
+      "destination": "/usr/bin/spark-submit",
+      "source": "bin/spark-submit",
+      "priority": 10,
+      "isDirectory": false
+    }
+    ,"sqoop": {
+      "destination": "/usr/bin/sqoop",
+      "source": "bin/sqoop",
+      "priority": 10,
+      "isDirectory": false
+    }
+    ,"sqoop-codegen": {
+      "destination": "/usr/bin/sqoop-codegen",
+      "source": "bin/sqoop-codegen",
+      "priority": 10,
+      "isDirectory": false
+    }
+    ,"sqoop-create-hive-table": {
+      "destination": "/usr/bin/sqoop-create-hive-table",
+      "source": "bin/sqoop-create-hive-table",
+      "priority": 10,
+      "isDirectory": false
+    }
+    ,"sqoop-eval": {
+      "destination": "/usr/bin/sqoop-eval",
+      "source": "bin/sqoop-eval",
+      "priority": 10,
+      "isDirectory": false
+    }
+    ,"sqoop-export": {
+      "destination": "/usr/bin/sqoop-export",
+      "source": "bin/sqoop-export",
+      "priority": 10,
+      "isDirectory": false
+    }
+    ,"sqoop-help": {
+      "destination": "/usr/bin/sqoop-help",
+      "source": "bin/sqoop-help",
+      "priority": 10,
+      "isDirectory": false
+    }
+    ,"sqoop-import": {
+      "destination": "/usr/bin/sqoop-import",
+      "source": "bin/sqoop-import",
+      "priority": 10,
+      "isDirectory": false
+    }
+    ,"sqoop-import-all-tables": {
+      "destination": "/usr/bin/sqoop-import-all-tables",
+      "source": "bin/sqoop-import-all-tables",
+      "priority": 10,
+      "isDirectory": false
+    }
+    ,"sqoop-job": {
+      "destination": "/usr/bin/sqoop-job",
+      "source": "bin/sqoop-job",
+      "priority": 10,
+      "isDirectory": false
+    }
+    ,"sqoop-list-databases": {
+      "destination": "/usr/bin/sqoop-list-databases",
+      "source": "bin/sqoop-list-databases",
+      "priority": 10,
+      "isDirectory": false
+    }
+    ,"sqoop-list-tables": {
+      "destination": "/usr/bin/sqoop-list-tables",
+      "source": "bin/sqoop-list-tables",
+      "priority": 10,
+      "isDirectory": false
+    }
+    ,"sqoop-merge": {
+      "destination": "/usr/bin/sqoop-merge",
+      "source": "bin/sqoop-merge",
+      "priority": 10,
+      "isDirectory": false
+    }
+    ,"sqoop-metastore": {
+      "destination": "/usr/bin/sqoop-metastore",
+      "source": "bin/sqoop-metastore",
+      "priority": 10,
+      "isDirectory": false
+    }
+    ,"sqoop-version": {
+      "destination": "/usr/bin/sqoop-version",
+      "source": "bin/sqoop-version",
+      "priority": 10,
+      "isDirectory": false
+    }
+    ,"sqoop2": {
+      "destination": "/usr/bin/sqoop2",
+      "source": "bin/sqoop2",
+      "priority": 10,
+      "isDirectory": false
+    }
+    ,"statestored": {
+      "destination": "/usr/bin/statestored",
+      "source": "bin/statestored",
+      "priority": 10,
+      "isDirectory": false
+    }
+    ,"whirr": {
+      "destination": "/usr/bin/whirr",
+      "source": "bin/whirr",
+      "priority": 10,
+      "isDirectory": false
+    }
+    ,"yarn": {
+      "destination": "/usr/bin/yarn",
+      "source": "bin/yarn",
+      "priority": 10,
+      "isDirectory": false
+    }
+    ,"zookeeper-client": {
+      "destination": "/usr/bin/zookeeper-client",
+      "source": "bin/zookeeper-client",
+      "priority": 10,
+      "isDirectory": false
+    }
+    ,"zookeeper-server": {
+      "destination": "/usr/bin/zookeeper-server",
+      "source": "bin/zookeeper-server",
+      "priority": 10,
+      "isDirectory": false
+    }
+    ,"zookeeper-server-cleanup": {
+      "destination": "/usr/bin/zookeeper-server-cleanup",
+      "source": "bin/zookeeper-server-cleanup",
+      "priority": 10,
+      "isDirectory": false
+    }
+    ,"zookeeper-server-initialize": {
+      "destination": "/usr/bin/zookeeper-server-initialize",
+      "source": "bin/zookeeper-server-initialize",
+      "priority": 10,
+      "isDirectory": false
+    }
+    ,"hbase-conf": {
+      "destination": "/etc/hbase/conf",
+      "source": "etc/hbase/conf.dist",
+      "priority": 10,
+      "isDirectory": true
+    }
+    ,"hbase-solr-conf": {
+      "destination": "/etc/hbase-solr/conf",
+      "source": "etc/hbase-solr/conf.dist",
+      "priority": 10,
+      "isDirectory": true
+    }
+    ,"hive-conf": {
+      "destination": "/etc/hive/conf",
+      "source": "etc/hive/conf.dist",
+      "priority": 10,
+      "isDirectory": true
+    }
+    ,"hive-hcatalog-conf": {
+      "destination": "/etc/hive-hcatalog/conf",
+      "source": "etc/hive-hcatalog/conf.dist",
+      "priority": 10,
+      "isDirectory": true
+    }
+    ,"hive-webhcat-conf": {
+      "destination": "/etc/hive-webhcat/conf",
+      "source": "etc/hive-webhcat/conf.dist",
+      "priority": 10,
+      "isDirectory": true
+    }
+    ,"impala-conf": {
+      "destination": "/etc/impala/conf",
+      "source": "etc/impala/conf.dist",
+      "priority": 10,
+      "isDirectory": true
+    }
+    ,"llama-conf": {
+      "destination": "/etc/llama/conf",
+      "source": "etc/llama/conf.dist",
+      "priority": 10,
+      "isDirectory": true
+    }
+    ,"mahout-conf": {
+      "destination": "/etc/mahout/conf",
+      "source": "etc/mahout/conf.dist",
+      "priority": 10,
+      "isDirectory": true
+    }
+    ,"oozie-conf": {
+      "destination": "/etc/oozie/conf",
+      "source": "etc/oozie/conf.dist",
+      "priority": 10,
+      "isDirectory": true
+    }
+    ,"pig-conf": {
+      "destination": "/etc/pig/conf",
+      "source": "etc/pig/conf.dist",
+      "priority": 10,
+      "isDirectory": true
+    }
+    ,"sentry-conf": {
+      "destination": "/etc/sentry/conf",
+      "source": "etc/sentry/conf.dist",
+      "priority": 10,
+      "isDirectory": true
+    }
+    ,"solr-conf": {
+      "destination": "/etc/solr/conf",
+      "source": "etc/solr/conf.dist",
+      "priority": 10,
+      "isDirectory": true
+    }
+    ,"spark-conf": {
+      "destination": "/etc/spark/conf",
+      "source": "etc/spark/conf.dist",
+      "priority": 10,
+      "isDirectory": true
+    }
+    ,"sqoop-conf": {
+      "destination": "/etc/sqoop/conf",
+      "source": "etc/sqoop/conf.dist",
+      "priority": 10,
+      "isDirectory": true
+    }
+    ,"sqoop2-conf": {
+      "destination": "/etc/sqoop2/conf",
+      "source": "etc/sqoop2/conf.dist",
+      "priority": 10,
+      "isDirectory": true
+    }
+    ,"zookeeper-conf": {
+      "destination": "/etc/zookeeper/conf",
+      "source": "etc/zookeeper/conf.dist",
+      "priority": 10,
+      "isDirectory": true
+    }
+    ,"hadoop-kms-conf": {
+      "destination": "/etc/hadoop-kms/conf",
+      "source": "etc/hadoop-kms/conf.dist",
+      "priority": 10,
+      "isDirectory": true
+    }
+    ,"flume-ng-conf": {
+      "destination": "/etc/flume-ng/conf",
+      "source": "etc/flume-ng/conf.empty",
+      "priority": 10,
+      "isDirectory": true
+    }
+    ,"hadoop-conf": {
+      "destination": "/etc/hadoop/conf",
+      "source": "etc/hadoop/conf.empty",
+      "priority": 10,
+      "isDirectory": true
+    }
+    ,"hadoop-httpfs-conf": {
+      "destination": "/etc/hadoop-httpfs/conf",
+      "source": "etc/hadoop-httpfs/conf.empty",
+      "priority": 10,
+      "isDirectory": true
+    }
+    ,"hue-conf": {
+      "destination": "/etc/hue/conf",
+      "source": "etc/hue/conf.empty",
+      "priority": 10,
+      "isDirectory": true
+    }
+}

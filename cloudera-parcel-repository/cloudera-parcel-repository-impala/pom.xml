@@ -65,13 +65,14 @@
 											git clean -df;
 											git status" />
 								</exec>
+								<delete dir="src/main/external/Impala/be/build/debug" />
 								<!-- TODO: Provide OS-X build script -->
 								<exec executable="sh" os="Linux">
 									<arg value="-c" />
 									<arg
 										value="
 										source src/main/external/Impala/bin/impala-config.sh;
-										${IMPALA_HOME}/buildall.sh -noclean -notests" />
+										${IMPALA_HOME}/buildall.sh -build_shared_libs -noclean -notests" />
 								</exec>
 								<delete includeEmptyDirs="true">
 									<fileset dir="src/main/resources" includes="IMPALA-${project.version}/bin/**" />

@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.cloudera.parcel</groupId>
+	<artifactId>CDH</artifactId>
+	<packaging>parcel</packaging>
+	<version>5.5.2-1.cdh5.5.2.p0.4</version>
+
+	<parent>
+		<groupId>com.cloudera.parcel</groupId>
+		<artifactId>cloudera-parcel-repository</artifactId>
+		<version>0.6.2-SNAPSHOT</version>
+	</parent>
+
+	<distributionManagement>
+		<repository>
+			<id>cdh.repo</id>
+			<url>scp://root:/Users/graham/.ssh/id_rsa.pem@52.63.86.162:22/var/www/html/tmph3l7m2vv103/sbin/cdh/parcels</url>
+		</repository>
+	</distributionManagement>
+
+	<properties>
+		<parcel.classifier>el6</parcel.classifier>
+	</properties>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>build-helper-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>regex-property</id>
+						<goals>
+							<goal>regex-property</goal>
+						</goals>
+						<configuration>
+							<name>short.version</name>
+							<value>${project.version}</value>
+							<regex>^([0-9]+\.[0-9]+\.[0-9]+).*</regex>
+							<replacement>$1</replacement>
+							<failIfNoMatch>true</failIfNoMatch>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>generate-sources</phase>
+						<configuration>
+							<target>
+								<exec executable="sh" error="/dev/null">
+									<arg value="-c" />
+									<arg
+										value="
+											cp -rvfnp \
+											src/main/external/CDH-${project.version} \
+											src/main/resources" />
+								</exec>
+							</target>
+							<skip>${maven.parcel-compile.skip}</skip>
+						</configuration>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>

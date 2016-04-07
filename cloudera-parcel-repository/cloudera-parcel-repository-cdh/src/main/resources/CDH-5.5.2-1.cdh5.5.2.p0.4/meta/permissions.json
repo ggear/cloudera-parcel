@@ -1,0 +1,112 @@
+{
+  "lib/hadoop-0.20-mapreduce/sbin/Linux/task-controller": {
+    "user":  "root",
+    "group": "mapred",
+    "permissions": "4754"
+  },
+  "lib/hadoop-yarn/bin/container-executor": {
+    "user":  "root",
+    "group": "yarn",
+    "permissions": "6050"
+  },
+  "etc/hadoop-httpfs/tomcat-conf.dist/conf/server.xml": {
+    "user":"httpfs",
+    "group": "httpfs",
+    "permissions": "0750"
+  },
+  "etc/hadoop-httpfs/tomcat-conf.https/conf/server.xml": {
+    "user":"httpfs",
+    "group": "httpfs",
+    "permissions": "0750"
+  },
+  "etc/solr/tomcat-conf.dist/conf/server.xml": {
+     "user":"solr",
+     "group": "solr",
+     "permissions": "0750"
+  },
+  "etc/solr/tomcat-conf.https/conf/server.xml": {
+     "user":"solr",
+     "group": "solr",
+     "permissions": "0750"
+  },
+  "etc/sqoop2/tomcat-conf.dist/conf/server.xml": {
+     "user":"sqoop2",
+     "group": "sqoop",
+     "permissions": "0750"
+  },
+  "etc/sqoop2/tomcat-conf.mr1/conf/server.xml": {
+     "user":"sqoop2",
+     "group": "sqoop",
+     "permissions": "0750"
+  },
+  "etc/oozie/tomcat-conf.http.mr1/conf/ssl/ssl-server.xml": {
+     "user":"oozie",
+     "group": "oozie",
+     "permissions": "0750"
+  },
+  "etc/oozie/tomcat-conf.http.mr1/conf/ssl/server.xml": {
+     "user":"oozie",
+     "group": "oozie",
+     "permissions": "0750"
+  },
+  "etc/oozie/tomcat-conf.http.mr1/conf/server.xml": {
+     "user":"oozie",
+     "group": "oozie",
+     "permissions": "0750"
+  },
+  "etc/oozie/tomcat-conf.http/conf/ssl/ssl-server.xml": {
+     "user":"oozie",
+     "group": "oozie",
+     "permissions": "0750"
+  },
+  "etc/oozie/tomcat-conf.http/conf/ssl/server.xml": {
+     "user":"oozie",
+     "group": "oozie",
+     "permissions": "0750"
+  },
+  "etc/oozie/tomcat-conf.http/conf/server.xml": {
+     "user":"oozie",
+     "group": "oozie",
+     "permissions": "0750"
+  },
+  "etc/oozie/tomcat-conf.https/conf/ssl/ssl-server.xml": {
+     "user":"oozie",
+     "group": "oozie",
+     "permissions": "0750"
+  },
+  "etc/oozie/tomcat-conf.https/conf/ssl/server.xml": {
+     "user":"oozie",
+     "group": "oozie",
+     "permissions": "0750"
+  },
+  "etc/oozie/tomcat-conf.https/conf/server.xml": {
+     "user":"oozie",
+     "group": "oozie",
+     "permissions": "0750"
+  },
+  "etc/oozie/tomcat-conf.https.mr1/conf/ssl/ssl-server.xml": {
+     "user":"oozie",
+     "group": "oozie",
+     "permissions": "0750"
+  },
+  "etc/oozie/tomcat-conf.https.mr1/conf/ssl/server.xml": {
+     "user":"oozie",
+     "group": "oozie",
+     "permissions": "0750"
+  },
+  "etc/oozie/tomcat-conf.https.mr1/conf/server.xml": {
+     "user":"oozie",
+     "group": "oozie",
+     "permissions": "0750"
+  },
+  "lib/hue/desktop": {
+    "user":  "hue",
+    "group": "hue",
+    "permissions": "0755"
+  },
+  "lib/hue/desktop/desktop.db": {
+    "user":  "hue",
+    "group": "hue",
+    "permissions": "0660"
+  }
+}
