@@ -1,6 +1,6 @@
 #Cloudera Parcel
 
-A module to help mananage Cloudera Parcels, including a Maven plugin to:
+A module to help mananage Cloudera Parcels, including a Maven plugin to bridge between JAR and Parcel artifacts and their repositories, giving the ability to affect the full lifecycle of parcel operations:
 
 * Build
 * Install
@@ -8,9 +8,11 @@ A module to help mananage Cloudera Parcels, including a Maven plugin to:
 * Download
 * Explode
 
-and meta data to drive parcel builds for:
+Additional modules are included to provide the meta data to drive parcel builds for:
 
+* CDH OS-X
 * Kudu OS-X
+* Impala OS-X
 
 ##Requirements
 
