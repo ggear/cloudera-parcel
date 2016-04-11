@@ -133,7 +133,7 @@
 									<arg value="-c" />
 									<arg
 										value="
-											cp -rvf \
+											cp -rvfnp \
 											src/main/external/CDH-${project.version} \
 											src/main/resources" />
 								</exec>
