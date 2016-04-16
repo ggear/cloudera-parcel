@@ -6,7 +6,7 @@
 	<groupId>com.cloudera.parcel</groupId>
 	<artifactId>KUDU</artifactId>
 	<packaging>parcel</packaging>
-	<version>0.7.1-1.kudu0.7.1.p0.36</version>
+	<version>0.8.0-1.kudu0.8.0.p0.11</version>
 
 	<parent>
 		<groupId>com.cloudera.parcel</groupId>
@@ -69,7 +69,7 @@
 									failonerror="true">
 									<arg line="thirdparty/build-if-necessary.sh" />
 								</exec>
-								<delete dir="src/main/external/kudu/build" />
+								<delete dir="src/main/external/kudu/build" quiet="true" />
 								<mkdir dir="src/main/external/kudu/build/release" />
 								<exec executable="../../build-support/enable_devtoolset.sh"
 									dir="src/main/external/kudu/build/release" failonerror="true">
@@ -82,10 +82,10 @@
 									failonerror="true">
 									<arg value="-j4" />
 								</exec>
-								<delete includeEmptyDirs="true">
+								<delete includeEmptyDirs="true" quiet="true">
 									<fileset dir="src/main/resources" includes="KUDU-${project.version}/bin/**" />
 								</delete>
-								<delete includeEmptyDirs="true">
+								<delete includeEmptyDirs="true" quiet="true">
 									<fileset dir="src/main/resources" includes="KUDU-${project.version}/lib/**" />
 								</delete>
 								<exec executable="sh" error="/dev/null">

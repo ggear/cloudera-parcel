@@ -1,10 +1,12 @@
 package com.cloudera.plugin;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Paths;
@@ -37,6 +39,7 @@ import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpResponse;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.common.collect.ImmutableMap;
+import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Session;
@@ -264,25 +267,35 @@ public class Parcel {
       throw new MojoExecutionException("Could not match [" + scpConnect + "] with regexp [" + REGEXP_SCP_CONNECT
           + "], please check your ssh connect string and provide all values.");
     }
+    Session session = null;
+    ChannelExec channelSsh = null;
+    ChannelSftp channelScp = null;
     try {
       if (assertSha1(log, buildPath, buildPathSha1, false)) {
         System.out.println("Deploying: " + buildPath + " to " + sshConnectMatcher.group(0));
         long time = System.currentTimeMillis();
         JSch jsch = new JSch();
         jsch.addIdentity(sshConnectMatcher.group(2));
-        Session session = jsch.getSession(sshConnectMatcher.group(1), sshConnectMatcher.group(3),
+        session = jsch.getSession(sshConnectMatcher.group(1), sshConnectMatcher.group(3),
             Integer.parseInt(sshConnectMatcher.group(4)));
         Properties config = new java.util.Properties();
         config.put("StrictHostKeyChecking", "no");
         session.setConfig(config);
         session.connect();
-        ChannelSftp channel = (ChannelSftp) session.openChannel("sftp");
-        channel.connect();
-        channel.cd(sshConnectMatcher.group(5));
-        channel.put(buildPath.getAbsolutePath(), buildPath.getName());
-        channel.put(buildPathSha1.getAbsolutePath(), buildPathSha1.getName());
-        channel.disconnect();
-        session.disconnect();
+        channelSsh = (ChannelExec) session.openChannel("exec");
+        BufferedReader readerSsh = new BufferedReader(new InputStreamReader(channelSsh.getInputStream()));
+        channelSsh.setCommand("mkdir -p " + sshConnectMatcher.group(5));
+        channelSsh.connect();
+        String output = IOUtils.toString(readerSsh);
+        if (!output.isEmpty()) {
+          throw new MojoExecutionException("Failed to create deploy directory [" + sshConnectMatcher.group(5)
+              + "] for artifact [" + getArtifactNamespace() + "] on [" + sshConnectMatcher.group(0) + "]");
+        }
+        channelScp = (ChannelSftp) session.openChannel("sftp");
+        channelScp.connect();
+        channelScp.cd(sshConnectMatcher.group(5));
+        channelScp.put(buildPath.getAbsolutePath(), buildPath.getName());
+        channelScp.put(buildPathSha1.getAbsolutePath(), buildPathSha1.getName());
         System.out.println("Deployed: " + buildPath + " ("
             + FileUtils.byteCountToDisplaySize(buildPath.length() + buildPathSha1.length()) + " at "
             + String.format("%.2f",
@@ -293,8 +306,17 @@ public class Parcel {
     } catch (Exception exception) {
       throw new MojoExecutionException("Failed to deploy artifact [" + getArtifactNamespace() + "] from [" + buildPath
           + "] to [" + sshConnectMatcher.group(0) + "]", exception);
+    } finally {
+      if (channelSsh != null) {
+        channelSsh.disconnect();
+      }
+      if (channelScp != null) {
+        channelScp.disconnect();
+      }
+      if (session != null) {
+        session.disconnect();
+      }
     }
-
     return deployed;
   }
 

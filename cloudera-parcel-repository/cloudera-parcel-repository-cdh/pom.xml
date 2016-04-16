@@ -6,7 +6,7 @@
 	<groupId>com.cloudera.parcel</groupId>
 	<artifactId>CDH</artifactId>
 	<packaging>parcel</packaging>
-	<version>5.5.2-1.cdh5.5.2.p0.4</version>
+	<version>5.7.0-1.cdh5.7.0.p0.45</version>
 
 	<parent>
 		<groupId>com.cloudera.parcel</groupId>
@@ -17,7 +17,7 @@
 	<distributionManagement>
 		<repository>
 			<id>cdh.repo</id>
-			<url>scp://root:/Users/graham/.ssh/id_rsa.pem@52.63.86.162:22/var/www/html/tmph3l7m2vv103/sbin/cdh/parcels</url>
+			<url>scp://root:/Users/graham/.ssh/id_rsa.pem@52.63.86.162:22/var/www/html/tmph3l7m2vv103/sbin/cdh5/parcels</url>
 		</repository>
 	</distributionManagement>
 
@@ -47,7 +47,7 @@
 	</repositories>
 
 	<properties>
-		<impala.version>2.3.0</impala.version>
+		<impala.version>2.5.0</impala.version>
 	</properties>
 
 	<build>
@@ -120,7 +120,7 @@
 						<phase>generate-sources</phase>
 						<configuration>
 							<target>
-								<delete includeEmptyDirs="true">
+								<delete includeEmptyDirs="true" quiet="false">
 									<fileset dir="src/main/resources/CDH-${project.version}"
 										defaultexcludes="false">
 										<include name="**/*" />
@@ -129,6 +129,7 @@
 										<exclude name=".gitignore" />
 									</fileset>
 								</delete>
+								<!-- TODO: Build CDH parcel
 								<exec executable="sh" error="/dev/null">
 									<arg value="-c" />
 									<arg
@@ -145,6 +146,7 @@
 											src/main/external/IMPALA-${impala.version}-cdh${short.version}/bin \
 											src/main/resources/CDH-${project.version}" />
 								</exec>
+								-->
 							</target>
 							<skip>${maven.parcel-compile.skip}</skip>
 						</configuration>

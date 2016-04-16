@@ -6,7 +6,7 @@
 	<groupId>com.cloudera.parcel</groupId>
 	<artifactId>IMPALA</artifactId>
 	<packaging>parcel</packaging>
-	<version>2.3.0-cdh5.5.2</version>
+	<version>2.5.0-cdh5.7.0</version>
 
 	<parent>
 		<groupId>com.cloudera.parcel</groupId>
@@ -65,7 +65,7 @@
 											git clean -df;
 											git status" />
 								</exec>
-								<delete dir="src/main/external/Impala/be/build/debug" />
+								<delete dir="src/main/external/Impala/be/build/debug" quiet="true" />
 								<!-- TODO: Provide OS-X build script -->
 								<exec executable="sh" os="Linux">
 									<arg value="-c" />
@@ -74,7 +74,7 @@
 										source src/main/external/Impala/bin/impala-config.sh;
 										${IMPALA_HOME}/buildall.sh -build_shared_libs -noclean -notests" />
 								</exec>
-								<delete includeEmptyDirs="true">
+								<delete includeEmptyDirs="true" quiet="true">
 									<fileset dir="src/main/resources" includes="IMPALA-${project.version}/bin/**" />
 								</delete>
 								<mkdir dir="src/main/resources/IMPALA-${project.version}/bin" />
