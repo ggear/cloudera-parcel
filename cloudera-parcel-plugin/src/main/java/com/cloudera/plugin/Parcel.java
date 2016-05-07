@@ -124,8 +124,8 @@ public class Parcel {
           GenericUrl remoteUrl = new GenericUrl(getRemoteUrl(repository));
           GenericUrl remoteUrlSha1 = new GenericUrl(getRemoteUrl(repository) + SUFFIX_SHA1);
           long time = System.currentTimeMillis();
-          if (downloaded = (downloadHttpResource(log, remoteUrl, localPath)
-              && downloadHttpResource(log, remoteUrlSha1, localPathSha1))) {
+          if (downloaded = downloadHttpResource(log, remoteUrl, localPath)
+              && downloadHttpResource(log, remoteUrlSha1, localPathSha1)) {
             if (!(downloaded = assertSha1(log, localPath, localPathSha1, true))) {
               localPath.delete();
               localPathSha1.delete();
