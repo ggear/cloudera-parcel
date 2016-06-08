@@ -13,6 +13,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.cloudera.plugin.Parcel.ParcelBuilder;
 import com.google.common.collect.Lists;
 
 public class ParcelTest {
@@ -89,49 +90,58 @@ public class ParcelTest {
 
   @Test(expected = MojoExecutionException.class)
   public void testIsValidDefaults() throws MojoExecutionException {
-    Assert.assertFalse(new Parcel().isValid());
+    Assert.assertFalse(ParcelBuilder.get().build().isValid());
   }
 
   @Test(expected = MojoExecutionException.class)
   public void testIsValidEmpty() throws MojoExecutionException {
-    Assert.assertTrue(new Parcel("", "", "", "", "", "", "").isValid());
+    Assert.assertTrue(ParcelBuilder.get().groupId("").artifactId("").version("").type("").build().isValid());
   }
 
   @Test()
   public void testIsValid() throws MojoExecutionException {
-    Assert.assertTrue(new Parcel("a", "a", "a", "a", "a", "a", "a").isValid());
+    Assert.assertTrue(ParcelBuilder.get().groupId("a").artifactId("a").version("a").type("a").build().isValid());
   }
 
   @Test
   public void testGetArtifactName() throws MojoExecutionException {
     Assert.assertEquals(PARCEL_ARTIFACT_ID + "-" + PARCEL_VERSION + "-" + PARCEL_CLASSIFIER + "." + PARCEL_TYPE,
-        new Parcel(PARCEL_GROUP_ID, PARCEL_ARTIFACT_ID, PARCEL_VERSION, PARCEL_CLASSIFIER, PATH_EXPLODE,
-            PATH_EXPLODE_LINK, PARCEL_TYPE).getArtifactName());
+        ParcelBuilder.get().groupId(PARCEL_GROUP_ID).artifactId(PARCEL_ARTIFACT_ID).version(PARCEL_VERSION)
+            .classifier(PARCEL_CLASSIFIER).outputDirectory(PATH_EXPLODE).linkDirectory(PATH_EXPLODE_LINK)
+            .type(PARCEL_TYPE).build().getArtifactName());
   }
 
   @Test
   public void testGetArtifactNameSansClassifierType() throws MojoExecutionException {
     Assert.assertEquals(PARCEL_ARTIFACT_ID + "-" + PARCEL_VERSION,
-        new Parcel(PARCEL_GROUP_ID, PARCEL_ARTIFACT_ID, PARCEL_VERSION, PARCEL_CLASSIFIER, PATH_EXPLODE,
-            PATH_EXPLODE_LINK, PARCEL_TYPE).getArtifactNameSansClassifierType());
+        ParcelBuilder.get().groupId(PARCEL_GROUP_ID).artifactId(PARCEL_ARTIFACT_ID).version(PARCEL_VERSION)
+            .classifier(PARCEL_CLASSIFIER).outputDirectory(PATH_EXPLODE).linkDirectory(PATH_EXPLODE_LINK)
+            .type(PARCEL_TYPE).build().getArtifactNameSansClassifierType());
   }
 
   @Test
   public void testGetArtifactNamespace() throws MojoExecutionException {
     Assert.assertEquals(
         PARCEL_GROUP_ID + ":" + PARCEL_ARTIFACT_ID + ":" + PARCEL_TYPE + ":" + PARCEL_CLASSIFIER + ":" + PARCEL_VERSION,
-        new Parcel(PARCEL_GROUP_ID, PARCEL_ARTIFACT_ID, PARCEL_VERSION, PARCEL_CLASSIFIER, PATH_EXPLODE,
-            PATH_EXPLODE_LINK, PARCEL_TYPE).getArtifactNamespace());
+        ParcelBuilder.get().groupId(PARCEL_GROUP_ID).artifactId(PARCEL_ARTIFACT_ID).version(PARCEL_VERSION)
+            .classifier(PARCEL_CLASSIFIER).outputDirectory(PATH_EXPLODE).linkDirectory(PATH_EXPLODE_LINK)
+            .type(PARCEL_TYPE).build().getArtifactNamespace());
   }
 
   @Test
   public void testGetVersionShort() throws MojoExecutionException {
-    Assert.assertEquals(PARCEL_VERSION_SHORT, new Parcel(PARCEL_GROUP_ID, PARCEL_ARTIFACT_ID, PARCEL_VERSION_SHORT,
-        PARCEL_CLASSIFIER, PATH_EXPLODE, PATH_EXPLODE_LINK, PARCEL_TYPE).getVersionShort());
-    Assert.assertEquals(PARCEL_VERSION_SHORT, new Parcel(PARCEL_GROUP_ID, PARCEL_ARTIFACT_ID, PARCEL_VERSION,
-        PARCEL_CLASSIFIER, PATH_EXPLODE, PATH_EXPLODE_LINK, PARCEL_TYPE).getVersionShort());
-    Assert.assertEquals(PARCEL_VERSION_SHORT, new Parcel(PARCEL_GROUP_ID, PARCEL_ARTIFACT_ID, PARCEL_VERSION_LONG,
-        PARCEL_CLASSIFIER, PATH_EXPLODE, PATH_EXPLODE_LINK, PARCEL_TYPE).getVersionShort());
+    Assert.assertEquals(PARCEL_VERSION_SHORT,
+        ParcelBuilder.get().groupId(PARCEL_GROUP_ID).artifactId(PARCEL_ARTIFACT_ID).version(PARCEL_VERSION_SHORT)
+            .classifier(PARCEL_CLASSIFIER).outputDirectory(PATH_EXPLODE).linkDirectory(PATH_EXPLODE_LINK)
+            .type(PARCEL_TYPE).build().getVersionShort());
+    Assert.assertEquals(PARCEL_VERSION_SHORT,
+        ParcelBuilder.get().groupId(PARCEL_GROUP_ID).artifactId(PARCEL_ARTIFACT_ID).version(PARCEL_VERSION)
+            .classifier(PARCEL_CLASSIFIER).outputDirectory(PATH_EXPLODE).linkDirectory(PATH_EXPLODE_LINK)
+            .type(PARCEL_TYPE).build().getVersionShort());
+    Assert.assertEquals(PARCEL_VERSION_SHORT,
+        ParcelBuilder.get().groupId(PARCEL_GROUP_ID).artifactId(PARCEL_ARTIFACT_ID).version(PARCEL_VERSION_LONG)
+            .classifier(PARCEL_CLASSIFIER).outputDirectory(PATH_EXPLODE).linkDirectory(PATH_EXPLODE_LINK)
+            .type(PARCEL_TYPE).build().getVersionShort());
   }
 
   @Test
@@ -139,8 +149,9 @@ public class ParcelTest {
     Assert.assertEquals(
         PARCEL_REPO_URL + "/" + PARCEL_VERSION_SHORT + "/" + PARCEL_ARTIFACT_ID + "-" + PARCEL_VERSION + "-"
             + PARCEL_CLASSIFIER + "." + PARCEL_TYPE,
-        new Parcel(PARCEL_GROUP_ID, PARCEL_ARTIFACT_ID, PARCEL_VERSION, PARCEL_CLASSIFIER, PATH_EXPLODE,
-            PATH_EXPLODE_LINK, PARCEL_TYPE).getRemoteUrl(PARCEL_REPO_URL));
+        ParcelBuilder.get().groupId(PARCEL_GROUP_ID).artifactId(PARCEL_ARTIFACT_ID).version(PARCEL_VERSION)
+            .classifier(PARCEL_CLASSIFIER).outputDirectory(PATH_EXPLODE).linkDirectory(PATH_EXPLODE_LINK)
+            .type(PARCEL_TYPE).build().getRemoteUrl(PARCEL_REPO_URL));
   }
 
   @Test
@@ -148,112 +159,159 @@ public class ParcelTest {
     Assert.assertEquals(
         "/" + PARCEL_GROUP_ID.replaceAll("\\.", "/") + "/" + PARCEL_ARTIFACT_ID + "/" + PARCEL_VERSION + "/"
             + PARCEL_ARTIFACT_ID + "-" + PARCEL_VERSION + "-" + PARCEL_CLASSIFIER + "." + PARCEL_TYPE,
-        new Parcel(PARCEL_GROUP_ID, PARCEL_ARTIFACT_ID, PARCEL_VERSION, PARCEL_CLASSIFIER, PATH_EXPLODE,
-            PATH_EXPLODE_LINK, PARCEL_TYPE).getLocalPath());
+        ParcelBuilder.get().groupId(PARCEL_GROUP_ID).artifactId(PARCEL_ARTIFACT_ID).version(PARCEL_VERSION)
+            .classifier(PARCEL_CLASSIFIER).outputDirectory(PATH_EXPLODE).linkDirectory(PATH_EXPLODE_LINK)
+            .type(PARCEL_TYPE).build().getLocalPath());
   }
 
   @Test(expected = MojoExecutionException.class)
   public void testDownloadSquattingHost() throws MojoExecutionException, IOException {
-    Assert.assertFalse(new Parcel(PARCEL_GROUP_ID, PARCEL_ARTIFACT_ID, PARCEL_VERSION, PARCEL_CLASSIFIER, PATH_EXPLODE,
-        PATH_EXPLODE_LINK, PARCEL_TYPE).download(new SystemStreamLog(), PATH_MAVEN_REPO,
+    Assert.assertFalse(ParcelBuilder.get().groupId(PARCEL_GROUP_ID).artifactId(PARCEL_ARTIFACT_ID)
+        .version(PARCEL_VERSION).classifier(PARCEL_CLASSIFIER).outputDirectory(PATH_EXPLODE)
+        .linkDirectory(PATH_EXPLODE_LINK).type(PARCEL_TYPE).build().download(new SystemStreamLog(), PATH_MAVEN_REPO,
             Lists.newArrayList("http://some.non.existant.host.com/sqoop-connectors/parcels")));
   }
 
   @Test(expected = MojoExecutionException.class)
   public void testDownloadBadHost() throws MojoExecutionException, IOException {
-    Assert.assertFalse(new Parcel(PARCEL_GROUP_ID, PARCEL_ARTIFACT_ID, PARCEL_VERSION, PARCEL_CLASSIFIER, PATH_EXPLODE,
-        PATH_EXPLODE_LINK, PARCEL_TYPE).download(new SystemStreamLog(), PATH_MAVEN_REPO,
+    Assert.assertFalse(ParcelBuilder.get().groupId(PARCEL_GROUP_ID).artifactId(PARCEL_ARTIFACT_ID)
+        .version(PARCEL_VERSION).classifier(PARCEL_CLASSIFIER).outputDirectory(PATH_EXPLODE)
+        .linkDirectory(PATH_EXPLODE_LINK).type(PARCEL_TYPE).build().download(new SystemStreamLog(), PATH_MAVEN_REPO,
             Lists.newArrayList("http://KHAsdalj123lljasd/sqoop-connectors/parcels")));
   }
 
   @Test(expected = MojoExecutionException.class)
   public void testDownloadBadPath() throws MojoExecutionException, IOException {
-    Assert.assertFalse(new Parcel(PARCEL_GROUP_ID, PARCEL_ARTIFACT_ID, "1.4c5.some.nonexistant.version",
-        PARCEL_CLASSIFIER, PATH_EXPLODE, PATH_EXPLODE_LINK, PARCEL_TYPE).download(new SystemStreamLog(),
-            PATH_MAVEN_REPO, PARCEL_REPO_URLS));
+    Assert.assertFalse(ParcelBuilder.get().groupId(PARCEL_GROUP_ID).artifactId(PARCEL_ARTIFACT_ID)
+        .version("1.4c5.some.nonexistant.version").classifier(PARCEL_CLASSIFIER).outputDirectory(PATH_EXPLODE)
+        .linkDirectory(PATH_EXPLODE_LINK).type(PARCEL_TYPE).build()
+        .download(new SystemStreamLog(), PATH_MAVEN_REPO, PARCEL_REPO_URLS));
   }
 
   @Test
   @SuppressWarnings("resource")
   public void testDownload() throws MojoExecutionException, IOException {
-    Assert.assertTrue(new Parcel(PARCEL_GROUP_ID, PARCEL_ARTIFACT_ID, PARCEL_VERSION, PARCEL_CLASSIFIER, PATH_EXPLODE,
-        PATH_EXPLODE_LINK, PARCEL_TYPE).download(new SystemStreamLog(), PATH_MAVEN_REPO, PARCEL_REPO_URLS));
-    Assert.assertFalse(new Parcel(PARCEL_GROUP_ID, PARCEL_ARTIFACT_ID, PARCEL_VERSION, PARCEL_CLASSIFIER, PATH_EXPLODE,
-        PATH_EXPLODE_LINK, PARCEL_TYPE).download(new SystemStreamLog(), PATH_MAVEN_REPO, PARCEL_REPO_URLS));
+    Assert
+        .assertTrue(ParcelBuilder.get().groupId(PARCEL_GROUP_ID).artifactId(PARCEL_ARTIFACT_ID).version(PARCEL_VERSION)
+            .classifier(PARCEL_CLASSIFIER).outputDirectory(PATH_EXPLODE).linkDirectory(PATH_EXPLODE_LINK)
+            .type(PARCEL_TYPE).build().download(new SystemStreamLog(), PATH_MAVEN_REPO, PARCEL_REPO_URLS));
+    Assert
+        .assertFalse(ParcelBuilder.get().groupId(PARCEL_GROUP_ID).artifactId(PARCEL_ARTIFACT_ID).version(PARCEL_VERSION)
+            .classifier(PARCEL_CLASSIFIER).outputDirectory(PATH_EXPLODE).linkDirectory(PATH_EXPLODE_LINK)
+            .type(PARCEL_TYPE).build().download(new SystemStreamLog(), PATH_MAVEN_REPO, PARCEL_REPO_URLS));
     FileUtils.listFiles(new File(PATH_MAVEN_REPO), null, true).iterator().next().delete();
-    Assert.assertTrue(new Parcel(PARCEL_GROUP_ID, PARCEL_ARTIFACT_ID, PARCEL_VERSION, PARCEL_CLASSIFIER, PATH_EXPLODE,
-        PATH_EXPLODE_LINK, PARCEL_TYPE).download(new SystemStreamLog(), PATH_MAVEN_REPO, PARCEL_REPO_URLS));
-    Assert.assertFalse(new Parcel(PARCEL_GROUP_ID, PARCEL_ARTIFACT_ID, PARCEL_VERSION, PARCEL_CLASSIFIER, PATH_EXPLODE,
-        PATH_EXPLODE_LINK, PARCEL_TYPE).download(new SystemStreamLog(), PATH_MAVEN_REPO, PARCEL_REPO_URLS));
+    Assert
+        .assertTrue(ParcelBuilder.get().groupId(PARCEL_GROUP_ID).artifactId(PARCEL_ARTIFACT_ID).version(PARCEL_VERSION)
+            .classifier(PARCEL_CLASSIFIER).outputDirectory(PATH_EXPLODE).linkDirectory(PATH_EXPLODE_LINK)
+            .type(PARCEL_TYPE).build().download(new SystemStreamLog(), PATH_MAVEN_REPO, PARCEL_REPO_URLS));
+    Assert
+        .assertFalse(ParcelBuilder.get().groupId(PARCEL_GROUP_ID).artifactId(PARCEL_ARTIFACT_ID).version(PARCEL_VERSION)
+            .classifier(PARCEL_CLASSIFIER).outputDirectory(PATH_EXPLODE).linkDirectory(PATH_EXPLODE_LINK)
+            .type(PARCEL_TYPE).build().download(new SystemStreamLog(), PATH_MAVEN_REPO, PARCEL_REPO_URLS));
     FileUtils.listFiles(new File(PATH_MAVEN_REPO), null, true).toArray(new File[2])[1].delete();
-    Assert.assertTrue(new Parcel(PARCEL_GROUP_ID, PARCEL_ARTIFACT_ID, PARCEL_VERSION, PARCEL_CLASSIFIER, PATH_EXPLODE,
-        PATH_EXPLODE_LINK, PARCEL_TYPE).download(new SystemStreamLog(), PATH_MAVEN_REPO, PARCEL_REPO_URLS));
-    Assert.assertFalse(new Parcel(PARCEL_GROUP_ID, PARCEL_ARTIFACT_ID, PARCEL_VERSION, PARCEL_CLASSIFIER, PATH_EXPLODE,
-        PATH_EXPLODE_LINK, PARCEL_TYPE).download(new SystemStreamLog(), PATH_MAVEN_REPO, PARCEL_REPO_URLS));
+    Assert
+        .assertTrue(ParcelBuilder.get().groupId(PARCEL_GROUP_ID).artifactId(PARCEL_ARTIFACT_ID).version(PARCEL_VERSION)
+            .classifier(PARCEL_CLASSIFIER).outputDirectory(PATH_EXPLODE).linkDirectory(PATH_EXPLODE_LINK)
+            .type(PARCEL_TYPE).build().download(new SystemStreamLog(), PATH_MAVEN_REPO, PARCEL_REPO_URLS));
+    Assert
+        .assertFalse(ParcelBuilder.get().groupId(PARCEL_GROUP_ID).artifactId(PARCEL_ARTIFACT_ID).version(PARCEL_VERSION)
+            .classifier(PARCEL_CLASSIFIER).outputDirectory(PATH_EXPLODE).linkDirectory(PATH_EXPLODE_LINK)
+            .type(PARCEL_TYPE).build().download(new SystemStreamLog(), PATH_MAVEN_REPO, PARCEL_REPO_URLS));
     new FileOutputStream(FileUtils.listFiles(new File(PATH_MAVEN_REPO), null, true).iterator().next(), true)
         .getChannel().truncate(0).close();
-    Assert.assertTrue(new Parcel(PARCEL_GROUP_ID, PARCEL_ARTIFACT_ID, PARCEL_VERSION, PARCEL_CLASSIFIER, PATH_EXPLODE,
-        PATH_EXPLODE_LINK, PARCEL_TYPE).download(new SystemStreamLog(), PATH_MAVEN_REPO, PARCEL_REPO_URLS));
-    Assert.assertFalse(new Parcel(PARCEL_GROUP_ID, PARCEL_ARTIFACT_ID, PARCEL_VERSION, PARCEL_CLASSIFIER, PATH_EXPLODE,
-        PATH_EXPLODE_LINK, PARCEL_TYPE).download(new SystemStreamLog(), PATH_MAVEN_REPO, PARCEL_REPO_URLS));
+    Assert
+        .assertTrue(ParcelBuilder.get().groupId(PARCEL_GROUP_ID).artifactId(PARCEL_ARTIFACT_ID).version(PARCEL_VERSION)
+            .classifier(PARCEL_CLASSIFIER).outputDirectory(PATH_EXPLODE).linkDirectory(PATH_EXPLODE_LINK)
+            .type(PARCEL_TYPE).build().download(new SystemStreamLog(), PATH_MAVEN_REPO, PARCEL_REPO_URLS));
+    Assert
+        .assertFalse(ParcelBuilder.get().groupId(PARCEL_GROUP_ID).artifactId(PARCEL_ARTIFACT_ID).version(PARCEL_VERSION)
+            .classifier(PARCEL_CLASSIFIER).outputDirectory(PATH_EXPLODE).linkDirectory(PATH_EXPLODE_LINK)
+            .type(PARCEL_TYPE).build().download(new SystemStreamLog(), PATH_MAVEN_REPO, PARCEL_REPO_URLS));
     new FileOutputStream(FileUtils.listFiles(new File(PATH_MAVEN_REPO), null, true).toArray(new File[2])[1], true)
         .getChannel().truncate(0).close();
-    Assert.assertTrue(new Parcel(PARCEL_GROUP_ID, PARCEL_ARTIFACT_ID, PARCEL_VERSION, PARCEL_CLASSIFIER, PATH_EXPLODE,
-        PATH_EXPLODE_LINK, PARCEL_TYPE).download(new SystemStreamLog(), PATH_MAVEN_REPO, PARCEL_REPO_URLS));
-    Assert.assertFalse(new Parcel(PARCEL_GROUP_ID, PARCEL_ARTIFACT_ID, PARCEL_VERSION, PARCEL_CLASSIFIER, PATH_EXPLODE,
-        PATH_EXPLODE_LINK, PARCEL_TYPE).download(new SystemStreamLog(), PATH_MAVEN_REPO, PARCEL_REPO_URLS));
+    Assert
+        .assertTrue(ParcelBuilder.get().groupId(PARCEL_GROUP_ID).artifactId(PARCEL_ARTIFACT_ID).version(PARCEL_VERSION)
+            .classifier(PARCEL_CLASSIFIER).outputDirectory(PATH_EXPLODE).linkDirectory(PATH_EXPLODE_LINK)
+            .type(PARCEL_TYPE).build().download(new SystemStreamLog(), PATH_MAVEN_REPO, PARCEL_REPO_URLS));
+    Assert
+        .assertFalse(ParcelBuilder.get().groupId(PARCEL_GROUP_ID).artifactId(PARCEL_ARTIFACT_ID).version(PARCEL_VERSION)
+            .classifier(PARCEL_CLASSIFIER).outputDirectory(PATH_EXPLODE).linkDirectory(PATH_EXPLODE_LINK)
+            .type(PARCEL_TYPE).build().download(new SystemStreamLog(), PATH_MAVEN_REPO, PARCEL_REPO_URLS));
   }
 
   @Test(expected = MojoExecutionException.class)
   public void testExplodeSquattingHost() throws MojoExecutionException, IOException {
-    Assert.assertFalse(new Parcel(PARCEL_GROUP_ID, PARCEL_ARTIFACT_ID, PARCEL_VERSION, PARCEL_CLASSIFIER, PATH_EXPLODE,
-        PATH_EXPLODE_LINK, PARCEL_TYPE).explode(new SystemStreamLog(), PATH_MAVEN_REPO,
+    Assert.assertFalse(ParcelBuilder.get().groupId(PARCEL_GROUP_ID).artifactId(PARCEL_ARTIFACT_ID)
+        .version(PARCEL_VERSION).classifier(PARCEL_CLASSIFIER).outputDirectory(PATH_EXPLODE)
+        .linkDirectory(PATH_EXPLODE_LINK).type(PARCEL_TYPE).build().explode(new SystemStreamLog(), PATH_MAVEN_REPO,
             Lists.newArrayList("http://some.non.existant.host.com/sqoop-connectors/parcels")));
   }
 
   @Test(expected = MojoExecutionException.class)
   public void testExplodeBadHost() throws MojoExecutionException, IOException {
-    Assert.assertFalse(new Parcel(PARCEL_GROUP_ID, PARCEL_ARTIFACT_ID, PARCEL_VERSION, PARCEL_CLASSIFIER, PATH_EXPLODE,
-        PATH_EXPLODE_LINK, PARCEL_TYPE).explode(new SystemStreamLog(), PATH_MAVEN_REPO,
+    Assert.assertFalse(ParcelBuilder.get().groupId(PARCEL_GROUP_ID).artifactId(PARCEL_ARTIFACT_ID)
+        .version(PARCEL_VERSION).classifier(PARCEL_CLASSIFIER).outputDirectory(PATH_EXPLODE)
+        .linkDirectory(PATH_EXPLODE_LINK).type(PARCEL_TYPE).build().explode(new SystemStreamLog(), PATH_MAVEN_REPO,
             Lists.newArrayList("http://KHAsdalj123lljasd/sqoop-connectors/parcels")));
   }
 
   @Test(expected = MojoExecutionException.class)
   public void testExplodeBadPath() throws MojoExecutionException, IOException {
-    Assert.assertFalse(new Parcel(PARCEL_GROUP_ID, PARCEL_ARTIFACT_ID, "1.4c5.some.nonexistant.version",
-        PARCEL_CLASSIFIER, PATH_EXPLODE, PATH_EXPLODE_LINK, PARCEL_TYPE).explode(new SystemStreamLog(), PATH_MAVEN_REPO,
-            PARCEL_REPO_URLS));
+    Assert.assertFalse(ParcelBuilder.get().groupId(PARCEL_GROUP_ID).artifactId(PARCEL_ARTIFACT_ID)
+        .version("1.4c5.some.nonexistant.version").classifier(PARCEL_CLASSIFIER).outputDirectory(PATH_EXPLODE)
+        .linkDirectory(PATH_EXPLODE_LINK).type(PARCEL_TYPE).build()
+        .explode(new SystemStreamLog(), PATH_MAVEN_REPO, PARCEL_REPO_URLS));
   }
 
   @Test
   @SuppressWarnings("resource")
   public void testExplode() throws MojoExecutionException, IOException {
-    Assert.assertTrue(new Parcel(PARCEL_GROUP_ID, PARCEL_ARTIFACT_ID, PARCEL_VERSION, PARCEL_CLASSIFIER, PATH_EXPLODE,
-        PATH_EXPLODE_LINK, PARCEL_TYPE).explode(new SystemStreamLog(), PATH_MAVEN_REPO, PARCEL_REPO_URLS));
-    Assert.assertTrue(new Parcel(PARCEL_GROUP_ID, PARCEL_ARTIFACT_ID, PARCEL_VERSION, PARCEL_CLASSIFIER, PATH_EXPLODE,
-        PATH_EXPLODE_LINK, PARCEL_TYPE).explode(new SystemStreamLog(), PATH_MAVEN_REPO, PARCEL_REPO_URLS));
+    Assert
+        .assertTrue(ParcelBuilder.get().groupId(PARCEL_GROUP_ID).artifactId(PARCEL_ARTIFACT_ID).version(PARCEL_VERSION)
+            .classifier(PARCEL_CLASSIFIER).outputDirectory(PATH_EXPLODE).linkDirectory(PATH_EXPLODE_LINK)
+            .type(PARCEL_TYPE).build().explode(new SystemStreamLog(), PATH_MAVEN_REPO, PARCEL_REPO_URLS));
+    Assert
+        .assertTrue(ParcelBuilder.get().groupId(PARCEL_GROUP_ID).artifactId(PARCEL_ARTIFACT_ID).version(PARCEL_VERSION)
+            .classifier(PARCEL_CLASSIFIER).outputDirectory(PATH_EXPLODE).linkDirectory(PATH_EXPLODE_LINK)
+            .type(PARCEL_TYPE).build().explode(new SystemStreamLog(), PATH_MAVEN_REPO, PARCEL_REPO_URLS));
     FileUtils.listFiles(new File(PATH_MAVEN_REPO), null, true).iterator().next().delete();
-    Assert.assertTrue(new Parcel(PARCEL_GROUP_ID, PARCEL_ARTIFACT_ID, PARCEL_VERSION, PARCEL_CLASSIFIER, PATH_EXPLODE,
-        PATH_EXPLODE_LINK, PARCEL_TYPE).explode(new SystemStreamLog(), PATH_MAVEN_REPO, PARCEL_REPO_URLS));
-    Assert.assertTrue(new Parcel(PARCEL_GROUP_ID, PARCEL_ARTIFACT_ID, PARCEL_VERSION, PARCEL_CLASSIFIER, PATH_EXPLODE,
-        PATH_EXPLODE_LINK, PARCEL_TYPE).explode(new SystemStreamLog(), PATH_MAVEN_REPO, PARCEL_REPO_URLS));
+    Assert
+        .assertTrue(ParcelBuilder.get().groupId(PARCEL_GROUP_ID).artifactId(PARCEL_ARTIFACT_ID).version(PARCEL_VERSION)
+            .classifier(PARCEL_CLASSIFIER).outputDirectory(PATH_EXPLODE).linkDirectory(PATH_EXPLODE_LINK)
+            .type(PARCEL_TYPE).build().explode(new SystemStreamLog(), PATH_MAVEN_REPO, PARCEL_REPO_URLS));
+    Assert
+        .assertTrue(ParcelBuilder.get().groupId(PARCEL_GROUP_ID).artifactId(PARCEL_ARTIFACT_ID).version(PARCEL_VERSION)
+            .classifier(PARCEL_CLASSIFIER).outputDirectory(PATH_EXPLODE).linkDirectory(PATH_EXPLODE_LINK)
+            .type(PARCEL_TYPE).build().explode(new SystemStreamLog(), PATH_MAVEN_REPO, PARCEL_REPO_URLS));
     FileUtils.listFiles(new File(PATH_MAVEN_REPO), null, true).toArray(new File[2])[1].delete();
-    Assert.assertTrue(new Parcel(PARCEL_GROUP_ID, PARCEL_ARTIFACT_ID, PARCEL_VERSION, PARCEL_CLASSIFIER, PATH_EXPLODE,
-        PATH_EXPLODE_LINK, PARCEL_TYPE).explode(new SystemStreamLog(), PATH_MAVEN_REPO, PARCEL_REPO_URLS));
-    Assert.assertTrue(new Parcel(PARCEL_GROUP_ID, PARCEL_ARTIFACT_ID, PARCEL_VERSION, PARCEL_CLASSIFIER, PATH_EXPLODE,
-        PATH_EXPLODE_LINK, PARCEL_TYPE).explode(new SystemStreamLog(), PATH_MAVEN_REPO, PARCEL_REPO_URLS));
+    Assert
+        .assertTrue(ParcelBuilder.get().groupId(PARCEL_GROUP_ID).artifactId(PARCEL_ARTIFACT_ID).version(PARCEL_VERSION)
+            .classifier(PARCEL_CLASSIFIER).outputDirectory(PATH_EXPLODE).linkDirectory(PATH_EXPLODE_LINK)
+            .type(PARCEL_TYPE).build().explode(new SystemStreamLog(), PATH_MAVEN_REPO, PARCEL_REPO_URLS));
+    Assert
+        .assertTrue(ParcelBuilder.get().groupId(PARCEL_GROUP_ID).artifactId(PARCEL_ARTIFACT_ID).version(PARCEL_VERSION)
+            .classifier(PARCEL_CLASSIFIER).outputDirectory(PATH_EXPLODE).linkDirectory(PATH_EXPLODE_LINK)
+            .type(PARCEL_TYPE).build().explode(new SystemStreamLog(), PATH_MAVEN_REPO, PARCEL_REPO_URLS));
     new FileOutputStream(FileUtils.listFiles(new File(PATH_MAVEN_REPO), null, true).iterator().next(), true)
         .getChannel().truncate(0).close();
-    Assert.assertTrue(new Parcel(PARCEL_GROUP_ID, PARCEL_ARTIFACT_ID, PARCEL_VERSION, PARCEL_CLASSIFIER, PATH_EXPLODE,
-        PATH_EXPLODE_LINK, PARCEL_TYPE).explode(new SystemStreamLog(), PATH_MAVEN_REPO, PARCEL_REPO_URLS));
-    Assert.assertTrue(new Parcel(PARCEL_GROUP_ID, PARCEL_ARTIFACT_ID, PARCEL_VERSION, PARCEL_CLASSIFIER, PATH_EXPLODE,
-        PATH_EXPLODE_LINK, PARCEL_TYPE).explode(new SystemStreamLog(), PATH_MAVEN_REPO, PARCEL_REPO_URLS));
+    Assert
+        .assertTrue(ParcelBuilder.get().groupId(PARCEL_GROUP_ID).artifactId(PARCEL_ARTIFACT_ID).version(PARCEL_VERSION)
+            .classifier(PARCEL_CLASSIFIER).outputDirectory(PATH_EXPLODE).linkDirectory(PATH_EXPLODE_LINK)
+            .type(PARCEL_TYPE).build().explode(new SystemStreamLog(), PATH_MAVEN_REPO, PARCEL_REPO_URLS));
+    Assert
+        .assertTrue(ParcelBuilder.get().groupId(PARCEL_GROUP_ID).artifactId(PARCEL_ARTIFACT_ID).version(PARCEL_VERSION)
+            .classifier(PARCEL_CLASSIFIER).outputDirectory(PATH_EXPLODE).linkDirectory(PATH_EXPLODE_LINK)
+            .type(PARCEL_TYPE).build().explode(new SystemStreamLog(), PATH_MAVEN_REPO, PARCEL_REPO_URLS));
     new FileOutputStream(FileUtils.listFiles(new File(PATH_MAVEN_REPO), null, true).toArray(new File[2])[1], true)
         .getChannel().truncate(0).close();
-    Assert.assertTrue(new Parcel(PARCEL_GROUP_ID, PARCEL_ARTIFACT_ID, PARCEL_VERSION, PARCEL_CLASSIFIER, PATH_EXPLODE,
-        PATH_EXPLODE_LINK, PARCEL_TYPE).explode(new SystemStreamLog(), PATH_MAVEN_REPO, PARCEL_REPO_URLS));
-    Assert.assertTrue(new Parcel(PARCEL_GROUP_ID, PARCEL_ARTIFACT_ID, PARCEL_VERSION, PARCEL_CLASSIFIER, PATH_EXPLODE,
-        PATH_EXPLODE_LINK, PARCEL_TYPE).explode(new SystemStreamLog(), PATH_MAVEN_REPO, PARCEL_REPO_URLS));
+    Assert
+        .assertTrue(ParcelBuilder.get().groupId(PARCEL_GROUP_ID).artifactId(PARCEL_ARTIFACT_ID).version(PARCEL_VERSION)
+            .classifier(PARCEL_CLASSIFIER).outputDirectory(PATH_EXPLODE).linkDirectory(PATH_EXPLODE_LINK)
+            .type(PARCEL_TYPE).build().explode(new SystemStreamLog(), PATH_MAVEN_REPO, PARCEL_REPO_URLS));
+    Assert
+        .assertTrue(ParcelBuilder.get().groupId(PARCEL_GROUP_ID).artifactId(PARCEL_ARTIFACT_ID).version(PARCEL_VERSION)
+            .classifier(PARCEL_CLASSIFIER).outputDirectory(PATH_EXPLODE).linkDirectory(PATH_EXPLODE_LINK)
+            .type(PARCEL_TYPE).build().explode(new SystemStreamLog(), PATH_MAVEN_REPO, PARCEL_REPO_URLS));
   }
 
   @Before

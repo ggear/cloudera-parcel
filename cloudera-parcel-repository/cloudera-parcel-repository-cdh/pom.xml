@@ -88,7 +88,7 @@
 									<artifactId>CDH</artifactId>
 									<version>${project.version}</version>
 									<classifier>el7</classifier>
-									<linkDirectory>src/main/external/CDH-${project.version}</linkDirectory>
+									<linkDirectory>${project.basedir}/src/main/external/CDH-${project.version}</linkDirectory>
 								</parcel>
 							</parcels>
 						</configuration>
@@ -105,7 +105,7 @@
 									<groupId>com.cloudera.parcel</groupId>
 									<artifactId>IMPALA</artifactId>
 									<version>${impala.version}-cdh${short.version}</version>
-									<linkDirectory>src/main/external/IMPALA-${impala.version}-cdh${short.version}</linkDirectory>
+									<linkDirectory>${project.basedir}/src/main/external/IMPALA-${impala.version}-cdh${short.version}</linkDirectory>
 								</parcel>
 							</parcels>
 						</configuration>
@@ -121,7 +121,7 @@
 						<configuration>
 							<target>
 								<delete includeEmptyDirs="true" quiet="false">
-									<fileset dir="src/main/resources/parcel"
+									<fileset dir="src/main/parcel"
 										defaultexcludes="false">
 										<include name="**/*" />
 										<exclude name="meta/**" />

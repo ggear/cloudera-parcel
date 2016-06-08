@@ -27,6 +27,9 @@ public class Explode extends AbstractMojo {
 
   @Override
   public void execute() throws MojoExecutionException {
+    if (parcels == null) {
+      throw new MojoExecutionException("Attempt to invoke mojo without <parcels> configuration");
+    }
     List<String> repositoriesUrls = new ArrayList<>();
     for (Repository repository : repositories) {
       repositoriesUrls.add(repository.getUrl());

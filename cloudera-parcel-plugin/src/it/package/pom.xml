@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.cloudera.parcel.build</groupId>
+	<artifactId>SQOOP_TERADATA_CONNECTOR</artifactId>
+	<version>1.4c5</version>
+
+	<repositories>
+		<repository>
+			<id>sqoop-connectors.parcel.repo</id>
+			<url>http://archive.cloudera.com/sqoop-connectors/parcels</url>
+		</repository>
+	</repositories>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>@project.groupId@</groupId>
+				<artifactId>@project.artifactId@</artifactId>
+				<version>@project.version@</version>
+				<executions>
+					<execution>
+						<id>prepare-1</id>
+						<phase>process-sources</phase>
+						<goals>
+							<goal>prepare</goal>
+						</goals>
+						<configuration>
+							<parcels>
+								<parcel>
+									<groupId>${project.groupId}</groupId>
+									<artifactId>${project.artifactId}</artifactId>
+									<version>${project.version}.1</version>
+									<classifier>el6</classifier>
+								</parcel>
+							</parcels>
+						</configuration>
+					</execution>
+					<execution>
+						<id>package-1</id>
+						<phase>package</phase>
+						<goals>
+							<goal>build</goal>
+						</goals>
+						<configuration>
+							<parcels>
+								<parcel>
+									<groupId>${project.groupId}</groupId>
+									<artifactId>${project.artifactId}</artifactId>
+									<version>${project.version}.1</version>
+									<classifier>el6</classifier>
+								</parcel>
+							</parcels>
+						</configuration>
+					</execution>
+					<execution>
+						<id>prepare-2</id>
+						<phase>process-sources</phase>
+						<goals>
+							<goal>prepare</goal>
+						</goals>
+						<configuration>
+							<parcels>
+								<parcel>
+									<groupId>${project.groupId}</groupId>
+									<artifactId>${project.artifactId}</artifactId>
+									<version>${project.version}.2</version>
+									<classifier>el6</classifier>
+									<parcelResourcesDirectory>src/main/parcel-2</parcelResourcesDirectory>
+									<parcelBuildDirectory>target/parcel-2</parcelBuildDirectory>
+								</parcel>
+							</parcels>
+						</configuration>
+					</execution>
+					<execution>
+						<id>package-2</id>
+						<phase>package</phase>
+						<goals>
+							<goal>build</goal>
+						</goals>
+						<configuration>
+							<parcels>
+								<parcel>
+									<groupId>${project.groupId}</groupId>
+									<artifactId>${project.artifactId}</artifactId>
+									<version>${project.version}.2</version>
+									<classifier>el6</classifier>
+									<parcelResourcesDirectory>src/main/parcel-2</parcelResourcesDirectory>
+									<parcelBuildDirectory>target/parcel-2</parcelBuildDirectory>
+								</parcel>
+							</parcels>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>
