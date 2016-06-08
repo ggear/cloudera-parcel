@@ -7,7 +7,7 @@
 			<implementation>org.apache.maven.lifecycle.mapping.DefaultLifecycleMapping</implementation>
 			<configuration>
 				<phases>
-					<process-resources>org.apache.maven.plugins:maven-resources-plugin:resources</process-resources>
+					<process-sources>com.cloudera.parcel:cloudera-parcel-plugin:prepare</process-sources>
 					<package>com.cloudera.parcel:cloudera-parcel-plugin:build</package>
 					<install>com.cloudera.parcel:cloudera-parcel-plugin:install</install>
 					<deploy>com.cloudera.parcel:cloudera-parcel-plugin:deploy</deploy>

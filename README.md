@@ -46,8 +46,8 @@ To perform a release:
 
 ```bash
 # Change the following variables to appropriate values for your target environment
-export CP_VERSION_RELEASE=0.6.1
-export CP_VERSION_HEAD=0.6.2
+export CP_VERSION_RELEASE=0.6.2
+export CP_VERSION_HEAD=0.6.3
 mvn clean install -PCMP
 mvn release:prepare -B -DreleaseVersion=$CP_VERSION_RELEASE -DdevelopmentVersion=$CP_VERSION_HEAD-SNAPSHOT
 mvn release:clean clean

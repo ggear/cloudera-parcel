@@ -7,9 +7,13 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.List;
@@ -188,50 +192,67 @@ public class Parcel {
     return exploded;
   }
 
-  public boolean build(Log log, final String dirSource, String dirBuild, String dirOutput)
-      throws MojoExecutionException {
+  public boolean prepare(Log log, final String dirSource, String dirOutput) throws MojoExecutionException {
+    final Path sourcePath = Paths.get(dirSource);
+    final Path ouputPath = Paths.get(dirOutput, getArtifactName());
+    try {
+      if (Files.exists(sourcePath)) {
+        FileUtils.deleteQuietly(ouputPath.toFile());
+        Files.walkFileTree(sourcePath, new SimpleFileVisitor<Path>() {
+          @Override
+          public FileVisitResult preVisitDirectory(final Path dir, final BasicFileAttributes attrs) throws IOException {
+            Files.createDirectories(ouputPath.resolve(sourcePath.relativize(dir)));
+            return FileVisitResult.CONTINUE;
+          }
+
+          @Override
+          public FileVisitResult visitFile(final Path file, final BasicFileAttributes attrs) throws IOException {
+            Files.copy(file, ouputPath.resolve(sourcePath.relativize(file)));
+            return FileVisitResult.CONTINUE;
+          }
+        });
+      }
+    } catch (Exception exception) {
+      throw new MojoExecutionException("Failed to prepare artifact [" + getArtifactNamespace() + "] from [" + sourcePath
+          + "] to [" + ouputPath + "]", exception);
+    }
+    return true;
+  }
+
+  public boolean build(Log log, String dirSource, final String dirBuild) throws MojoExecutionException {
     File buildPath = new File(dirBuild, getArtifactName());
     File buildPathSha1 = new File(dirBuild, getArtifactName() + SUFFIX_SHA1);
-    File ouputPath = new File(dirOutput);
+    File sourcePath = new File(dirSource);
     buildPath.delete();
     buildPathSha1.delete();
-    File parcelRepoRootPath = new File(dirBuild, DIR_PARCEL_REPO + File.separator + artifactId.toLowerCase()
-        + File.separator + DIR_PARCEL_REPO_TYPE + File.separator + getVersionShort());
-    File parcelRepoPath = new File(parcelRepoRootPath, buildPath.getName());
-    File parcelRepoPathSha1 = new File(parcelRepoRootPath, buildPathSha1.getName());
-    parcelRepoRootPath.mkdirs();
-    parcelRepoPath.delete();
-    parcelRepoPathSha1.delete();
     try {
       TarArchiver archiver = new TarArchiver();
       archiver.setCompression(TarCompressionMethod.gzip);
       DefaultFileSet fileSet = new DefaultFileSet();
-      fileSet.setDirectory(ouputPath);
+      fileSet.setDirectory(sourcePath);
       fileSet.setFileSelectors(new FileSelector[] { new FileSelector() {
         @Override
         public boolean isSelected(FileInfo fileInfo) throws IOException {
-          return !fileInfo.isFile() || !new File(dirSource, fileInfo.getName()).canExecute();
+          return !fileInfo.isFile() || !new File(dirBuild, fileInfo.getName()).canExecute();
         }
       } });
       archiver.addFileSet(fileSet);
       archiver.setFileMode(0755);
       fileSet = new DefaultFileSet();
-      fileSet.setDirectory(ouputPath);
+      fileSet.setDirectory(sourcePath);
       fileSet.setFileSelectors(new FileSelector[] { new FileSelector() {
         @Override
         public boolean isSelected(FileInfo fileInfo) throws IOException {
-          return fileInfo.isFile() && new File(dirSource, fileInfo.getName()).canExecute();
+          return fileInfo.isFile() && new File(dirBuild, fileInfo.getName()).canExecute();
         }
       } });
       archiver.addFileSet(fileSet);
       archiver.setDestFile(buildPath);
       archiver.createArchive();
       FileUtils.writeStringToFile(buildPathSha1, calculateSha1(buildPath) + "\n");
-      FileUtils.copyFile(buildPath, parcelRepoPath);
-      FileUtils.copyFile(buildPathSha1, parcelRepoPathSha1);
     } catch (Exception exception) {
       throw new MojoExecutionException(
-          "Failed to build artifact [" + getArtifactNamespace() + "] from [" + ouputPath + "] to [" + buildPath + "]",
+          "Failed to build artifact [" + getArtifactNamespace() + "] from [" + sourcePath + "] to [" + buildPath + "]",
           exception);
     }
     return assertSha1(log, buildPath, buildPathSha1, false);
@@ -387,22 +408,19 @@ public class Parcel {
 
   private static final String SUFFIX_SHA1 = ".sha1";
 
-  private static final String DIR_PARCEL_REPO = "parcel-repo";
-  private static final String DIR_PARCEL_REPO_TYPE = "parcels";
-
   private static final Pattern REGEXP_SCP_CONNECT = Pattern.compile("^scp://(.*):(.*)@(.*):([0-9]*)(.*)");
 
   private static final Map<String, ImmutableMap<String, String>> OS_NAME_VERSION_DESCRIPTOR = ImmutableMap.of(//
       "Mac OS X", //
       ImmutableMap.of(//
           "10\\.11.*", "elcapitan"//
-  ), //
+      ), //
       "Linux", //
       ImmutableMap.of(//
           ".*\\.el6\\..*", "el6", //
           ".*\\.el7\\..*", "el7", //
           "4\\.2\\.0.*-generic", "trusty"//
-  )//
+      )//
   );
 
   public static String getOsDescriptor() {

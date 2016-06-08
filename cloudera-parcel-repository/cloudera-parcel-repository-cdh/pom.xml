@@ -121,7 +121,7 @@
 						<configuration>
 							<target>
 								<delete includeEmptyDirs="true" quiet="false">
-									<fileset dir="src/main/resources/CDH-${project.version}"
+									<fileset dir="src/main/resources/parcel"
 										defaultexcludes="false">
 										<include name="**/*" />
 										<exclude name="meta/**" />

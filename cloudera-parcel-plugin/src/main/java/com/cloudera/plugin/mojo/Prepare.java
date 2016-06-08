@@ -10,8 +10,8 @@ import org.codehaus.plexus.util.StringUtils;
 
 import com.cloudera.plugin.Parcel;
 
-@Mojo(name = "build", requiresProject = true, defaultPhase = LifecyclePhase.PACKAGE)
-public class Build extends AbstractMojo {
+@Mojo(name = "prepare", requiresProject = true, defaultPhase = LifecyclePhase.PROCESS_SOURCES)
+public class Prepare extends AbstractMojo {
 
   @Parameter(defaultValue = "${project}", required = true, readonly = true)
   private MavenProject project;
@@ -19,18 +19,18 @@ public class Build extends AbstractMojo {
   @Parameter(defaultValue = "${parcel.classifier}", required = false, readonly = true)
   private String parcelClassifier;
 
-  @Parameter(defaultValue = "${project.build.directory}", required = true, readonly = true)
-  private String buildDirectory;
-
   @Parameter(defaultValue = "${project.build.directory}/parcel", required = true, readonly = true)
-  private String parcelSourceDirectory;
+  private String parcelBuildDirectory;
+
+  @Parameter(defaultValue = "${basedir}/src/main/resources/parcel", required = true, readonly = true)
+  private String parcelResourcesDirectory;
 
   @Override
   public void execute() throws MojoExecutionException {
     Parcel parcel = new Parcel(project.getGroupId(), project.getArtifactId(), project.getVersion(),
         StringUtils.isEmpty(parcelClassifier) ? Parcel.getOsDescriptor() : parcelClassifier, project.getPackaging());
     if (parcel.isValid()) {
-      parcel.build(getLog(), parcelSourceDirectory, buildDirectory);
+      parcel.prepare(getLog(), parcelResourcesDirectory, parcelBuildDirectory);
     }
   }
 

@@ -27,7 +27,7 @@ public class Explode extends AbstractMojo {
 
   @Override
   public void execute() throws MojoExecutionException {
-    List<String> repositoriesUrls = new ArrayList<String>();
+    List<String> repositoriesUrls = new ArrayList<>();
     for (Repository repository : repositories) {
       repositoriesUrls.add(repository.getUrl());
     }
