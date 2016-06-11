@@ -38,7 +38,7 @@ Alternatively, the module can be distributed as a binary by installing the depen
 
 ##Usage
 
-The plugin can be used as per the [integration tests](https://github.com/ggear/cloudera-parcel/tree/master/cloudera-parcel-plugin/src/it) and [cloudera-framework](https://github.com/ggear/cloudera-framework/tree/master/cloudera-framework-thirdparty/src/main/repository).
+The plugin can be used as per the [integration tests](https://github.com/ggear/cloudera-parcel/tree/master/cloudera-parcel-plugin/src/it) and [cloudera-framework](https://github.com/ggear/cloudera-framework).
 
 ##Release
 
@@ -55,4 +55,6 @@ find . -type f -name pom.xml | xargs sed -i "" 's/'$CP_VERSION_RELEASE'-SNAPSHOT
 git add -A
 git commit -m "[maven-release-plugin] prepare sub modules for next development iteration"
 git push --all
+mvn clean install -PCMP
+git tag
 ```
