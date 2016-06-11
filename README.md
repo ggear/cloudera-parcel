@@ -48,7 +48,6 @@ To perform a release:
 # Change the following variables to appropriate values for your target environment
 export CP_VERSION_RELEASE=0.6.5
 export CP_VERSION_HEAD=0.7.0
-mvn clean install -PCMP
 mvn release:prepare -B -DreleaseVersion=$CP_VERSION_RELEASE -DdevelopmentVersion=$CP_VERSION_HEAD-SNAPSHOT
 mvn release:perform
 mvn release:clean clean
@@ -56,5 +55,4 @@ find . -type f -name pom.xml | xargs sed -i "" 's/'$CP_VERSION_RELEASE'-SNAPSHOT
 git add -A
 git commit -m "[maven-release-plugin] prepare sub modules for next development iteration"
 git push --all
-git tag
 ```
