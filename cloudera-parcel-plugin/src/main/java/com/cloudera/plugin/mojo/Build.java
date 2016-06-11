@@ -29,25 +29,21 @@ public class Build extends AbstractMojo {
   @Parameter(defaultValue = "${project.build.directory}/parcel", required = true, readonly = true)
   private String parcelBuildDirectory;
 
-  @Parameter(defaultValue = "${project.basedir}/src/main/parcel", required = true, readonly = true)
-  private String parcelResourcesDirectory;
-
   @Parameter(required = false)
   private List<Parcel> parcels;
 
   @Override
   public void execute() throws MojoExecutionException {
     if (parcels == null) {
-      parcels = Arrays.asList(new Parcel[] {
-          ParcelBuilder.get().groupId(project.getGroupId()).artifactId(project.getArtifactId()).version(project.getVersion())
-              .classifier(StringUtils.isEmpty(parcelClassifier) ? Parcel.getOsDescriptor() : parcelClassifier)
-              .parcelResourcesDirectory(parcelResourcesDirectory).buildDirectory(buildDirectory)
-              .parcelBuildDirectory(parcelBuildDirectory).type(project.getPackaging()).build() });
+      parcels = Arrays.asList(new Parcel[] { ParcelBuilder.get().groupId(project.getGroupId())
+          .artifactId(project.getArtifactId()).version(project.getVersion())
+          .classifier(StringUtils.isEmpty(parcelClassifier) ? Parcel.getOsDescriptor() : parcelClassifier)
+          .baseDirectory(project.getBasedir().getAbsolutePath()).buildDirectory(buildDirectory)
+          .parcelBuildDirectory(parcelBuildDirectory).type(project.getPackaging()).build() });
     }
     for (Parcel parcel : parcels) {
-      if (parcel.isValid()) {
-        parcel.build(getLog());
-      }
+      parcel.setBaseDirectory(project.getBasedir().getAbsolutePath());
+      parcel.build(getLog());
     }
   }
 

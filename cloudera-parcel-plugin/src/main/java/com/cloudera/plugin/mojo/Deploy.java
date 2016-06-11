@@ -26,21 +26,24 @@ public class Deploy extends AbstractMojo {
   @Parameter(defaultValue = "${project.build.directory}", required = true, readonly = true)
   private String buildDirectory;
 
+  @Parameter(defaultValue = "${parcel.distributionRepositoryUrl}", required = true, readonly = true)
+  private String distributionRepositoryUrl;
+
   @Parameter(required = false)
   private List<Parcel> parcels;
 
   @Override
   public void execute() throws MojoExecutionException {
     if (parcels == null) {
-      parcels = Arrays.asList(new Parcel[] {
-          ParcelBuilder.get().groupId(project.getGroupId()).artifactId(project.getArtifactId()).version(project.getVersion())
-              .classifier(StringUtils.isEmpty(parcelClassifier) ? Parcel.getOsDescriptor() : parcelClassifier)
-              .buildDirectory(buildDirectory).type(project.getPackaging()).build() });
+      parcels = Arrays.asList(new Parcel[] { ParcelBuilder.get().groupId(project.getGroupId())
+          .artifactId(project.getArtifactId()).version(project.getVersion())
+          .classifier(StringUtils.isEmpty(parcelClassifier) ? Parcel.getOsDescriptor() : parcelClassifier)
+          .baseDirectory(project.getBasedir().getAbsolutePath()).buildDirectory(buildDirectory)
+          .distributionRepositoryUrl(distributionRepositoryUrl).type(project.getPackaging()).build() });
     }
     for (Parcel parcel : parcels) {
-      if (parcel.isValid()) {
-        parcel.deploy(getLog(), project.getDistributionManagement().getRepository().getUrl());
-      }
+      parcel.setBaseDirectory(project.getBasedir().getAbsolutePath());
+      parcel.deploy(getLog());
     }
   }
 

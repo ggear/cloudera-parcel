@@ -14,12 +14,10 @@
 		<version>0.6.4-SNAPSHOT</version>
 	</parent>
 
-	<distributionManagement>
-		<repository>
-			<id>kudu.repo</id>
-			<url>scp://root:/Users/graham/.ssh/id_rsa.pem@52.63.86.162:22/var/www/html/tmph3l7m2vv103/sbin/kudu/parcels</url>
-		</repository>
-	</distributionManagement>
+	<properties>
+		<impala.version>2.5.0</impala.version>
+		<parcel.distributionRepositoryUrl>scp://graham:/Users/graham/.ssh/id_rsa.pem@52.63.86.162:22/var/www/html/tmph3l7m2vv103/sbin/kudu/parcels</parcel.distributionRepositoryUrl>
+	</properties>
 
 	<build>
 		<plugins>

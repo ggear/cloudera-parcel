@@ -3,16 +3,9 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>com.cloudera.parcel.build</groupId>
+	<groupId>com.cloudera</groupId>
 	<artifactId>SQOOP_TERADATA_CONNECTOR</artifactId>
 	<version>1.4c5</version>
-
-	<repositories>
-		<repository>
-			<id>sqoop-connectors.parcel.repo</id>
-			<url>http://archive.cloudera.com/sqoop-connectors/parcels</url>
-		</repository>
-	</repositories>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -26,7 +19,52 @@
 				<version>@project.version@</version>
 				<executions>
 					<execution>
-						<id>prepare-1</id>
+						<id>download</id>
+						<phase>validate</phase>
+						<goals>
+							<goal>download</goal>
+						</goals>
+						<configuration>
+							<parcels>
+								<parcel>
+									<groupId>${project.groupId}</groupId>
+									<artifactId>${project.artifactId}</artifactId>
+									<version>${project.version}</version>
+									<classifier>el6</classifier>
+									<repositoryUrl>http://archive.cloudera.com/sqoop-connectors/parcels</repositoryUrl>
+								</parcel>
+							</parcels>
+						</configuration>
+					</execution>
+					<execution>
+						<id>explode</id>
+						<phase>initialize</phase>
+						<goals>
+							<goal>explode</goal>
+						</goals>
+						<configuration>
+							<parcels>
+								<parcel>
+									<groupId>${project.groupId}</groupId>
+									<artifactId>${project.artifactId}</artifactId>
+									<version>${project.version}</version>
+									<classifier>el6</classifier>
+									<repositoryUrl>http://archive.cloudera.com/sqoop-connectors/parcels</repositoryUrl>
+									<outputDirectory>${project.build.directory}/parcel</outputDirectory>
+								</parcel>
+								<parcel>
+									<groupId>${project.groupId}</groupId>
+									<artifactId>${project.artifactId}</artifactId>
+									<version>${project.version}</version>
+									<classifier>el6</classifier>
+									<repositoryUrl>http://archive.cloudera.com/sqoop-connectors/parcels</repositoryUrl>
+									<linkDirectory>${project.build.directory}/sqoop-connectors</linkDirectory>
+								</parcel>
+							</parcels>
+						</configuration>
+					</execution>
+					<execution>
+						<id>prepare</id>
 						<phase>process-sources</phase>
 						<goals>
 							<goal>prepare</goal>
@@ -36,14 +74,14 @@
 								<parcel>
 									<groupId>${project.groupId}</groupId>
 									<artifactId>${project.artifactId}</artifactId>
-									<version>${project.version}.1</version>
+									<version>${project.version}</version>
 									<classifier>el6</classifier>
 								</parcel>
 							</parcels>
 						</configuration>
 					</execution>
 					<execution>
-						<id>package-1</id>
+						<id>build</id>
 						<phase>package</phase>
 						<goals>
 							<goal>build</goal>
@@ -53,50 +91,34 @@
 								<parcel>
 									<groupId>${project.groupId}</groupId>
 									<artifactId>${project.artifactId}</artifactId>
-									<version>${project.version}.1</version>
+									<version>${project.version}</version>
 									<classifier>el6</classifier>
 								</parcel>
 							</parcels>
 						</configuration>
 					</execution>
 					<execution>
-						<id>prepare-2</id>
-						<phase>process-sources</phase>
+						<id>install</id>
+						<phase>install</phase>
 						<goals>
-							<goal>prepare</goal>
+							<goal>install</goal>
 						</goals>
 						<configuration>
 							<parcels>
 								<parcel>
 									<groupId>${project.groupId}</groupId>
 									<artifactId>${project.artifactId}</artifactId>
-									<version>${project.version}.2</version>
+									<version>${project.version}</version>
 									<classifier>el6</classifier>
-									<parcelResourcesDirectory>src/main/parcel-2</parcelResourcesDirectory>
-									<parcelBuildDirectory>target/parcel-2</parcelBuildDirectory>
 								</parcel>
 							</parcels>
 						</configuration>
 					</execution>
-					<execution>
-						<id>package-2</id>
-						<phase>package</phase>
-						<goals>
-							<goal>build</goal>
-						</goals>
-						<configuration>
-							<parcels>
-								<parcel>
-									<groupId>${project.groupId}</groupId>
-									<artifactId>${project.artifactId}</artifactId>
-									<version>${project.version}.2</version>
-									<classifier>el6</classifier>
-									<parcelResourcesDirectory>src/main/parcel-2</parcelResourcesDirectory>
-									<parcelBuildDirectory>target/parcel-2</parcelBuildDirectory>
-								</parcel>
-							</parcels>
-						</configuration>
-					</execution>
+					<!-- <execution> <id>deploy</id> <phase>deploy</phase> <goals> <goal>deploy</goal> 
+						</goals> <configuration> <parcels> <parcel> <groupId>${project.groupId}</groupId> 
+						<artifactId>${project.artifactId}</artifactId> <version>${project.version}</version> 
+						<classifier>el6</classifier> <distributionRepositoryUrl>scp://graham:/Users/graham/.ssh/id_rsa.pem@52.63.86.162:22/var/www/html/tmph3l7m2vv103/sbin/sqoop-connectors/parcels</distributionRepositoryUrl> 
+						</parcel> </parcels> </configuration> </execution> -->
 				</executions>
 			</plugin>
 		</plugins>

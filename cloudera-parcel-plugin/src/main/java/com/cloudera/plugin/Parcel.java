@@ -13,6 +13,7 @@ import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
+import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.security.MessageDigest;
 import java.util.ArrayList;
@@ -51,26 +52,48 @@ import com.jcraft.jsch.Session;
 public class Parcel {
 
   public boolean isValid() throws MojoExecutionException {
-    List<String> paramaters = new ArrayList<>();
+    List<String> paramatersMissing = new ArrayList<>();
     if (StringUtils.isEmpty(groupId)) {
-      paramaters.add("groupId");
+      paramatersMissing.add("groupId");
     }
     if (StringUtils.isEmpty(artifactId)) {
-      paramaters.add("artifactId");
+      paramatersMissing.add("artifactId");
     }
     if (StringUtils.isEmpty(version)) {
-      paramaters.add("version");
+      paramatersMissing.add("version");
     }
     if (StringUtils.isEmpty(classifier)) {
       classifier = getOsDescriptor();
     }
-    if (StringUtils.isEmpty(type)) {
-      paramaters.add("type");
+    if (StringUtils.isEmpty(baseDirectory)) {
+      paramatersMissing.add("baseDirectory");
     }
-    if (!paramaters.isEmpty()) {
-      throw new MojoExecutionException("The required parameters " + paramaters + " are missing or invalid");
+    if (StringUtils.isEmpty(type)) {
+      paramatersMissing.add("type");
+    }
+    if (!paramatersMissing.isEmpty()) {
+      throw new MojoExecutionException("The required parameters " + paramatersMissing
+          + " were missing from the POM as <properties><parcel.MISSING-PARAMATER> or "
+          + "<execution><configuration><parcels><parcel><MISSING-PARAMATER> definitions");
     }
     return true;
+  }
+
+  @SuppressWarnings("rawtypes")
+  public boolean isValid(Map paramaters) throws MojoExecutionException {
+    List<Object> paramatersMissing = new ArrayList<>();
+    for (Object paramater : paramaters.keySet()) {
+      if (paramaters.get(paramater) == null
+          || paramaters.get(paramater) instanceof String && StringUtils.isEmpty((String) paramaters.get(paramater))) {
+        paramatersMissing.add(paramater);
+      }
+    }
+    if (!paramatersMissing.isEmpty()) {
+      throw new MojoExecutionException("The required parameters " + paramatersMissing
+          + " were missing from the POM as <properties><parcel.MISSING-PARAMATER> or "
+          + "<execution><configuration><parcels><parcel><MISSING-PARAMATER> definitions");
+    }
+    return isValid();
   }
 
   public String getArtifactName() throws MojoExecutionException {
@@ -107,10 +130,11 @@ public class Parcel {
         : null;
   }
 
-  public boolean download(Log log, String dirRepository, List<String> urlRepositories) throws MojoExecutionException {
+  public boolean download(Log log) throws MojoExecutionException {
+    isValid(ImmutableMap.of("localRepositoryDirectory", localRepositoryDirectory, "repositoryUrl", repositoryUrl));
     boolean downloaded = false;
-    File localPath = new File(getFile(dirRepository).getAbsolutePath(), getLocalPath());
-    File localPathSha1 = new File(getFile(dirRepository).getAbsolutePath(), getLocalPath() + SUFFIX_SHA1);
+    File localPath = new File(getFile(localRepositoryDirectory).getAbsolutePath(), getLocalPath());
+    File localPathSha1 = new File(getFile(localRepositoryDirectory).getAbsolutePath(), getLocalPath() + SUFFIX_SHA1);
     if (localPath.exists() && localPathSha1.exists()) {
       if (!assertSha1(log, localPath, localPathSha1, true)) {
         localPath.delete();
@@ -122,31 +146,28 @@ public class Parcel {
       localPathSha1.delete();
     }
     if (!localPath.exists() && !localPathSha1.exists()) {
-      for (String repository : urlRepositories) {
-        System.out.println("Downloading: " + getRemoteUrl(repository));
-        try {
-          GenericUrl remoteUrl = new GenericUrl(getRemoteUrl(repository));
-          GenericUrl remoteUrlSha1 = new GenericUrl(getRemoteUrl(repository) + SUFFIX_SHA1);
-          long time = System.currentTimeMillis();
-          if (downloaded = downloadHttpResource(log, remoteUrl, localPath)
-              && downloadHttpResource(log, remoteUrlSha1, localPathSha1)) {
-            if (!(downloaded = assertSha1(log, localPath, localPathSha1, true))) {
-              localPath.delete();
-              localPathSha1.delete();
-              throw new MojoExecutionException(
-                  "Downloaded file from [" + remoteUrl + "] failed to match checksum [" + remoteUrlSha1 + "]");
-            }
-            System.out.println("Downloaded: " + remoteUrl + " ("
-                + FileUtils.byteCountToDisplaySize(localPath.length() + localPathSha1.length()) + " at "
-                + String.format("%.2f",
-                    (localPath.length() + localPathSha1.length()) / ((System.currentTimeMillis() - time) * 1000D))
-                + " MB/sec)");
-            break;
+      System.out.println("Downloading: " + getRemoteUrl(repositoryUrl));
+      try {
+        GenericUrl remoteUrl = new GenericUrl(getRemoteUrl(repositoryUrl));
+        GenericUrl remoteUrlSha1 = new GenericUrl(getRemoteUrl(repositoryUrl) + SUFFIX_SHA1);
+        long time = System.currentTimeMillis();
+        if (downloaded = downloadHttpResource(log, remoteUrl, localPath)
+            && downloadHttpResource(log, remoteUrlSha1, localPathSha1)) {
+          if (!(downloaded = assertSha1(log, localPath, localPathSha1, true))) {
+            localPath.delete();
+            localPathSha1.delete();
+            throw new MojoExecutionException(
+                "Downloaded file from [" + remoteUrl + "] failed to match checksum [" + remoteUrlSha1 + "]");
           }
-        } catch (Exception exception) {
-          if (log.isDebugEnabled()) {
-            log.debug("Error encountered downlaoding parcel [" + getArtifactName() + "]", exception);
-          }
+          System.out.println("Downloaded: " + remoteUrl + " ("
+              + FileUtils.byteCountToDisplaySize(localPath.length() + localPathSha1.length()) + " at "
+              + String.format("%.2f",
+                  (localPath.length() + localPathSha1.length()) / ((System.currentTimeMillis() - time) * 1000D))
+              + " MB/sec)");
+        }
+      } catch (Exception exception) {
+        if (log.isDebugEnabled()) {
+          log.debug("Error encountered downlaoding parcel [" + getArtifactName() + "]", exception);
         }
       }
       if (!downloaded) {
@@ -157,14 +178,16 @@ public class Parcel {
     return downloaded;
   }
 
-  public boolean explode(Log log, String dirRepository, List<String> urlRepositories) throws MojoExecutionException {
-    download(log, dirRepository, urlRepositories);
+  public boolean explode(Log log) throws MojoExecutionException {
+    isValid(ImmutableMap.of("localRepositoryDirectory", localRepositoryDirectory));
+    download(log);
     File explodedPath = StringUtils.isEmpty(outputDirectory)
-        ? new File(getFile(dirRepository).getAbsolutePath(), getLocalPath()).getParentFile() : getFile(outputDirectory);
+        ? new File(getFile(localRepositoryDirectory).getAbsolutePath(), getLocalPath()).getParentFile()
+        : getFile(outputDirectory);
     String explodedPathRoot = explodedPath.toString() + File.separator + getArtifactNameSansClassifierType();
     boolean exploded = new File(explodedPath, getArtifactNameSansClassifierType()).exists();
     if (!exploded) {
-      File localPath = new File(getFile(dirRepository).getAbsolutePath(), getLocalPath());
+      File localPath = new File(getFile(localRepositoryDirectory).getAbsolutePath(), getLocalPath());
       log.info("Exploding " + localPath.getAbsolutePath());
       try {
         explodedPath.mkdirs();
@@ -193,11 +216,13 @@ public class Parcel {
   }
 
   public boolean prepare(Log log) throws MojoExecutionException {
+    isValid(ImmutableMap.of("parcelResourcesDirectory", parcelResourcesDirectory, "parcelBuildDirectory",
+        parcelBuildDirectory));
     final Path sourcePath = Paths.get(getFile(parcelResourcesDirectory).getAbsolutePath());
-    final Path ouputPath = Paths.get(getFile(parcelBuildDirectory).getAbsolutePath(), getArtifactName());
+    final Path ouputPath = Paths.get(getFile(parcelBuildDirectory).getAbsolutePath(),
+        getArtifactNameSansClassifierType());
     try {
       if (Files.exists(sourcePath)) {
-        FileUtils.deleteQuietly(ouputPath.toFile());
         Files.walkFileTree(sourcePath, new SimpleFileVisitor<Path>() {
           @Override
           public FileVisitResult preVisitDirectory(final Path dir, final BasicFileAttributes attrs) throws IOException {
@@ -207,7 +232,8 @@ public class Parcel {
 
           @Override
           public FileVisitResult visitFile(final Path file, final BasicFileAttributes attrs) throws IOException {
-            Files.copy(file, ouputPath.resolve(sourcePath.relativize(file)));
+            Files.copy(file, ouputPath.resolve(sourcePath.relativize(file)), StandardCopyOption.REPLACE_EXISTING,
+                StandardCopyOption.COPY_ATTRIBUTES);
             return FileVisitResult.CONTINUE;
           }
         });
@@ -220,6 +246,7 @@ public class Parcel {
   }
 
   public boolean build(Log log) throws MojoExecutionException {
+    isValid(ImmutableMap.of("buildDirectory", buildDirectory, "parcelBuildDirectory", parcelBuildDirectory));
     File buildPath = new File(getFile(buildDirectory).getAbsolutePath(), getArtifactName());
     File buildPathSha1 = new File(getFile(buildDirectory).getAbsolutePath(), getArtifactName() + SUFFIX_SHA1);
     File sourcePath = getFile(parcelBuildDirectory);
@@ -260,10 +287,12 @@ public class Parcel {
     return assertSha1(log, buildPath, buildPathSha1, false);
   }
 
-  public boolean install(Log log, String dirRepository) throws MojoExecutionException {
+  public boolean install(Log log) throws MojoExecutionException {
+    isValid(ImmutableMap.of("buildDirectory", buildDirectory, "localRepositoryDirectory", localRepositoryDirectory));
     File buildPath = new File(getFile(buildDirectory).getAbsolutePath(), getArtifactName());
     File buildPathSha1 = new File(getFile(buildDirectory).getAbsolutePath(), getArtifactName() + SUFFIX_SHA1);
-    File repositoryRootPath = new File(getFile(dirRepository).getAbsolutePath(), getLocalPath()).getParentFile();
+    File repositoryRootPath = new File(getFile(localRepositoryDirectory).getAbsolutePath(), getLocalPath())
+        .getParentFile();
     File repositoryPath = new File(repositoryRootPath, getArtifactName());
     File repositoryPathSha1 = new File(repositoryRootPath, getArtifactName() + SUFFIX_SHA1);
     try {
@@ -280,15 +309,16 @@ public class Parcel {
     return assertSha1(log, repositoryPath, repositoryPathSha1, false);
   }
 
-  public boolean deploy(Log log, String scpConnect) throws MojoExecutionException {
+  public boolean deploy(Log log) throws MojoExecutionException {
+    isValid(ImmutableMap.of("buildDirectory", buildDirectory, "distributionRepositoryUrl", distributionRepositoryUrl));
     boolean deployed = false;
     File buildPath = new File(getFile(buildDirectory).getAbsolutePath(), getArtifactName());
     File buildPathSha1 = new File(getFile(buildDirectory).getAbsolutePath(), getArtifactName() + SUFFIX_SHA1);
     Matcher sshConnectMatcher = REGEXP_SCP_CONNECT
-        .matcher(scpConnect + (scpConnect.endsWith("/") ? "" : "/") + getVersionShort());
+        .matcher(distributionRepositoryUrl + (distributionRepositoryUrl.endsWith("/") ? "" : "/") + getVersionShort());
     if (!sshConnectMatcher.matches()) {
-      throw new MojoExecutionException("Could not match [" + scpConnect + "] with regexp [" + REGEXP_SCP_CONNECT
-          + "], please check your ssh connect string and provide all values.");
+      throw new MojoExecutionException("Could not match [" + distributionRepositoryUrl + "] with regexp ["
+          + REGEXP_SCP_CONNECT + "], please check your ssh connect string and provide all values.");
     }
     Session session = null;
     ChannelExec channelSsh = null;
@@ -311,8 +341,9 @@ public class Parcel {
         channelSsh.connect();
         String output = IOUtils.toString(readerSsh);
         if (!output.isEmpty()) {
-          throw new MojoExecutionException("Failed to create deploy directory [" + sshConnectMatcher.group(5)
-              + "] for artifact [" + getArtifactNamespace() + "] on [" + sshConnectMatcher.group(0) + "]");
+          throw new MojoExecutionException(
+              "Failed to create deploy directory [" + sshConnectMatcher.group(5) + "] for artifact ["
+                  + getArtifactNamespace() + "] on [" + sshConnectMatcher.group(0) + "] with error [" + output + "]");
         }
         channelScp = (ChannelSftp) session.openChannel("sftp");
         channelScp.connect();
@@ -425,8 +456,8 @@ public class Parcel {
       )//
   );
 
-  private static File getFile(String path) {
-    return path.startsWith("/") ? new File(path) : new File(DIR_WORKING, path);
+  private File getFile(String path) {
+    return path.startsWith("/") ? new File(path) : new File(baseDirectory, path);
   }
 
   public static String getOsDescriptor() {
@@ -444,9 +475,6 @@ public class Parcel {
         + " on the command line.");
   }
 
-  public static final String DIR_WORKING = new File(".").getAbsolutePath().substring(0,
-      new File(".").getAbsolutePath().length() - 2);
-
   @Parameter(required = false, defaultValue = "com.cloudera.parcel")
   private String groupId = "com.cloudera.parcel";
 
@@ -458,6 +486,9 @@ public class Parcel {
 
   @Parameter(required = false, defaultValue = "")
   private String classifier = "";
+
+  @Parameter(required = false, defaultValue = "")
+  private String baseDirectory = "";
 
   @Parameter(required = false, defaultValue = "src/main/parcel")
   private String parcelResourcesDirectory = "src/main/parcel";
@@ -472,7 +503,16 @@ public class Parcel {
   private String outputDirectory = "";
 
   @Parameter(required = false, defaultValue = "")
-  private String linkDirectory = "target/parcel-runtime";
+  private String linkDirectory = "";
+
+  @Parameter(required = false, defaultValue = "")
+  private String repositoryUrl = "";
+
+  @Parameter(required = false, defaultValue = "")
+  private String distributionRepositoryUrl = "";
+
+  @Parameter(required = false, defaultValue = "")
+  private String localRepositoryDirectory = "";
 
   @Parameter(required = false, defaultValue = "parcel")
   private String type = "parcel";
@@ -512,6 +552,14 @@ public class Parcel {
     this.classifier = classifier;
   }
 
+  public String getBaseDirectory() {
+    return baseDirectory;
+  }
+
+  public void setBaseDirectory(String baseDirectory) {
+    this.baseDirectory = baseDirectory;
+  }
+
   public String getParcelResourcesDirectory() {
     return parcelResourcesDirectory;
   }
@@ -544,12 +592,36 @@ public class Parcel {
     this.outputDirectory = outputDirectory;
   }
 
+  public String getLocalRepositoryDirectory() {
+    return localRepositoryDirectory;
+  }
+
+  public void setLocalRepositoryDirectory(String localRepositoryDirectory) {
+    this.localRepositoryDirectory = localRepositoryDirectory;
+  }
+
   public String getLinkDirectory() {
     return linkDirectory;
   }
 
   public void setLinkDirectory(String linkDirectory) {
     this.linkDirectory = linkDirectory;
+  }
+
+  public String getRepositoryUrl() {
+    return repositoryUrl;
+  }
+
+  public void setRepositoryUrl(String repositoryUrl) {
+    this.repositoryUrl = repositoryUrl;
+  }
+
+  public String getDistributionRepositoryUrl() {
+    return distributionRepositoryUrl;
+  }
+
+  public void setDistributionRepositoryUrl(String distributionRepositoryUrl) {
+    this.distributionRepositoryUrl = distributionRepositoryUrl;
   }
 
   public String getType() {
@@ -592,6 +664,11 @@ public class Parcel {
       return this;
     }
 
+    public ParcelBuilder baseDirectory(String baseDirectory) {
+      parcel.baseDirectory = baseDirectory;
+      return this;
+    }
+
     public ParcelBuilder parcelResourcesDirectory(String parcelResourcesDirectory) {
       parcel.parcelResourcesDirectory = parcelResourcesDirectory;
       return this;
@@ -614,6 +691,21 @@ public class Parcel {
 
     public ParcelBuilder linkDirectory(String linkDirectory) {
       parcel.linkDirectory = linkDirectory;
+      return this;
+    }
+
+    public ParcelBuilder repositoryUrl(String repositoryUrl) {
+      parcel.repositoryUrl = repositoryUrl;
+      return this;
+    }
+
+    public ParcelBuilder distributionRepositoryUrl(String distributionRepositoryUrl) {
+      parcel.distributionRepositoryUrl = distributionRepositoryUrl;
+      return this;
+    }
+
+    public ParcelBuilder localRepositoryDirectory(String localRepositoryDirectory) {
+      parcel.localRepositoryDirectory = localRepositoryDirectory;
       return this;
     }
 

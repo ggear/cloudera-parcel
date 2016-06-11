@@ -3,13 +3,14 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>com.cloudera.parcel.build</groupId>
+	<groupId>com.cloudera</groupId>
 	<artifactId>SQOOP_TERADATA_CONNECTOR</artifactId>
 	<version>1.4c5</version>
 	<packaging>parcel</packaging>
 
 	<properties>
 		<parcel.classifier>el6</parcel.classifier>
+		<parcel.distributionRepositoryUrl>scp://graham:/Users/graham/.ssh/id_rsa.pem@52.63.86.162:22/var/www/html/tmph3l7m2vv103/sbin/sqoop-connectors/parcels</parcel.distributionRepositoryUrl>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 

@@ -19,9 +19,9 @@
 	</properties>
 
 	<modules>
-<!-- 		<module>cloudera-parcel-repository-kudu</module>
+		<module>cloudera-parcel-repository-kudu</module>
 		<module>cloudera-parcel-repository-impala</module>
- -->		<module>cloudera-parcel-repository-cdh</module>
+		<module>cloudera-parcel-repository-cdh</module>
 	</modules>
 
 	<build>

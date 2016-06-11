@@ -36,16 +36,17 @@ public class Install extends AbstractMojo {
   @Override
   public void execute() throws MojoExecutionException {
     if (parcels == null) {
-      parcels = Arrays.asList(new Parcel[] {
-          ParcelBuilder.get().groupId(project.getGroupId()).artifactId(project.getArtifactId()).version(project.getVersion())
-              .classifier(StringUtils.isEmpty(parcelClassifier) ? Parcel.getOsDescriptor() : parcelClassifier)
-              .buildDirectory(buildDirectory).type(project.getPackaging()).build() });
+      parcels = Arrays.asList(new Parcel[] { ParcelBuilder.get().groupId(project.getGroupId())
+          .artifactId(project.getArtifactId()).version(project.getVersion())
+          .classifier(StringUtils.isEmpty(parcelClassifier) ? Parcel.getOsDescriptor() : parcelClassifier)
+          .baseDirectory(project.getBasedir().getAbsolutePath()).buildDirectory(buildDirectory)
+          .type(project.getPackaging()).build() });
 
     }
     for (Parcel parcel : parcels) {
-      if (parcel.isValid()) {
-        parcel.install(getLog(), localRepository.getBasedir());
-      }
+      parcel.setLocalRepositoryDirectory(localRepository.getBasedir());
+      parcel.setBaseDirectory(project.getBasedir().getAbsolutePath());
+      parcel.install(getLog());
     }
   }
 

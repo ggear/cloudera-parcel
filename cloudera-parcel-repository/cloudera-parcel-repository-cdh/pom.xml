@@ -14,40 +14,9 @@
 		<version>0.6.4-SNAPSHOT</version>
 	</parent>
 
-	<distributionManagement>
-		<repository>
-			<id>cdh.repo</id>
-			<url>scp://root:/Users/graham/.ssh/id_rsa.pem@52.63.86.162:22/var/www/html/tmph3l7m2vv103/sbin/cdh5/parcels</url>
-		</repository>
-	</distributionManagement>
-
-	<repositories>
-		<repository>
-			<id>cdh.repo</id>
-			<url>http://archive-primary.cloudera.com/cdh5/parcels</url>
-			<releases>
-				<enabled>false</enabled>
-				<updatePolicy>never</updatePolicy>
-			</releases>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-		</repository>
-		<repository>
-			<id>impala.repo</id>
-			<url>http://52.63.86.162/tmph3l7m2vv103/sbin/impala/parcels</url>
-			<releases>
-				<enabled>false</enabled>
-				<updatePolicy>never</updatePolicy>
-			</releases>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-		</repository>
-	</repositories>
-
 	<properties>
 		<impala.version>2.5.0</impala.version>
+		<parcel.distributionRepositoryUrl>scp://graham:/Users/graham/.ssh/id_rsa.pem@52.63.86.162:22/var/www/html/tmph3l7m2vv103/sbin/cdh5/parcels</parcel.distributionRepositoryUrl>
 	</properties>
 
 	<build>
@@ -88,6 +57,7 @@
 									<artifactId>CDH</artifactId>
 									<version>${project.version}</version>
 									<classifier>el7</classifier>
+									<repositoryUrl>http://archive-primary.cloudera.com/cdh5/parcels</repositoryUrl>
 									<linkDirectory>${project.basedir}/src/main/external/CDH-${project.version}</linkDirectory>
 								</parcel>
 							</parcels>
@@ -105,6 +75,7 @@
 									<groupId>com.cloudera.parcel</groupId>
 									<artifactId>IMPALA</artifactId>
 									<version>${impala.version}-cdh${short.version}</version>
+									<repositoryUrl>http://52.63.86.162/tmph3l7m2vv103/sbin/impala/parcels</repositoryUrl>
 									<linkDirectory>${project.basedir}/src/main/external/IMPALA-${impala.version}-cdh${short.version}</linkDirectory>
 								</parcel>
 							</parcels>
@@ -121,32 +92,18 @@
 						<configuration>
 							<target>
 								<delete includeEmptyDirs="true" quiet="false">
-									<fileset dir="src/main/parcel"
-										defaultexcludes="false">
+									<fileset dir="src/main/parcel" defaultexcludes="false">
 										<include name="**/*" />
 										<exclude name="meta/**" />
 										<exclude name="README" />
 										<exclude name=".gitignore" />
 									</fileset>
 								</delete>
-								<!-- TODO: Build CDH parcel
-								<exec executable="sh" error="/dev/null">
-									<arg value="-c" />
-									<arg
-										value="
-											cp -rvfnp \
-											src/main/external/CDH-${project.version} \
-											src/main/resources" />
-								</exec>
-								<exec executable="sh" error="/dev/null">
-									<arg value="-c" />
-									<arg
-										value="
-											cp -rvf \
-											src/main/external/IMPALA-${impala.version}-cdh${short.version}/bin \
-											src/main/resources/CDH-${project.version}" />
-								</exec>
-								-->
+								<!-- TODO: Build CDH parcel <exec executable="sh" error="/dev/null"> 
+									<arg value="-c" /> <arg value=" cp -rvfnp \ src/main/external/CDH-${project.version} 
+									\ src/main/resources" /> </exec> <exec executable="sh" error="/dev/null"> 
+									<arg value="-c" /> <arg value=" cp -rvf \ src/main/external/IMPALA-${impala.version}-cdh${short.version}/bin 
+									\ src/main/resources/CDH-${project.version}" /> </exec> -->
 							</target>
 							<skip>${maven.parcel-compile.skip}</skip>
 						</configuration>

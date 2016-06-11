@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.cloudera</groupId>
@@ -19,9 +20,14 @@
 	</scm>
 
 	<distributionManagement>
-		<site>
-			<url>scm:git:git@github.com:ggear/cloudera-parcel.git</url>
-		</site>
+		<repository>
+			<id>cloudera-framework</id>
+			<url>http://52.63.86.162:80/artifactory/libs-release-local</url>
+		</repository>
+		<snapshotRepository>
+			<id>cloudera-framework-snapshots</id>
+			<url>http://52.63.86.162:80/artifactory/libs-snapshot-local</url>
+		</snapshotRepository>
 	</distributionManagement>
 
 	<properties>
