@@ -20,8 +20,8 @@
 
 	<distributionManagement>
 		<repository>
-			<id>cloudera-framework</id>
-			<url>http://52.63.86.162:80/artifactory/libs-release-local</url>
+			<id>cloudera-framework-plugins</id>
+			<url>http://52.63.86.162:80/artifactory/plugins-release-local</url>
 		</repository>
 	</distributionManagement>
 
