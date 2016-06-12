@@ -34,7 +34,31 @@ mvn install
 cd ..
 ```
 
-Alternatively, the module can be distributed as a binary by installing the dependencies into a shared lib (eg, [cloudera-framework](https://github.com/ggear/cloudera-framework/tree/master/cloudera-framework-thirdparty/src/main/repository)).
+Alternatively, the module can be included as a binary dependency in maven, for example the plugin can be used as so:
+
+```xml
+	<pluginRepositories>
+		<pluginRepository>
+			<id>cloudera-framework-plugins</id>
+			<url>http://52.63.86.162:80/artifactory/plugins-release-local</url>
+			<snapshots>
+				<enabled>false</enabled>
+				<updatePolicy>never</updatePolicy>
+			</snapshots>
+		</pluginRepository>
+	</pluginRepositories>
+	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>com.cloudera.parcel</groupId>
+					<artifactId>cloudera-parcel-plugin</artifactId>
+					<version>0.7.0</version>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
+```
 
 ##Usage
 
