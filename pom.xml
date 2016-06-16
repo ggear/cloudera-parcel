@@ -50,7 +50,7 @@
 
 		<jsch.version>0.1.53</jsch.version>
 		<commons-io.version>2.4</commons-io.version>
-		<google-http.version>1.21.0</google-http.version>
+		<httpclient.version>4.5.2</httpclient.version>
 		<google-guava.version>19.0</google-guava.version>
 		<jython.version>2.7.0</jython.version>
 		<schema-validator.version>5.8.0</schema-validator.version>

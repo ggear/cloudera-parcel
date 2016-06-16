@@ -53,7 +53,7 @@ Alternatively, the module can be included as a binary dependency in maven, for e
 				<plugin>
 					<groupId>com.cloudera.parcel</groupId>
 					<artifactId>cloudera-parcel-plugin</artifactId>
-					<version>0.7.1</version>
+					<version>0.7.2</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>
@@ -70,8 +70,8 @@ To perform a release:
 
 ```bash
 # Change the following variables to appropriate values for your target environment
-export CP_VERSION_RELEASE=0.7.1
-export CP_VERSION_HEAD=0.7.2
+export CP_VERSION_RELEASE=0.7.2
+export CP_VERSION_HEAD=0.7.3
 mvn release:prepare -B -DreleaseVersion=$CP_VERSION_RELEASE -DdevelopmentVersion=$CP_VERSION_HEAD-SNAPSHOT
 mvn release:perform
 mvn release:clean clean

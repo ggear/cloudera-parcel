@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -31,6 +30,10 @@ import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.text.StrSubstitutor;
+import org.apache.http.HttpEntity;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugins.annotations.Parameter;
@@ -49,9 +52,6 @@ import org.python.core.PySystemState;
 import org.python.util.PythonInterpreter;
 
 import com.cloudera.cli.validator.Main;
-import com.google.api.client.http.GenericUrl;
-import com.google.api.client.http.HttpResponse;
-import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.common.collect.ImmutableMap;
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.ChannelSftp;
@@ -188,8 +188,8 @@ public class Parcel {
         log.info("Downloading: " + getRemoteUrl(repositoryUrl));
       }
       try {
-        GenericUrl remoteUrl = new GenericUrl(getRemoteUrl(repositoryUrl));
-        GenericUrl remoteUrlSha1 = new GenericUrl(getRemoteUrl(repositoryUrl) + SUFFIX_SHA1);
+        String remoteUrl = getRemoteUrl(repositoryUrl);
+        String remoteUrlSha1 = getRemoteUrl(repositoryUrl) + SUFFIX_SHA1;
         long time = System.currentTimeMillis();
         if (downloaded = downloadHttpResource(log, remoteUrl, localPath) && downloadHttpResource(log, remoteUrlSha1, localPathSha1)) {
           if (!(downloaded = assertSha1(log, localPath, localPathSha1, true))) {
@@ -504,14 +504,15 @@ public class Parcel {
     return environmentString.toString();
   }
 
-  private boolean downloadHttpResource(Log log, GenericUrl remote, File local) throws MojoExecutionException {
+  private boolean downloadHttpResource(Log log, String remote, File local) throws MojoExecutionException {
     local.getParentFile().mkdirs();
-    FileOutputStream localStream = null;
+    InputStream stream = null;
+    CloseableHttpClient httpclient = HttpClients.custom().disableContentCompression().build();
     try {
-      HttpResponse httpResponse = new NetHttpTransport().createRequestFactory().buildGetRequest(remote).setContentLoggingLimit(0)
-          .setConnectTimeout(5000).setReadTimeout(0).execute();
-      if (httpResponse.getStatusCode() == 200) {
-        httpResponse.download(localStream = new FileOutputStream(local));
+      HttpEntity entity = httpclient.execute(new HttpGet(remote)).getEntity();
+      if (entity != null) {
+        stream = entity.getContent();
+        Files.copy(stream, local.toPath());
         return true;
       }
     } catch (Exception exception) {
@@ -519,7 +520,8 @@ public class Parcel {
         log.debug("Error downloading resource [" + remote + "]", exception);
       }
     } finally {
-      IOUtils.closeQuietly(localStream);
+      IOUtils.closeQuietly(stream);
+      IOUtils.closeQuietly(httpclient);
     }
     return false;
   }
