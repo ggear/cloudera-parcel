@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.maven.artifact.repository.ArtifactRepository;
-import org.apache.maven.model.Repository;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
@@ -23,10 +22,10 @@ public class Explode extends AbstractMojo {
   @Parameter(defaultValue = "${localRepository}", required = true, readonly = true)
   private ArtifactRepository localRepository;
 
-  @Parameter(defaultValue = "${project.repositories}", required = true, readonly = true)
-  private List<Repository> repositories;
+  @Parameter(defaultValue = "${parcel.buildMetaData}", required = false, readonly = true)
+  private boolean buildMetaData = true;
 
-  @Parameter(required = true)
+  @Parameter(required = false)
   private List<Parcel> parcels;
 
   @Override

@@ -62,7 +62,7 @@ Alternatively, the module can be included as a binary dependency in maven, for e
 
 ##Usage
 
-The plugin can be used as per the [integration tests](https://github.com/ggear/cloudera-parcel/tree/master/cloudera-parcel-plugin/src/it) and [cloudera-framework](https://github.com/ggear/cloudera-framework).
+The plugin can be used as per the [integration tests](https://github.com/ggear/cloudera-parcel/tree/master/cloudera-parcel-plugin/src/it), the embedded [example](https://github.com/ggear/cloudera-parcel/tree/master/cloudera-parcel-repository/cloudera-parcel-repository-sqoop-teradata) and [cloudera-framework](https://github.com/ggear/cloudera-framework).
 
 ##Release
 

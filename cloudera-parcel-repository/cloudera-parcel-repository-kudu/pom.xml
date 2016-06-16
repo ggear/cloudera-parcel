@@ -6,7 +6,7 @@
 	<groupId>com.cloudera.parcel</groupId>
 	<artifactId>KUDU</artifactId>
 	<packaging>parcel</packaging>
-	<version>0.8.0-1.kudu0.8.0.p0.11</version>
+	<version>0.9.0-1.kudu0.9.0.p0.17</version>
 
 	<parent>
 		<groupId>com.cloudera.parcel</groupId>
@@ -16,6 +16,7 @@
 
 	<properties>
 		<impala.version>2.5.0</impala.version>
+		<parcel.buildMetaData>false</parcel.buildMetaData>
 		<parcel.distributionRepositoryUrl>scp://graham:/Users/graham/.ssh/id_rsa.pem@52.63.86.162:22/var/www/html/tmph3l7m2vv103/sbin/kudu/parcels</parcel.distributionRepositoryUrl>
 	</properties>
 
@@ -81,10 +82,10 @@
 									<arg value="-j4" />
 								</exec>
 								<delete includeEmptyDirs="true" quiet="true">
-									<fileset dir="src/main/resources" includes="KUDU-${project.version}/bin/**" />
+									<fileset dir="target/parcel" includes="KUDU-${project.version}/bin/**" />
 								</delete>
 								<delete includeEmptyDirs="true" quiet="true">
-									<fileset dir="src/main/resources" includes="KUDU-${project.version}/lib/**" />
+									<fileset dir="target/parcel" includes="KUDU-${project.version}/lib/**" />
 								</delete>
 								<exec executable="sh" error="/dev/null">
 									<arg value="-c" />
@@ -93,7 +94,7 @@
 											cp -rvf \
 											src/main/external/kudu/build/release/bin \
 											src/main/external/kudu/build/release/lib \
-											src/main/resources/KUDU-${project.version}" />
+											target/parcel/KUDU-${project.version}" />
 								</exec>
 							</target>
 							<skip>${maven.parcel-compile.skip}</skip>

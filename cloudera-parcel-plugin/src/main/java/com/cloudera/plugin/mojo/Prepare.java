@@ -23,11 +23,14 @@ public class Prepare extends AbstractMojo {
   @Parameter(defaultValue = "${parcel.classifier}", required = false, readonly = true)
   private String parcelClassifier;
 
-  @Parameter(defaultValue = "${project.build.directory}/parcel", required = true, readonly = true)
+  @Parameter(defaultValue = "${project.build.directory}/parcel", required = false, readonly = true)
   private String parcelBuildDirectory;
 
-  @Parameter(defaultValue = "${project.basedir}/src/main/parcel", required = true, readonly = true)
+  @Parameter(defaultValue = "${project.basedir}/src/main/parcel", required = false, readonly = true)
   private String parcelResourcesDirectory;
+
+  @Parameter(defaultValue = "${parcel.buildMetaData}", required = false, readonly = true)
+  private boolean buildMetaData = true;
 
   @Parameter(required = false)
   private List<Parcel> parcels;
@@ -35,11 +38,10 @@ public class Prepare extends AbstractMojo {
   @Override
   public void execute() throws MojoExecutionException {
     if (parcels == null) {
-      parcels = Arrays.asList(new Parcel[] { ParcelBuilder.get().groupId(project.getGroupId())
-          .artifactId(project.getArtifactId()).version(project.getVersion())
-          .classifier(StringUtils.isEmpty(parcelClassifier) ? Parcel.getOsDescriptor() : parcelClassifier)
+      parcels = Arrays.asList(new Parcel[] { ParcelBuilder.get().groupId(project.getGroupId()).artifactId(project.getArtifactId())
+          .version(project.getVersion()).classifier(StringUtils.isEmpty(parcelClassifier) ? Parcel.getOsDescriptor() : parcelClassifier)
           .baseDirectory(project.getBasedir().getAbsolutePath()).parcelResourcesDirectory(parcelResourcesDirectory)
-          .parcelBuildDirectory(parcelBuildDirectory).type(project.getPackaging()).build() });
+          .parcelBuildDirectory(parcelBuildDirectory).type(project.getPackaging()).buildMetaData(buildMetaData).build() });
 
     }
     for (Parcel parcel : parcels) {

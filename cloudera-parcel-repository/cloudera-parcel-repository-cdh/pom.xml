@@ -6,7 +6,7 @@
 	<groupId>com.cloudera.parcel</groupId>
 	<artifactId>CDH</artifactId>
 	<packaging>parcel</packaging>
-	<version>5.7.0-1.cdh5.7.0.p0.45</version>
+	<version>5.7.1-1.cdh5.7.1.p0.11</version>
 
 	<parent>
 		<groupId>com.cloudera.parcel</groupId>
@@ -16,6 +16,7 @@
 
 	<properties>
 		<impala.version>2.5.0</impala.version>
+		<parcel.buildMetaData>false</parcel.buildMetaData>
 		<parcel.distributionRepositoryUrl>scp://graham:/Users/graham/.ssh/id_rsa.pem@52.63.86.162:22/var/www/html/tmph3l7m2vv103/sbin/cdh5/parcels</parcel.distributionRepositoryUrl>
 	</properties>
 
@@ -99,11 +100,7 @@
 										<exclude name=".gitignore" />
 									</fileset>
 								</delete>
-								<!-- TODO: Build CDH parcel <exec executable="sh" error="/dev/null"> 
-									<arg value="-c" /> <arg value=" cp -rvfnp \ src/main/external/CDH-${project.version} 
-									\ src/main/resources" /> </exec> <exec executable="sh" error="/dev/null"> 
-									<arg value="-c" /> <arg value=" cp -rvf \ src/main/external/IMPALA-${impala.version}-cdh${short.version}/bin 
-									\ src/main/resources/CDH-${project.version}" /> </exec> -->
+								<!-- TODO: Build CDH parcel, copy Impala and Kudu -->
 							</target>
 							<skip>${maven.parcel-compile.skip}</skip>
 						</configuration>

@@ -5,7 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.cloudera</groupId>
 	<artifactId>SQOOP_TERADATA_CONNECTOR</artifactId>
-	<version>1.4c5</version>
+	<version>1.4c5.BESPOKE</version>
 	<packaging>parcel</packaging>
 
 	<properties>
@@ -21,6 +21,69 @@
 				<artifactId>@project.artifactId@</artifactId>
 				<version>@project.version@</version>
 				<extensions>true</extensions>
+				<executions>
+					<execution>
+						<id>download</id>
+						<phase>validate</phase>
+						<goals>
+							<goal>download</goal>
+						</goals>
+						<configuration>
+							<parcels>
+								<parcel>
+									<groupId>${project.groupId}</groupId>
+									<artifactId>${project.artifactId}</artifactId>
+									<version>1.4c5</version>
+									<classifier>el6</classifier>
+									<repositoryUrl>http://archive.cloudera.com/sqoop-connectors/parcels</repositoryUrl>
+								</parcel>
+							</parcels>
+						</configuration>
+					</execution>
+					<execution>
+						<id>explode</id>
+						<phase>initialize</phase>
+						<goals>
+							<goal>explode</goal>
+						</goals>
+						<configuration>
+							<parcels>
+								<parcel>
+									<groupId>${project.groupId}</groupId>
+									<artifactId>${project.artifactId}</artifactId>
+									<version>1.4c5</version>
+									<classifier>el6</classifier>
+									<repositoryUrl>http://archive.cloudera.com/sqoop-connectors/parcels</repositoryUrl>
+									<linkDirectory>${project.build.directory}/sqoop-connectors</linkDirectory>
+								</parcel>
+								<parcel>
+									<groupId>${project.groupId}</groupId>
+									<artifactId>${project.artifactId}</artifactId>
+									<version>1.4c5</version>
+									<classifier>el6</classifier>
+									<repositoryUrl>http://archive.cloudera.com/sqoop-connectors/parcels</repositoryUrl>
+									<linkDirectory>${project.build.directory}/sqoop-connectors</linkDirectory>
+								</parcel>
+								<parcel>
+									<groupId>${project.groupId}</groupId>
+									<artifactId>${project.artifactId}</artifactId>
+									<version>1.4c5</version>
+									<classifier>el6</classifier>
+									<repositoryUrl>http://archive.cloudera.com/sqoop-connectors/parcels</repositoryUrl>
+									<outputDirectory>${project.build.directory}/parcel/${project.artifactId}-${project.version}</outputDirectory>
+								</parcel>
+								<parcel>
+									<groupId>${project.groupId}</groupId>
+									<artifactId>${project.artifactId}</artifactId>
+									<version>1.4c5</version>
+									<classifier>el6</classifier>
+									<repositoryUrl>http://archive.cloudera.com/sqoop-connectors/parcels</repositoryUrl>
+									<outputDirectory>${project.build.directory}/parcel/${project.artifactId}-${project.version}</outputDirectory>
+								</parcel>
+							</parcels>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>

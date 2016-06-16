@@ -16,15 +16,17 @@ public class ParcelTest {
   private static final String PARCEL_CLASSIFIER = "el6";
   private static final String PARCEL_VERSION = "1.4c5";
   private static final String PARCEL_VERSION_SHORT = "1.4";
+  private static final String PARCEL_VERSION_BASE = "sqoop_teradata_connector1.4";
+  private static final String PARCEL_VERSION_BASE_LONG = "sqoop1.4.0";
   private static final String PARCEL_VERSION_LONG = "1.4-1.sqoop1.4.0.p0.88";
+  private static final String PARCEL_VERSION_LONG_ALTERNATE = "1.4-sqoop1.4.0";
   private static final String PARCEL_ARTIFACT_ID = "SQOOP_TERADATA_CONNECTOR";
   private static final String PARCEL_GROUP_ID = "com.cloudera.parcel";
   private static final String PARCEL_REPO_URL = "http://archive.cloudera.com/sqoop-connectors/parcels";
 
   private static final String PATH_EXPLODE = new File(".").getAbsolutePath() + "/target/test-sqoop-runtime";
   private static final String PATH_EXPLODE_LINK = new File(".").getAbsolutePath() + "/target/test-sqoop-runtime-link";
-  private static final String PATH_WORKING = new File(".").getAbsolutePath().substring(0,
-      new File(".").getAbsolutePath().length() - 2);
+  private static final String PATH_WORKING = new File(".").getAbsolutePath().substring(0, new File(".").getAbsolutePath().length() - 2);
 
   private String osName;
   private String osVersion;
@@ -93,69 +95,87 @@ public class ParcelTest {
 
   @Test()
   public void testIsValid() throws MojoExecutionException {
-    Assert.assertTrue(
-        ParcelBuilder.get().groupId("a").artifactId("a").version("a").type("a").baseDirectory("a").build().isValid());
+    Assert.assertTrue(ParcelBuilder.get().groupId("a").artifactId("a").version("a").type("a").baseDirectory("a").build().isValid());
   }
 
   @Test
   public void testGetArtifactName() throws MojoExecutionException {
     Assert.assertEquals(PARCEL_ARTIFACT_ID + "-" + PARCEL_VERSION + "-" + PARCEL_CLASSIFIER + "." + PARCEL_TYPE,
-        ParcelBuilder.get().groupId(PARCEL_GROUP_ID).artifactId(PARCEL_ARTIFACT_ID).version(PARCEL_VERSION)
-            .classifier(PARCEL_CLASSIFIER).baseDirectory(PATH_WORKING).outputDirectory(PATH_EXPLODE)
-            .linkDirectory(PATH_EXPLODE_LINK).type(PARCEL_TYPE).build().getArtifactName());
+        ParcelBuilder.get().groupId(PARCEL_GROUP_ID).artifactId(PARCEL_ARTIFACT_ID).version(PARCEL_VERSION).classifier(PARCEL_CLASSIFIER)
+            .baseDirectory(PATH_WORKING).outputDirectory(PATH_EXPLODE).linkDirectory(PATH_EXPLODE_LINK).type(PARCEL_TYPE).build()
+            .getArtifactName());
   }
 
   @Test
   public void testGetArtifactNameSansClassifierType() throws MojoExecutionException {
     Assert.assertEquals(PARCEL_ARTIFACT_ID + "-" + PARCEL_VERSION,
-        ParcelBuilder.get().groupId(PARCEL_GROUP_ID).artifactId(PARCEL_ARTIFACT_ID).version(PARCEL_VERSION)
-            .classifier(PARCEL_CLASSIFIER).baseDirectory(PATH_WORKING).outputDirectory(PATH_EXPLODE)
-            .linkDirectory(PATH_EXPLODE_LINK).type(PARCEL_TYPE).build().getArtifactNameSansClassifierType());
+        ParcelBuilder.get().groupId(PARCEL_GROUP_ID).artifactId(PARCEL_ARTIFACT_ID).version(PARCEL_VERSION).classifier(PARCEL_CLASSIFIER)
+            .baseDirectory(PATH_WORKING).outputDirectory(PATH_EXPLODE).linkDirectory(PATH_EXPLODE_LINK).type(PARCEL_TYPE).build()
+            .getArtifactNameSansClassifierType());
   }
 
   @Test
   public void testGetArtifactNamespace() throws MojoExecutionException {
-    Assert.assertEquals(
-        PARCEL_GROUP_ID + ":" + PARCEL_ARTIFACT_ID + ":" + PARCEL_TYPE + ":" + PARCEL_CLASSIFIER + ":" + PARCEL_VERSION,
-        ParcelBuilder.get().groupId(PARCEL_GROUP_ID).artifactId(PARCEL_ARTIFACT_ID).version(PARCEL_VERSION)
-            .classifier(PARCEL_CLASSIFIER).baseDirectory(PATH_WORKING).outputDirectory(PATH_EXPLODE)
-            .linkDirectory(PATH_EXPLODE_LINK).type(PARCEL_TYPE).build().getArtifactNamespace());
+    Assert.assertEquals(PARCEL_GROUP_ID + ":" + PARCEL_ARTIFACT_ID + ":" + PARCEL_TYPE + ":" + PARCEL_CLASSIFIER + ":" + PARCEL_VERSION,
+        ParcelBuilder.get().groupId(PARCEL_GROUP_ID).artifactId(PARCEL_ARTIFACT_ID).version(PARCEL_VERSION).classifier(PARCEL_CLASSIFIER)
+            .baseDirectory(PATH_WORKING).outputDirectory(PATH_EXPLODE).linkDirectory(PATH_EXPLODE_LINK).type(PARCEL_TYPE).build()
+            .getArtifactNamespace());
   }
 
   @Test
   public void testGetVersionShort() throws MojoExecutionException {
     Assert.assertEquals(PARCEL_VERSION_SHORT,
         ParcelBuilder.get().groupId(PARCEL_GROUP_ID).artifactId(PARCEL_ARTIFACT_ID).version(PARCEL_VERSION_SHORT)
-            .classifier(PARCEL_CLASSIFIER).baseDirectory(PATH_WORKING).outputDirectory(PATH_EXPLODE)
-            .linkDirectory(PATH_EXPLODE_LINK).type(PARCEL_TYPE).build().getVersionShort());
+            .classifier(PARCEL_CLASSIFIER).baseDirectory(PATH_WORKING).outputDirectory(PATH_EXPLODE).linkDirectory(PATH_EXPLODE_LINK)
+            .type(PARCEL_TYPE).build().getVersionShort());
     Assert.assertEquals(PARCEL_VERSION_SHORT,
-        ParcelBuilder.get().groupId(PARCEL_GROUP_ID).artifactId(PARCEL_ARTIFACT_ID).version(PARCEL_VERSION)
-            .classifier(PARCEL_CLASSIFIER).baseDirectory(PATH_WORKING).outputDirectory(PATH_EXPLODE)
-            .linkDirectory(PATH_EXPLODE_LINK).type(PARCEL_TYPE).build().getVersionShort());
+        ParcelBuilder.get().groupId(PARCEL_GROUP_ID).artifactId(PARCEL_ARTIFACT_ID).version(PARCEL_VERSION).classifier(PARCEL_CLASSIFIER)
+            .baseDirectory(PATH_WORKING).outputDirectory(PATH_EXPLODE).linkDirectory(PATH_EXPLODE_LINK).type(PARCEL_TYPE).build()
+            .getVersionShort());
     Assert.assertEquals(PARCEL_VERSION_SHORT,
         ParcelBuilder.get().groupId(PARCEL_GROUP_ID).artifactId(PARCEL_ARTIFACT_ID).version(PARCEL_VERSION_LONG)
-            .classifier(PARCEL_CLASSIFIER).baseDirectory(PATH_WORKING).outputDirectory(PATH_EXPLODE)
-            .linkDirectory(PATH_EXPLODE_LINK).type(PARCEL_TYPE).build().getVersionShort());
+            .classifier(PARCEL_CLASSIFIER).baseDirectory(PATH_WORKING).outputDirectory(PATH_EXPLODE).linkDirectory(PATH_EXPLODE_LINK)
+            .type(PARCEL_TYPE).build().getVersionShort());
+  }
+
+  @Test
+  public void testGetVersionBase() throws MojoExecutionException {
+    Assert.assertEquals(PARCEL_VERSION_BASE,
+        ParcelBuilder.get().groupId(PARCEL_GROUP_ID).artifactId(PARCEL_ARTIFACT_ID).version(PARCEL_VERSION_SHORT)
+            .classifier(PARCEL_CLASSIFIER).baseDirectory(PATH_WORKING).outputDirectory(PATH_EXPLODE).linkDirectory(PATH_EXPLODE_LINK)
+            .type(PARCEL_TYPE).build().getVersionBase());
+    Assert.assertEquals(PARCEL_VERSION_BASE,
+        ParcelBuilder.get().groupId(PARCEL_GROUP_ID).artifactId(PARCEL_ARTIFACT_ID).version(PARCEL_VERSION).classifier(PARCEL_CLASSIFIER)
+            .baseDirectory(PATH_WORKING).outputDirectory(PATH_EXPLODE).linkDirectory(PATH_EXPLODE_LINK).type(PARCEL_TYPE).build()
+            .getVersionBase());
+    Assert.assertEquals(PARCEL_VERSION_BASE,
+        ParcelBuilder.get().groupId(PARCEL_GROUP_ID).artifactId(PARCEL_ARTIFACT_ID).version(PARCEL_VERSION_LONG)
+            .classifier(PARCEL_CLASSIFIER).baseDirectory(PATH_WORKING).outputDirectory(PATH_EXPLODE).linkDirectory(PATH_EXPLODE_LINK)
+            .type(PARCEL_TYPE).build().getVersionBase());
+    Assert.assertEquals(PARCEL_VERSION_BASE_LONG,
+        ParcelBuilder.get().groupId(PARCEL_GROUP_ID).artifactId(PARCEL_ARTIFACT_ID).version(PARCEL_VERSION_LONG_ALTERNATE)
+            .classifier(PARCEL_CLASSIFIER).baseDirectory(PATH_WORKING).outputDirectory(PATH_EXPLODE).linkDirectory(PATH_EXPLODE_LINK)
+            .type(PARCEL_TYPE).build().getVersionBase());
   }
 
   @Test
   public void testGetRemoteUrl() throws MojoExecutionException {
     Assert.assertEquals(
-        PARCEL_REPO_URL + "/" + PARCEL_VERSION_SHORT + "/" + PARCEL_ARTIFACT_ID + "-" + PARCEL_VERSION + "-"
-            + PARCEL_CLASSIFIER + "." + PARCEL_TYPE,
-        ParcelBuilder.get().groupId(PARCEL_GROUP_ID).artifactId(PARCEL_ARTIFACT_ID).version(PARCEL_VERSION)
-            .classifier(PARCEL_CLASSIFIER).baseDirectory(PATH_WORKING).outputDirectory(PATH_EXPLODE)
-            .linkDirectory(PATH_EXPLODE_LINK).type(PARCEL_TYPE).build().getRemoteUrl(PARCEL_REPO_URL));
+        PARCEL_REPO_URL + "/" + PARCEL_VERSION_SHORT + "/" + PARCEL_ARTIFACT_ID + "-" + PARCEL_VERSION + "-" + PARCEL_CLASSIFIER + "."
+            + PARCEL_TYPE,
+        ParcelBuilder.get().groupId(PARCEL_GROUP_ID).artifactId(PARCEL_ARTIFACT_ID).version(PARCEL_VERSION).classifier(PARCEL_CLASSIFIER)
+            .baseDirectory(PATH_WORKING).outputDirectory(PATH_EXPLODE).linkDirectory(PATH_EXPLODE_LINK).type(PARCEL_TYPE).build()
+            .getRemoteUrl(PARCEL_REPO_URL));
   }
 
   @Test
   public void testGetLocalPath() throws MojoExecutionException {
     Assert.assertEquals(
-        "/" + PARCEL_GROUP_ID.replaceAll("\\.", "/") + "/" + PARCEL_ARTIFACT_ID + "/" + PARCEL_VERSION + "/"
-            + PARCEL_ARTIFACT_ID + "-" + PARCEL_VERSION + "-" + PARCEL_CLASSIFIER + "." + PARCEL_TYPE,
-        ParcelBuilder.get().groupId(PARCEL_GROUP_ID).artifactId(PARCEL_ARTIFACT_ID).version(PARCEL_VERSION)
-            .classifier(PARCEL_CLASSIFIER).baseDirectory(PATH_WORKING).outputDirectory(PATH_EXPLODE)
-            .linkDirectory(PATH_EXPLODE_LINK).type(PARCEL_TYPE).build().getLocalPath());
+        "/" + PARCEL_GROUP_ID.replaceAll("\\.", "/") + "/" + PARCEL_ARTIFACT_ID + "/" + PARCEL_VERSION + "/" + PARCEL_ARTIFACT_ID + "-"
+            + PARCEL_VERSION + "-" + PARCEL_CLASSIFIER + "." + PARCEL_TYPE,
+        ParcelBuilder.get().groupId(PARCEL_GROUP_ID).artifactId(PARCEL_ARTIFACT_ID).version(PARCEL_VERSION).classifier(PARCEL_CLASSIFIER)
+            .baseDirectory(PATH_WORKING).outputDirectory(PATH_EXPLODE).linkDirectory(PATH_EXPLODE_LINK).type(PARCEL_TYPE).build()
+            .getLocalPath());
   }
 
 }

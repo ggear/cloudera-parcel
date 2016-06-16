@@ -22,7 +22,10 @@ public class Download extends AbstractMojo {
   @Parameter(defaultValue = "${localRepository}", required = true, readonly = true)
   private ArtifactRepository localRepository;
 
-  @Parameter(required = true)
+  @Parameter(defaultValue = "${parcel.buildMetaData}", required = false, readonly = true)
+  private boolean buildMetaData = true;
+
+  @Parameter(required = false)
   private List<Parcel> parcels;
 
   @Override
