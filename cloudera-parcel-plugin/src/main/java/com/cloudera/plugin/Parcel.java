@@ -18,7 +18,7 @@ import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.security.MessageDigest;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -103,6 +103,10 @@ public class Parcel {
               + "<execution><configuration><parcels><parcel><MISSING-PARAMATER> definitions");
     }
     return isValid();
+  }
+
+  public String getLabel() throws MojoExecutionException {
+    return artifactId.toLowerCase();
   }
 
   public String getName() throws MojoExecutionException {
@@ -283,7 +287,7 @@ public class Parcel {
 
           @Override
           public FileVisitResult visitFile(final Path file, final BasicFileAttributes attrs) throws IOException {
-            if (FILE_PARCEL.equals(file.toFile().getAbsolutePath().replace(getFile(parcelResourcesDirectory).getAbsolutePath(), ""))) {
+            if (PATH_PARCEL.equals(file.toFile().getAbsolutePath().replace(getFile(parcelResourcesDirectory).getAbsolutePath(), ""))) {
               try {
                 FileUtils.writeStringToFile(ouputPath.resolve(sourcePath.relativize(file)).toFile(),
                     new StrSubstitutor(getEnvironmentMap(), "${parcel.", "}").replace(FileUtils.readFileToString(file.toFile())));
@@ -309,16 +313,23 @@ public class Parcel {
     isValid(ImmutableMap.of("buildDirectory", buildDirectory, "parcelBuildDirectory", parcelBuildDirectory));
     File buildPath = new File(getFile(buildDirectory).getAbsolutePath(), getArtifactName());
     File buildPathSha1 = new File(getFile(buildDirectory).getAbsolutePath(), getArtifactName() + SUFFIX_SHA1);
-    File buildPathEnv = new File(getFile(buildDirectory).getAbsolutePath(), getArtifactName() + SUFFIX_ENV);
+    File buildPathEnv = new File(getFile(buildDirectory).getAbsolutePath(), FILE_ENVIRONMENT);
+    File buildPathEnvParcel = new File(getFile(parcelBuildDirectory).getAbsolutePath(),
+        getArtifactNameSansClassifierType() + PATH_ENVIRONMENT);
     File buildPathManifest = new File(getFile(buildDirectory).getAbsolutePath(), FILE_MANIFEST);
     File sourcePath = getFile(parcelBuildDirectory);
     File sourceParcelPath = new File(getFile(parcelBuildDirectory).getAbsolutePath(), getArtifactNameSansClassifierType());
     buildPath.delete();
     buildPathSha1.delete();
     buildPathEnv.delete();
+    buildPathEnvParcel.delete();
     try {
       if (buildMetaData) {
-        validateParcel(log, new String[] { "-d", sourceParcelPath.getAbsolutePath() });
+        if (validateMetaData) {
+          validateParcel(log, new String[] { "-d", sourceParcelPath.getAbsolutePath() });
+        }
+        FileUtils.writeStringToFile(buildPathEnv, getEnvironmentString());
+        FileUtils.writeStringToFile(buildPathEnvParcel, getEnvironmentString());
       }
       TarArchiver archiver = new TarArchiver();
       archiver.setLongfile(TarLongFileMode.gnu);
@@ -347,10 +358,11 @@ public class Parcel {
       archiver.createArchive();
       FileUtils.writeStringToFile(buildPathSha1, calculateSha1(buildPath) + "\n");
       if (buildMetaData) {
-        FileUtils.writeStringToFile(buildPathEnv, getEnvironmentString());
-        executePythonScript(log, FILE_MAKE_MANIFEST, getFile(buildDirectory).getAbsolutePath());
-        validateParcel(log, new String[] { "-f", buildPath.getAbsolutePath() });
-        validateParcel(log, new String[] { "-m", buildPathManifest.getAbsolutePath() });
+        executePythonScript(log, PATH_MAKE_MANIFEST, getFile(buildDirectory).getAbsolutePath());
+        if (validateMetaData) {
+          validateParcel(log, new String[] { "-f", buildPath.getAbsolutePath() });
+          validateParcel(log, new String[] { "-m", buildPathManifest.getAbsolutePath() });
+        }
       }
     } catch (
 
@@ -473,8 +485,9 @@ public class Parcel {
   }
 
   private Map<String, String> getEnvironmentMap() throws MojoExecutionException {
-    Map<String, String> environmentMap = new HashMap<>();
+    Map<String, String> environmentMap = new LinkedHashMap<String, String>();
     environmentMap.put("name", getName());
+    environmentMap.put("label", getLabel());
     environmentMap.put("version", getVersion());
     environmentMap.put("version.short", getVersionShort());
     environmentMap.put("version.base", getVersionBase());
@@ -486,20 +499,16 @@ public class Parcel {
   }
 
   private String getEnvironmentString() throws MojoExecutionException {
+    Map<String, String> environmentMap = getEnvironmentMap();
     StringBuilder environmentString = new StringBuilder(512);
     environmentString.append("###############################################################################\n");
     environmentString.append("#\n");
     environmentString.append("# Parcel Environment\n");
     environmentString.append("#\n");
     environmentString.append("###############################################################################\n");
-    environmentString.append("export PARCEL_NAME=\"" + getName() + "\"\n");
-    environmentString.append("export PARCEL_VERSION=\"" + getVersion() + "\"\n");
-    environmentString.append("export PARCEL_VERSION_SHORT=\"" + getVersionShort() + "\"\n");
-    environmentString.append("export PARCEL_VERSION_BASE=\"" + getVersionBase() + "\"\n");
-    environmentString.append("export PARCEL_VERSION_FULL=\"" + getVersionClassifier() + "\"\n");
-    environmentString.append("export PARCEL_ROOT=\"" + getArtifactNameSansClassifierType() + "\"\n");
-    environmentString.append("export PARCEL_FILE=\"" + getArtifactName() + "\"\n");
-    environmentString.append("export PARCEL_REPO=\"" + getRepositoryUrlRoot() + "\"\n");
+    for (String key : environmentMap.keySet()) {
+      environmentString.append("export PARCEL_" + key.replace('.', '_').toUpperCase() + "=\"" + environmentMap.get(key) + "\"\n");
+    }
     environmentString.append("\n");
     return environmentString.toString();
   }
@@ -622,14 +631,16 @@ public class Parcel {
     return path.startsWith("/") ? new File(path) : new File(baseDirectory, path);
   }
 
-  private static final String SUFFIX_ENV = ".env";
   private static final String SUFFIX_SHA1 = ".sha1";
 
-  private static final Pattern REGEXP_SCP_CONNECT = Pattern.compile("^scp://(.*):(.*)@(.*):([0-9]*)(.*)");
-
   private static final String FILE_MANIFEST = "manifest.json";
-  private static final String FILE_PARCEL = "/meta/parcel.json";
-  private static final String FILE_MAKE_MANIFEST = "/bin/make_manifest.py";
+  private static final String FILE_ENVIRONMENT = "parcel.env";
+
+  private static final String PATH_PARCEL = "/meta/parcel.json";
+  private static final String PATH_ENVIRONMENT = "/meta/" + FILE_ENVIRONMENT;
+  private static final String PATH_MAKE_MANIFEST = "/bin/make_manifest.py";
+
+  private static final Pattern REGEXP_SCP_CONNECT = Pattern.compile("^scp://(.*):(.*)@(.*):([0-9]*)(.*)");
 
   private static final Map<String, ImmutableMap<String, String>> OS_NAME_VERSION_DESCRIPTOR = ImmutableMap.of(//
       "Mac OS X", //
@@ -691,6 +702,9 @@ public class Parcel {
 
   @Parameter(required = false, defaultValue = "true")
   private boolean buildMetaData = true;
+
+  @Parameter(required = false, defaultValue = "true")
+  private boolean validateMetaData = true;
 
   public Parcel() {
   }
@@ -823,6 +837,14 @@ public class Parcel {
     this.buildMetaData = buildMetaData;
   }
 
+  public boolean getValidateMetaData() {
+    return validateMetaData;
+  }
+
+  public void setValidateMetaData(boolean validateMetaData) {
+    this.validateMetaData = validateMetaData;
+  }
+
   public static class ParcelBuilder {
 
     public static ParcelBuilder get() {
@@ -907,6 +929,11 @@ public class Parcel {
 
     public ParcelBuilder type(String type) {
       parcel.type = type;
+      return this;
+    }
+
+    public ParcelBuilder validateMetaData(boolean validateMetaData) {
+      parcel.validateMetaData = validateMetaData;
       return this;
     }
 

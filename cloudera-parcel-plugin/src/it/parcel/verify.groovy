@@ -6,7 +6,8 @@ File parcelExplodeLink = new File(basedir, "target/sqoop-connectors/meta/sqoop_e
 File parcelPrepare = new File(basedir, "target/parcel/SQOOP_TERADATA_CONNECTOR-1.4c5.BESPOKE/README");
 File parcelBuild = new File(basedir, "target/SQOOP_TERADATA_CONNECTOR-1.4c5.BESPOKE-el6.parcel");
 File parcelBuildSha1 = new File(basedir, "target/SQOOP_TERADATA_CONNECTOR-1.4c5.BESPOKE-el6.parcel.sha1");
-File parcelBuildEnv = new File(basedir, "target/SQOOP_TERADATA_CONNECTOR-1.4c5.BESPOKE-el6.parcel.env");
+File parcelBuildEnv = new File(basedir, "target/parcel.env");
+File parcelBuildEnvParcel = new File(basedir, "target/parcel/SQOOP_TERADATA_CONNECTOR-1.4c5.BESPOKE/meta/parcel.env");
 File parcelBuildManifest = new File(basedir, "target/manifest.json");
 File parcelInstall = new File(basedir, "../../local-repo/com/cloudera/SQOOP_TERADATA_CONNECTOR/1.4c5.BESPOKE/SQOOP_TERADATA_CONNECTOR-1.4c5.BESPOKE-el6.parcel");
 File parcelSha1Install = new File(basedir, "../../local-repo/com/cloudera/SQOOP_TERADATA_CONNECTOR/1.4c5.BESPOKE/SQOOP_TERADATA_CONNECTOR-1.4c5.BESPOKE-el6.parcel.sha1");
@@ -20,6 +21,7 @@ assert parcelPrepare.isFile()
 assert parcelBuild.isFile()
 assert parcelBuildSha1.isFile()
 assert parcelBuildEnv.isFile()
+assert parcelBuildEnvParcel.isFile()
 assert parcelBuildManifest.isFile()
 assert parcelInstall.isFile()
 assert parcelSha1Install.isFile()

@@ -32,6 +32,9 @@ public class Deploy extends AbstractMojo {
   @Parameter(defaultValue = "${parcel.buildMetaData}", required = false, readonly = true)
   private boolean buildMetaData = true;
 
+  @Parameter(defaultValue = "${parcel.validateMetaData}", required = false, readonly = true)
+  private boolean validateMetaData = true;
+
   @Parameter(required = false)
   private List<Parcel> parcels;
 
@@ -41,7 +44,8 @@ public class Deploy extends AbstractMojo {
       parcels = Arrays.asList(new Parcel[] { ParcelBuilder.get().groupId(project.getGroupId()).artifactId(project.getArtifactId())
           .version(project.getVersion()).classifier(StringUtils.isEmpty(parcelClassifier) ? Parcel.getOsDescriptor() : parcelClassifier)
           .baseDirectory(project.getBasedir().getAbsolutePath()).buildDirectory(buildDirectory)
-          .distributionRepositoryUrl(distributionRepositoryUrl).type(project.getPackaging()).buildMetaData(buildMetaData).build() });
+          .distributionRepositoryUrl(distributionRepositoryUrl).type(project.getPackaging()).buildMetaData(buildMetaData)
+          .validateMetaData(validateMetaData).build() });
     }
     for (Parcel parcel : parcels) {
       parcel.setBaseDirectory(project.getBasedir().getAbsolutePath());

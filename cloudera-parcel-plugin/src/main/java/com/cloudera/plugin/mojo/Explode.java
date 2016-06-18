@@ -25,6 +25,9 @@ public class Explode extends AbstractMojo {
   @Parameter(defaultValue = "${parcel.buildMetaData}", required = false, readonly = true)
   private boolean buildMetaData = true;
 
+  @Parameter(defaultValue = "${parcel.validateMetaData}", required = false, readonly = true)
+  private boolean validateMetaData = true;
+
   @Parameter(required = false)
   private List<Parcel> parcels;
 
