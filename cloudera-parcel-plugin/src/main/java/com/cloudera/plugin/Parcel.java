@@ -485,7 +485,7 @@ public class Parcel {
   }
 
   private Map<String, String> getEnvironmentMap() throws MojoExecutionException {
-    Map<String, String> environmentMap = new LinkedHashMap<String, String>();
+    Map<String, String> environmentMap = new LinkedHashMap<>();
     environmentMap.put("name", getName());
     environmentMap.put("label", getLabel());
     environmentMap.put("version", getVersion());
