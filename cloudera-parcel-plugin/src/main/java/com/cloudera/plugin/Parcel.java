@@ -110,7 +110,31 @@ public class Parcel {
   }
 
   public String getName() throws MojoExecutionException {
-    return artifactId.replace("-", "_").toUpperCase();
+    return artifactId.replace(".", "_").replace("-", "_").toUpperCase();
+  }
+
+  public String getNamespace() throws MojoExecutionException {
+    String nameEscaped = artifactId.replace(".", "_").replace("-", "_").toLowerCase();
+    if (nameEscaped.contains("_")) {
+      while (nameEscaped.contains("_")) {
+        int underscoreIndex = nameEscaped.indexOf("_");
+        if (underscoreIndex == 0 || underscoreIndex + 1 == nameEscaped.length()) {
+          nameEscaped = nameEscaped.replaceFirst("_", "");
+        } else {
+          int dotIndex = nameEscaped.indexOf(".") == -1 ? 0 : nameEscaped.indexOf(".") + 1;
+          nameEscaped = (nameEscaped.substring(0, dotIndex) + nameEscaped.charAt(dotIndex) + nameEscaped.substring(underscoreIndex))
+              .replaceFirst("_", ".");
+        }
+      }
+      int dotIndex = nameEscaped.lastIndexOf(".") == -1 ? 0 : nameEscaped.lastIndexOf(".") + 1;
+      nameEscaped = (nameEscaped.substring(0, dotIndex) + nameEscaped.charAt(dotIndex)).replace(".", "");
+    }
+    String namespace = (nameEscaped + "_" + getVersionEscaped()).toLowerCase();
+    if (namespace.length() > 32) {
+      throw new MojoExecutionException("Artifact ID [" + artifactId + "] and version [" + version + "] too long to jam into a namespace ["
+          + namespace + "], please rename");
+    }
+    return namespace;
   }
 
   public String getArtifactName() throws MojoExecutionException {
@@ -124,6 +148,10 @@ public class Parcel {
   public String getArtifactNamespace() throws MojoExecutionException {
     return isValid() ? groupId + ":" + getName() + ":" + type + (StringUtils.isEmpty(classifier) ? "" : ":" + classifier) + ":" + version
         : null;
+  }
+
+  public String getVersionEscaped() {
+    return version.replace(".", "_").replace("-", "_");
   }
 
   public String getVersionShort() {
@@ -491,7 +519,9 @@ public class Parcel {
     environmentMap.put("version", getVersion());
     environmentMap.put("version.short", getVersionShort());
     environmentMap.put("version.base", getVersionBase());
+    environmentMap.put("version.escaped", getVersionEscaped());
     environmentMap.put("version.full", getVersionClassifier());
+    environmentMap.put("namespace", getNamespace());
     environmentMap.put("root", getArtifactNameSansClassifierType());
     environmentMap.put("file", getArtifactName());
     environmentMap.put("repo", getRepositoryUrlRoot());

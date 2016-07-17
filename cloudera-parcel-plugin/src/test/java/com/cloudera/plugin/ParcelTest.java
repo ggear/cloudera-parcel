@@ -17,6 +17,7 @@ public class ParcelTest {
   private static final String PARCEL_VERSION = "1.4c5";
   private static final String PARCEL_VERSION_SHORT = "1.4";
   private static final String PARCEL_VERSION_BASE = "sqoop_teradata_connector1.4";
+  private static final String PARCEL_NAMESPACE = "stc_1_4c5";
   private static final String PARCEL_VERSION_BASE_LONG = "sqoop1.4.0";
   private static final String PARCEL_VERSION_LONG = "1.4-1.sqoop1.4.0.p0.88";
   private static final String PARCEL_VERSION_LONG_ALTERNATE = "1.4-sqoop1.4.0";
@@ -107,6 +108,18 @@ public class ParcelTest {
   }
 
   @Test
+  public void testGetNamespace() throws MojoExecutionException {
+    Assert.assertEquals(PARCEL_NAMESPACE,
+        ParcelBuilder.get().groupId(PARCEL_GROUP_ID).artifactId(PARCEL_ARTIFACT_ID).version(PARCEL_VERSION).classifier(PARCEL_CLASSIFIER)
+            .baseDirectory(PATH_WORKING).outputDirectory(PATH_EXPLODE).linkDirectory(PATH_EXPLODE_LINK).type(PARCEL_TYPE).build()
+            .getNamespace());
+    Assert.assertEquals(PARCEL_NAMESPACE + "_snapshot",
+        ParcelBuilder.get().groupId(PARCEL_GROUP_ID).artifactId(PARCEL_ARTIFACT_ID).version(PARCEL_VERSION + "-SNAPSHOT")
+            .classifier(PARCEL_CLASSIFIER).baseDirectory(PATH_WORKING).outputDirectory(PATH_EXPLODE).linkDirectory(PATH_EXPLODE_LINK)
+            .type(PARCEL_TYPE).build().getNamespace());
+  }
+
+  @Test
   public void testGetArtifactNameSansClassifierType() throws MojoExecutionException {
     Assert.assertEquals(PARCEL_ARTIFACT_ID + "-" + PARCEL_VERSION,
         ParcelBuilder.get().groupId(PARCEL_GROUP_ID).artifactId(PARCEL_ARTIFACT_ID).version(PARCEL_VERSION).classifier(PARCEL_CLASSIFIER)
@@ -120,6 +133,22 @@ public class ParcelTest {
         ParcelBuilder.get().groupId(PARCEL_GROUP_ID).artifactId(PARCEL_ARTIFACT_ID).version(PARCEL_VERSION).classifier(PARCEL_CLASSIFIER)
             .baseDirectory(PATH_WORKING).outputDirectory(PATH_EXPLODE).linkDirectory(PATH_EXPLODE_LINK).type(PARCEL_TYPE).build()
             .getArtifactNamespace());
+  }
+
+  @Test
+  public void testGetVersionEscaped() throws MojoExecutionException {
+    Assert.assertEquals(PARCEL_VERSION_SHORT.replace(".", "_").replace("-", "_"),
+        ParcelBuilder.get().groupId(PARCEL_GROUP_ID).artifactId(PARCEL_ARTIFACT_ID).version(PARCEL_VERSION_SHORT)
+            .classifier(PARCEL_CLASSIFIER).baseDirectory(PATH_WORKING).outputDirectory(PATH_EXPLODE).linkDirectory(PATH_EXPLODE_LINK)
+            .type(PARCEL_TYPE).build().getVersionEscaped());
+    Assert.assertEquals(PARCEL_VERSION.replace(".", "_").replace("-", "_"),
+        ParcelBuilder.get().groupId(PARCEL_GROUP_ID).artifactId(PARCEL_ARTIFACT_ID).version(PARCEL_VERSION).classifier(PARCEL_CLASSIFIER)
+            .baseDirectory(PATH_WORKING).outputDirectory(PATH_EXPLODE).linkDirectory(PATH_EXPLODE_LINK).type(PARCEL_TYPE).build()
+            .getVersionEscaped());
+    Assert.assertEquals(PARCEL_VERSION_LONG.replace(".", "_").replace("-", "_"),
+        ParcelBuilder.get().groupId(PARCEL_GROUP_ID).artifactId(PARCEL_ARTIFACT_ID).version(PARCEL_VERSION_LONG)
+            .classifier(PARCEL_CLASSIFIER).baseDirectory(PATH_WORKING).outputDirectory(PATH_EXPLODE).linkDirectory(PATH_EXPLODE_LINK)
+            .type(PARCEL_TYPE).build().getVersionEscaped());
   }
 
   @Test
