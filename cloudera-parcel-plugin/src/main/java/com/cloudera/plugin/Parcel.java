@@ -113,23 +113,27 @@ public class Parcel {
     return artifactId.replace(".", "_").replace("-", "_").toUpperCase();
   }
 
-  public String getNamespace() throws MojoExecutionException {
-    String nameEscaped = artifactId.replace(".", "_").replace("-", "_").toLowerCase();
-    if (nameEscaped.contains("_")) {
-      while (nameEscaped.contains("_")) {
-        int underscoreIndex = nameEscaped.indexOf("_");
-        if (underscoreIndex == 0 || underscoreIndex + 1 == nameEscaped.length()) {
-          nameEscaped = nameEscaped.replaceFirst("_", "");
+  public String getNameShort() throws MojoExecutionException {
+    String nameShort = artifactId.replace(".", "_").replace("-", "_").toLowerCase();
+    if (nameShort.contains("_")) {
+      while (nameShort.contains("_")) {
+        int underscoreIndex = nameShort.indexOf("_");
+        if (underscoreIndex == 0 || underscoreIndex + 1 == nameShort.length()) {
+          nameShort = nameShort.replaceFirst("_", "");
         } else {
-          int dotIndex = nameEscaped.indexOf(".") == -1 ? 0 : nameEscaped.indexOf(".") + 1;
-          nameEscaped = (nameEscaped.substring(0, dotIndex) + nameEscaped.charAt(dotIndex) + nameEscaped.substring(underscoreIndex))
+          int dotIndex = nameShort.indexOf(".") == -1 ? 0 : nameShort.indexOf(".") + 1;
+          nameShort = (nameShort.substring(0, dotIndex) + nameShort.charAt(dotIndex) + nameShort.substring(underscoreIndex))
               .replaceFirst("_", ".");
         }
       }
-      int dotIndex = nameEscaped.lastIndexOf(".") == -1 ? 0 : nameEscaped.lastIndexOf(".") + 1;
-      nameEscaped = (nameEscaped.substring(0, dotIndex) + nameEscaped.charAt(dotIndex)).replace(".", "");
+      int dotIndex = nameShort.lastIndexOf(".") == -1 ? 0 : nameShort.lastIndexOf(".") + 1;
+      nameShort = (nameShort.substring(0, dotIndex) + nameShort.charAt(dotIndex)).replace(".", "");
     }
-    String namespace = (nameEscaped + "_" + getVersionEscaped()).toLowerCase();
+    return nameShort;
+  }
+
+  public String getNamespace() throws MojoExecutionException {
+    String namespace = (getNameShort() + "_" + getVersionEscaped()).toLowerCase();
     if (namespace.length() > 32) {
       throw new MojoExecutionException("Artifact ID [" + artifactId + "] and version [" + version + "] too long to jam into a namespace ["
           + namespace + "], please rename");
@@ -515,13 +519,14 @@ public class Parcel {
   private Map<String, String> getEnvironmentMap() throws MojoExecutionException {
     Map<String, String> environmentMap = new LinkedHashMap<>();
     environmentMap.put("name", getName());
-    environmentMap.put("label", getLabel());
+    environmentMap.put("name.short", getNameShort());
+    environmentMap.put("name.long", getLabel());
+    environmentMap.put("namespace", getNamespace());
     environmentMap.put("version", getVersion());
     environmentMap.put("version.short", getVersionShort());
     environmentMap.put("version.base", getVersionBase());
     environmentMap.put("version.escaped", getVersionEscaped());
     environmentMap.put("version.full", getVersionClassifier());
-    environmentMap.put("namespace", getNamespace());
     environmentMap.put("root", getArtifactNameSansClassifierType());
     environmentMap.put("file", getArtifactName());
     environmentMap.put("repo", getRepositoryUrlRoot());
