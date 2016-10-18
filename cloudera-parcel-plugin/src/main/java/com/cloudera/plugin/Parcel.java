@@ -680,7 +680,11 @@ public class Parcel {
   private static final Map<String, ImmutableMap<String, String>> OS_NAME_VERSION_DESCRIPTOR = ImmutableMap.of(//
       "Mac OS X", //
       ImmutableMap.of(//
-          "10\\.11.*", "elcapitan"//
+          "10\\.11.*", "elcapitan", //
+          "10\\.12.*", "elcapitan"//
+      // TODO Replace line below with above when compilation of all parcels
+      // works on sierra
+      // "10\\.12.*", "sierra"//
       ), //
       "Linux", //
       ImmutableMap.of(//

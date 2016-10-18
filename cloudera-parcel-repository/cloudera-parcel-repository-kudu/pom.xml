@@ -6,7 +6,7 @@
 	<groupId>com.cloudera.parcel</groupId>
 	<artifactId>KUDU</artifactId>
 	<packaging>parcel</packaging>
-	<version>0.9.1-1.kudu0.9.1.p0.32</version>
+	<version>0.10.0-1.kudu0.10.0.p0.7</version>
 
 	<parent>
 		<groupId>com.cloudera.parcel</groupId>
@@ -81,13 +81,14 @@
 									failonerror="true">
 									<arg value="-j4" />
 								</exec>
-								<delete includeEmptyDirs="true" quiet="true">
+								<mkdir dir="target/parcel/KUDU-${project.version}" />
+								<delete includeEmptyDirs="true">
 									<fileset dir="target/parcel" includes="KUDU-${project.version}/bin/**" />
 								</delete>
-								<delete includeEmptyDirs="true" quiet="true">
+								<delete includeEmptyDirs="true">
 									<fileset dir="target/parcel" includes="KUDU-${project.version}/lib/**" />
 								</delete>
-								<exec executable="sh" error="/dev/null">
+								<exec executable="sh">
 									<arg value="-c" />
 									<arg
 										value="
