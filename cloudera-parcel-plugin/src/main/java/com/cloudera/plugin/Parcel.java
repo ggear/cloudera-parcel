@@ -681,7 +681,7 @@ public class Parcel {
       "Mac OS X", //
       ImmutableMap.of(//
           "10\\.11.*", "elcapitan", //
-          "10\\.12.*", "elcapitan"//
+          "10\\.12.*", "sierra"//
       // TODO Replace line below with above when compilation of all parcels
       // works on sierra
       // "10\\.12.*", "sierra"//

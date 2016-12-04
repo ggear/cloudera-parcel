@@ -1,112 +1,106 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
-	<modelVersion>4.0.0</modelVersion>
-	<groupId>com.cloudera.parcel</groupId>
-	<artifactId>KUDU</artifactId>
-	<packaging>parcel</packaging>
-	<version>0.10.0-1.kudu0.10.0.p0.7</version>
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.cloudera.parcel</groupId>
+    <artifactId>KUDU</artifactId>
+    <packaging>parcel</packaging>
+    <version>1.1.0-1.kudu1.1.0.p0.5</version>
 
-	<parent>
-		<groupId>com.cloudera.parcel</groupId>
-		<artifactId>cloudera-parcel-repository</artifactId>
-		<version>0.7.7-SNAPSHOT</version>
-	</parent>
+    <parent>
+        <groupId>com.cloudera.parcel</groupId>
+        <artifactId>cloudera-parcel-repository</artifactId>
+        <version>0.7.7-SNAPSHOT</version>
+    </parent>
 
-	<properties>
-		<impala.version>2.5.0</impala.version>
-		<parcel.buildMetaData>false</parcel.buildMetaData>
-		<parcel.distributionRepositoryUrl>scp://graham:/Users/graham/.ssh/id_rsa.pem@52.63.86.162:22/var/www/html/tmph3l7m2vv103/sbin/kudu/parcels</parcel.distributionRepositoryUrl>
-	</properties>
+    <properties>
+        <parcel.buildMetaData>false</parcel.buildMetaData>
+        <parcel.distributionRepositoryUrl>scp://graham:/Users/graham/.ssh/id_rsa.pem@52.63.86.162:22/var/www/html/tmph3l7m2vv103/sbin/kudu/parcels
+        </parcel.distributionRepositoryUrl>
+    </properties>
 
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>build-helper-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>regex-property</id>
-						<goals>
-							<goal>regex-property</goal>
-						</goals>
-						<configuration>
-							<name>short.version</name>
-							<value>${project.version}</value>
-							<regex>^([0-9]+\.[0-9]+\.[0-9]+).*</regex>
-							<replacement>$1</replacement>
-							<failIfNoMatch>true</failIfNoMatch>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-antrun-plugin</artifactId>
-				<executions>
-					<execution>
-						<phase>generate-sources</phase>
-						<configuration>
-							<target>
-								<exec executable="git" dir="src/main/external" error="/dev/null">
-									<arg line="clone git@github.com:cloudera/kudu.git" />
-								</exec>
-								<exec executable="sh">
-									<arg value="-c" />
-									<arg
-										value="
-											cd src/main/external/kudu; 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>regex-property</id>
+                        <goals>
+                            <goal>regex-property</goal>
+                        </goals>
+                        <configuration>
+                            <name>short.version</name>
+                            <value>${project.version}</value>
+                            <regex>^([0-9]+\.[0-9]+\.[0-9]+).*</regex>
+                            <replacement>$1</replacement>
+                            <failIfNoMatch>true</failIfNoMatch>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <target>
+                                <exec executable="git" dir="src/main/external" error="/dev/null">
+                                    <arg line="clone git@github.com:apache/kudu.git"/>
+                                </exec>
+                                <exec executable="sh">
+                                    <arg value="-c"/>
+                                    <arg value="
+											cd src/main/external/kudu;
 											git checkout master;
 											git pull --all;
-											git checkout ${short.version};
 											git checkout .;
 											git clean -df;
-											git status" />
-								</exec>
-								<exec executable="build-support/enable_devtoolset.sh" dir="src/main/external/kudu"
-									failonerror="true">
-									<arg line="thirdparty/build-if-necessary.sh" />
-								</exec>
-								<delete dir="src/main/external/kudu/build" quiet="true" />
-								<mkdir dir="src/main/external/kudu/build/release" />
-								<exec executable="../../build-support/enable_devtoolset.sh"
-									dir="src/main/external/kudu/build/release" failonerror="true">
-									<arg value="../../thirdparty/installed/bin/cmake" />
-									<arg value="-DCMAKE_BUILD_TYPE=release" />
-									<arg value="-DNO_TESTS=1" />
-									<arg value="../.." />
-								</exec>
-								<exec executable="make" dir="src/main/external/kudu/build/release"
-									failonerror="true">
-									<arg value="-j4" />
-								</exec>
-								<mkdir dir="target/parcel/KUDU-${project.version}" />
-								<delete includeEmptyDirs="true">
-									<fileset dir="target/parcel" includes="KUDU-${project.version}/bin/**" />
-								</delete>
-								<delete includeEmptyDirs="true">
-									<fileset dir="target/parcel" includes="KUDU-${project.version}/lib/**" />
-								</delete>
-								<exec executable="sh">
-									<arg value="-c" />
-									<arg
-										value="
+											git status"/>
+                                </exec>
+                                <!-- Build from master while 1.1.0 remains broken on MacOS: git checkout ${short.version}; -->
+                                <!-- Some releases require a clean start: git clean -fdx -->
+                                <exec executable="thirdparty/build-if-necessary.sh" dir="src/main/external/kudu" failonerror="true"></exec>
+                                <delete dir="src/main/external/kudu/build" quiet="true"/>
+                                <mkdir dir="src/main/external/kudu/build/release"/>
+                                <exec executable="cmake" dir="src/main/external/kudu/build/release" failonerror="true">
+                                    <arg value="-DCMAKE_BUILD_TYPE=release"/>
+                                    <arg value="-DOPENSSL_ROOT_DIR=/usr/local/opt/openssl"/>
+                                    <arg value="-DNO_TESTS=1"/>
+                                    <arg value="../.."/>
+                                </exec>
+                                <exec executable="make" dir="src/main/external/kudu/build/release" failonerror="true">
+                                    <arg value="-j4"/>
+                                </exec>
+                                <mkdir dir="target/parcel/KUDU-${project.version}"/>
+                                <delete includeEmptyDirs="true">
+                                    <fileset dir="target/parcel" includes="KUDU-${project.version}/bin/**"/>
+                                </delete>
+                                <delete includeEmptyDirs="true">
+                                    <fileset dir="target/parcel" includes="KUDU-${project.version}/lib/**"/>
+                                </delete>
+                                <exec executable="sh">
+                                    <arg value="-c"/>
+                                    <arg value="
 											cp -rvf \
 											src/main/external/kudu/build/release/bin \
 											src/main/external/kudu/build/release/lib \
-											target/parcel/KUDU-${project.version}" />
-								</exec>
-							</target>
-							<skip>${maven.parcel-compile.skip}</skip>
-						</configuration>
-						<goals>
-							<goal>run</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
-	</build>
+											target/parcel/KUDU-${project.version}"/>
+                                </exec>
+                            </target>
+                            <skip>${maven.parcel-compile.skip}</skip>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>
