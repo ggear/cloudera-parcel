@@ -3,6 +3,7 @@ package com.cloudera.plugin.mojo;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.cloudera.plugin.Parcel;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -10,8 +11,6 @@ import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
-
-import com.cloudera.plugin.Parcel;
 
 @Mojo(name = "download", requiresProject = false, defaultPhase = LifecyclePhase.VALIDATE)
 public class Download extends AbstractMojo {

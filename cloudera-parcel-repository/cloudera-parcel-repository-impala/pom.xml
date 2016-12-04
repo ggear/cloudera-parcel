@@ -1,102 +1,103 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
-	<modelVersion>4.0.0</modelVersion>
-	<groupId>com.cloudera.parcel</groupId>
-	<artifactId>IMPALA</artifactId>
-	<packaging>parcel</packaging>
-	<version>2.5.0-cdh5.7.1</version>
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.cloudera.parcel</groupId>
+    <artifactId>IMPALA</artifactId>
+    <packaging>parcel</packaging>
+    <version>2.5.0-cdh5.7.1</version>
 
-	<parent>
-		<groupId>com.cloudera.parcel</groupId>
-		<artifactId>cloudera-parcel-repository</artifactId>
-		<version>0.7.8-SNAPSHOT</version>
-	</parent>
+    <parent>
+        <groupId>com.cloudera.parcel</groupId>
+        <artifactId>cloudera-parcel-repository</artifactId>
+        <version>0.7.8-SNAPSHOT</version>
+    </parent>
 
-	<properties>
-		<impala.version>2.5.0</impala.version>
-		<parcel.buildMetaData>false</parcel.buildMetaData>
-		<parcel.distributionRepositoryUrl>scp://graham:/Users/graham/.ssh/id_rsa.pem@52.63.86.162:22/var/www/html/tmph3l7m2vv103/sbin/impala/parcels</parcel.distributionRepositoryUrl>
-	</properties>
+    <properties>
+        <impala.version>2.5.0</impala.version>
+        <parcel.buildMetaData>false</parcel.buildMetaData>
+        <parcel.distributionRepositoryUrl>scp://graham:/Users/graham/.ssh/id_rsa.pem@52.63.86.162:22/var/www/html/tmph3l7m2vv103/sbin/impala/parcels
+        </parcel.distributionRepositoryUrl>
+    </properties>
 
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>build-helper-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>regex-property</id>
-						<goals>
-							<goal>regex-property</goal>
-						</goals>
-						<configuration>
-							<name>short.version</name>
-							<value>${project.version}</value>
-							<regex>^[0-9]+\.[0-9]+\.[0-9]+-(cdh[0-9]+\.[0-9]+\.[0-9]).*</regex>
-							<replacement>$1-release</replacement>
-							<failIfNoMatch>true</failIfNoMatch>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-antrun-plugin</artifactId>
-				<executions>
-					<execution>
-						<phase>generate-sources</phase>
-						<configuration>
-							<target>
-								<exec executable="git" dir="src/main/external" error="/dev/null">
-									<arg line="clone https://github.com/cloudera/Impala.git" />
-								</exec>
-								<exec executable="sh">
-									<arg value="-c" />
-									<arg
-										value="
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>regex-property</id>
+                        <goals>
+                            <goal>regex-property</goal>
+                        </goals>
+                        <configuration>
+                            <name>short.version</name>
+                            <value>${project.version}</value>
+                            <regex>^[0-9]+\.[0-9]+\.[0-9]+-(cdh[0-9]+\.[0-9]+\.[0-9]).*</regex>
+                            <replacement>$1-release</replacement>
+                            <failIfNoMatch>true</failIfNoMatch>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <target>
+                                <exec executable="git" dir="src/main/external" error="/dev/null">
+                                    <arg line="clone https://github.com/cloudera/Impala.git"/>
+                                </exec>
+                                <exec executable="sh">
+                                    <arg value="-c"/>
+                                    <arg
+                                            value="
 											cd src/main/external/Impala; 
 											git checkout cdh5-trunk;
 											git pull --all;
 											git checkout ${short.version};
 											git checkout .;
 											git clean -df;
-											git status" />
-								</exec>
-								<delete dir="src/main/external/Impala/be/build/debug" />
-								<!-- TODO: Provide OS-X build script -->
-								<exec executable="sh" os="Linux">
-									<arg value="-c" />
-									<arg
-										value="
+											git status"/>
+                                </exec>
+                                <delete dir="src/main/external/Impala/be/build/debug"/>
+                                <!-- TODO: Provide OS-X build script -->
+                                <exec executable="sh" os="Linux">
+                                    <arg value="-c"/>
+                                    <arg
+                                            value="
 										source src/main/external/Impala/bin/impala-config.sh;
-										${IMPALA_HOME}/buildall.sh -build_shared_libs -noclean -notests" />
-								</exec>
-								<delete includeEmptyDirs="true">
-									<fileset dir="target/parcel" includes="IMPALA-${project.version}/bin/**" />
-								</delete>
-								<mkdir dir="target/parcel/IMPALA-${project.version}/bin" />
-								<exec executable="sh" error="/dev/null">
-									<arg value="-c" />
-									<arg
-										value="
+										${IMPALA_HOME}/buildall.sh -build_shared_libs -noclean -notests"/>
+                                </exec>
+                                <delete includeEmptyDirs="true">
+                                    <fileset dir="target/parcel" includes="IMPALA-${project.version}/bin/**"/>
+                                </delete>
+                                <mkdir dir="target/parcel/IMPALA-${project.version}/bin"/>
+                                <exec executable="sh" error="/dev/null">
+                                    <arg value="-c"/>
+                                    <arg
+                                            value="
 											cp -rvf \
 											src/main/external/Impala/be/build/debug/service/impalad \
 											src/main/external/Impala/be/build/debug/catalog/catalogd \
 											src/main/external/Impala/be/build/debug/statestore/statestored \
-											target/parcel/IMPALA-${project.version}/bin" />
-								</exec>
-							</target>
-							<skip>${maven.parcel-compile.skip}</skip>
-						</configuration>
-						<goals>
-							<goal>run</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
-	</build>
+											target/parcel/IMPALA-${project.version}/bin"/>
+                                </exec>
+                            </target>
+                            <skip>${maven.parcel-compile.skip}</skip>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>

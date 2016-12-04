@@ -1,18 +1,18 @@
 {
-	"schema_version": 1,
-	"name": "${parcel.name}",
-	"version": "${parcel.version}",
-	"extraVersionInfo": {
-		"fullVersion": "${parcel.version.full}",
-		"baseVersion": "${parcel.version.base}"
-	},
-	"setActiveSymlink": false,
-	"scripts": {
-		"defines": "kudu_env.sh"
-	},
-	"packages": [],
-	"components": [],
-	"provides": [],
-	"users": {},
-	"groups": []
+  "schema_version": 1,
+  "name": "${parcel.name}",
+  "version": "${parcel.version}",
+  "extraVersionInfo": {
+    "fullVersion": "${parcel.version.full}",
+    "baseVersion": "${parcel.version.base}"
+  },
+  "setActiveSymlink": false,
+  "scripts": {
+    "defines": "kudu_env.sh"
+  },
+  "packages": [],
+  "components": [],
+  "provides": [],
+  "users": {},
+  "groups": []
 }

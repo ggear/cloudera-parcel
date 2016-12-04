@@ -27,6 +27,12 @@ import java.util.regex.Pattern;
 
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
 
+import com.cloudera.cli.validator.Main;
+import com.google.common.collect.ImmutableMap;
+import com.jcraft.jsch.ChannelExec;
+import com.jcraft.jsch.ChannelSftp;
+import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.Session;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.text.StrSubstitutor;
@@ -51,14 +57,81 @@ import org.python.core.PyString;
 import org.python.core.PySystemState;
 import org.python.util.PythonInterpreter;
 
-import com.cloudera.cli.validator.Main;
-import com.google.common.collect.ImmutableMap;
-import com.jcraft.jsch.ChannelExec;
-import com.jcraft.jsch.ChannelSftp;
-import com.jcraft.jsch.JSch;
-import com.jcraft.jsch.Session;
-
 public class Parcel {
+
+  private static final String SUFFIX_SHA1 = ".sha1";
+  private static final String FILE_MANIFEST = "manifest.json";
+  private static final String FILE_ENVIRONMENT = "parcel.env";
+  private static final String PATH_PARCEL = "/meta/parcel.json";
+  private static final String PATH_ENVIRONMENT = "/meta/" + FILE_ENVIRONMENT;
+  private static final String PATH_MAKE_MANIFEST = "/bin/make_manifest.py";
+  private static final Pattern REGEXP_SCP_CONNECT = Pattern.compile("^scp://(.*):(.*)@(.*):([0-9]*)(.*)");
+  private static final Map<String, ImmutableMap<String, String>> OS_NAME_VERSION_DESCRIPTOR = ImmutableMap.of(//
+    "Mac OS X", //
+    ImmutableMap.of(//
+      "10\\.11.*", "elcapitan", //
+      "10\\.12.*", "sierra"//
+      // TODO Replace line below with above when compilation of all parcels
+      // works on sierra
+      // "10\\.12.*", "sierra"//
+    ), //
+    "Linux", //
+    ImmutableMap.of(//
+      ".*\\.el6\\..*", "el6", //
+      ".*\\.el7\\..*", "el7", //
+      "4\\.2\\.0.*-generic", "trusty"//
+    )//
+  );
+  @Parameter(required = false, defaultValue = "com.cloudera.parcel")
+  private String groupId = "com.cloudera.parcel";
+  @Parameter(required = true)
+  private String artifactId;
+  @Parameter(required = true)
+  private String version;
+  @Parameter(required = false, defaultValue = "")
+  private String classifier = "";
+  @Parameter(required = false, defaultValue = "")
+  private String baseDirectory = "";
+  @Parameter(required = false, defaultValue = "src/main/parcel")
+  private String parcelResourcesDirectory = "src/main/parcel";
+  @Parameter(required = false, defaultValue = "target")
+  private String buildDirectory = "target";
+  @Parameter(required = false, defaultValue = "target/parcel")
+  private String parcelBuildDirectory = "target/parcel";
+  @Parameter(required = false, defaultValue = "")
+  private String outputDirectory = "";
+  @Parameter(required = false, defaultValue = "")
+  private String linkDirectory = "";
+  @Parameter(required = false, defaultValue = "")
+  private String repositoryUrl = "";
+  @Parameter(required = false, defaultValue = "")
+  private String distributionRepositoryUrl = "";
+  @Parameter(required = false, defaultValue = "/var/www/html")
+  private String distributionRepositoryRoot = "/var/www/html";
+  @Parameter(required = false, defaultValue = "")
+  private String localRepositoryDirectory = "";
+  @Parameter(required = false, defaultValue = "parcel")
+  private String type = "parcel";
+  @Parameter(required = false, defaultValue = "true")
+  private boolean buildMetaData = true;
+  @Parameter(required = false, defaultValue = "true")
+  private boolean validateMetaData = true;
+
+  public Parcel() {
+  }
+
+  public static String getOsDescriptor() {
+    Map<String, String> osVersionDescriptor = OS_NAME_VERSION_DESCRIPTOR.get(System.getProperty("os.name"));
+    if (osVersionDescriptor != null) {
+      for (String versionRegEx : osVersionDescriptor.keySet())
+        if (System.getProperty("os.version").matches(versionRegEx)) {
+          return osVersionDescriptor.get(versionRegEx);
+        }
+    }
+    throw new RuntimeException("Could not determine OS descritor from system property os.name [" + System.getProperty("os.name")
+      + "] and os.version [" + System.getProperty("os.version") + "] from the regexp mapping " + OS_NAME_VERSION_DESCRIPTOR
+      + ". If your OS looks like a supported platform, you can overide this parcels [classifier]" + " on the command line.");
+  }
 
   public boolean isValid() throws MojoExecutionException {
     List<String> paramatersMissing = new ArrayList<>();
@@ -82,8 +155,8 @@ public class Parcel {
     }
     if (!paramatersMissing.isEmpty()) {
       throw new MojoExecutionException(
-          "The required parameters " + paramatersMissing + " were missing from the POM as <properties><parcel.MISSING-PARAMATER> or "
-              + "<execution><configuration><parcels><parcel><MISSING-PARAMATER> definitions");
+        "The required parameters " + paramatersMissing + " were missing from the POM as <properties><parcel.MISSING-PARAMATER> or "
+          + "<execution><configuration><parcels><parcel><MISSING-PARAMATER> definitions");
     }
     return true;
   }
@@ -93,14 +166,14 @@ public class Parcel {
     List<Object> paramatersMissing = new ArrayList<>();
     for (Object paramater : paramaters.keySet()) {
       if (paramaters.get(paramater) == null
-          || paramaters.get(paramater) instanceof String && StringUtils.isEmpty((String) paramaters.get(paramater))) {
+        || paramaters.get(paramater) instanceof String && StringUtils.isEmpty((String) paramaters.get(paramater))) {
         paramatersMissing.add(paramater);
       }
     }
     if (!paramatersMissing.isEmpty()) {
       throw new MojoExecutionException(
-          "The required parameters " + paramatersMissing + " were missing from the POM as <properties><parcel.MISSING-PARAMATER> or "
-              + "<execution><configuration><parcels><parcel><MISSING-PARAMATER> definitions");
+        "The required parameters " + paramatersMissing + " were missing from the POM as <properties><parcel.MISSING-PARAMATER> or "
+          + "<execution><configuration><parcels><parcel><MISSING-PARAMATER> definitions");
     }
     return isValid();
   }
@@ -123,7 +196,7 @@ public class Parcel {
         } else {
           int dotIndex = nameShort.indexOf(".") == -1 ? 0 : nameShort.indexOf(".") + 1;
           nameShort = (nameShort.substring(0, dotIndex) + nameShort.charAt(dotIndex) + nameShort.substring(underscoreIndex))
-              .replaceFirst("_", ".");
+            .replaceFirst("_", ".");
         }
       }
       int dotIndex = nameShort.lastIndexOf(".") == -1 ? 0 : nameShort.lastIndexOf(".") + 1;
@@ -136,7 +209,7 @@ public class Parcel {
     String namespace = (getNameShort() + "_" + getVersionEscaped()).toLowerCase();
     if (namespace.length() > 32) {
       throw new MojoExecutionException("Artifact ID [" + artifactId + "] and version [" + version + "] too long to jam into a namespace ["
-          + namespace + "], please rename");
+        + namespace + "], please rename");
     }
     return namespace;
   }
@@ -151,7 +224,7 @@ public class Parcel {
 
   public String getArtifactNamespace() throws MojoExecutionException {
     return isValid() ? groupId + ":" + getName() + ":" + type + (StringUtils.isEmpty(classifier) ? "" : ":" + classifier) + ":" + version
-        : null;
+      : null;
   }
 
   public String getVersionEscaped() {
@@ -186,7 +259,7 @@ public class Parcel {
 
   public String getRemoteUrl(String repositoryUrl) throws MojoExecutionException {
     return isValid() ? repositoryUrl + "/" + getVersionShort() + "/" + artifactId + "-" + version
-        + (StringUtils.isEmpty(classifier) ? "" : "-" + classifier) + "." + type : null;
+      + (StringUtils.isEmpty(classifier) ? "" : "-" + classifier) + "." + type : null;
   }
 
   public String getLocalPath() throws MojoExecutionException {
@@ -235,9 +308,9 @@ public class Parcel {
           }
           if (log.isInfoEnabled()) {
             log.info(
-                "Downloaded: " + remoteUrl + " (" + FileUtils.byteCountToDisplaySize(localPath.length() + localPathSha1.length()) + " at "
-                    + String.format("%.2f", (localPath.length() + localPathSha1.length()) / ((System.currentTimeMillis() - time) * 1000D))
-                    + " MB/sec)");
+              "Downloaded: " + remoteUrl + " (" + FileUtils.byteCountToDisplaySize(localPath.length() + localPathSha1.length()) + " at "
+                + String.format("%.2f", (localPath.length() + localPathSha1.length()) / ((System.currentTimeMillis() - time) * 1000D))
+                + " MB/sec)");
           }
         }
       } catch (Exception exception) {
@@ -247,7 +320,7 @@ public class Parcel {
       }
       if (!downloaded) {
         throw new MojoExecutionException("Could not find parcel [" + getArtifactName() + "] in remote repositories, "
-            + "see above for download attemps and try a mvn -X invocation for DEBUG logs showing transport exceptions");
+          + "see above for download attemps and try a mvn -X invocation for DEBUG logs showing transport exceptions");
       }
     }
     return downloaded;
@@ -257,7 +330,7 @@ public class Parcel {
     isValid(ImmutableMap.of("localRepositoryDirectory", localRepositoryDirectory));
     download(log);
     File explodedPath = (StringUtils.isEmpty(outputDirectory)
-        ? new File(getFile(localRepositoryDirectory).getAbsolutePath(), getLocalPath()) : getFile(outputDirectory)).getParentFile();
+      ? new File(getFile(localRepositoryDirectory).getAbsolutePath(), getLocalPath()) : getFile(outputDirectory)).getParentFile();
     boolean exploded = StringUtils.isEmpty(outputDirectory) && new File(explodedPath, getArtifactNameSansClassifierType()).exists();
     if (!exploded) {
       File localPath = new File(getFile(localRepositoryDirectory).getAbsolutePath(), getLocalPath());
@@ -272,7 +345,7 @@ public class Parcel {
         exploded = true;
       } catch (Exception exception) {
         throw new MojoExecutionException(
-            "Failed to explode artifact [" + getArtifactNamespace() + "] from [" + localPath + "] to [" + explodedPath + "]", exception);
+          "Failed to explode artifact [" + getArtifactNamespace() + "] from [" + localPath + "] to [" + explodedPath + "]", exception);
       }
     }
     if (!StringUtils.isEmpty(outputDirectory)) {
@@ -287,8 +360,8 @@ public class Parcel {
         }
       } catch (IOException exception) {
         throw new MojoExecutionException(
-            "Failed to move exploded artifact [" + getArtifactNamespace() + "] from [" + explodedPathRoot + "] to [" + outputPathRoot + "]",
-            exception);
+          "Failed to move exploded artifact [" + getArtifactNamespace() + "] from [" + explodedPathRoot + "] to [" + outputPathRoot + "]",
+          exception);
       }
     }
     File explodedPathRoot = new File(explodedPath, getArtifactNameSansClassifierType());
@@ -299,7 +372,7 @@ public class Parcel {
       }
     } catch (Exception exception) {
       throw new MojoExecutionException("Failed to sym link to exploded artifact [" + getArtifactNamespace() + "] from [" + explodedPathRoot
-          + "] to [" + linkDirectory + "]", exception);
+        + "] to [" + linkDirectory + "]", exception);
     }
     return exploded;
   }
@@ -322,13 +395,13 @@ public class Parcel {
             if (PATH_PARCEL.equals(file.toFile().getAbsolutePath().replace(getFile(parcelResourcesDirectory).getAbsolutePath(), ""))) {
               try {
                 FileUtils.writeStringToFile(ouputPath.resolve(sourcePath.relativize(file)).toFile(),
-                    new StrSubstitutor(getEnvironmentMap(), "${parcel.", "}").replace(FileUtils.readFileToString(file.toFile())));
+                  new StrSubstitutor(getEnvironmentMap(), "${parcel.", "}").replace(FileUtils.readFileToString(file.toFile())));
               } catch (Exception exception) {
                 throw new IOException("Failed to rewrite file [" + file + "]", exception);
               }
             } else {
               Files.copy(file, ouputPath.resolve(sourcePath.relativize(file)), StandardCopyOption.REPLACE_EXISTING,
-                  StandardCopyOption.COPY_ATTRIBUTES);
+                StandardCopyOption.COPY_ATTRIBUTES);
             }
             return FileVisitResult.CONTINUE;
           }
@@ -336,7 +409,7 @@ public class Parcel {
       }
     } catch (Exception exception) {
       throw new MojoExecutionException(
-          "Failed to prepare artifact [" + getArtifactNamespace() + "] from [" + sourcePath + "] to [" + ouputPath + "]", exception);
+        "Failed to prepare artifact [" + getArtifactNamespace() + "] from [" + sourcePath + "] to [" + ouputPath + "]", exception);
     }
     return true;
   }
@@ -347,7 +420,7 @@ public class Parcel {
     File buildPathSha1 = new File(getFile(buildDirectory).getAbsolutePath(), getArtifactName() + SUFFIX_SHA1);
     File buildPathEnv = new File(getFile(buildDirectory).getAbsolutePath(), FILE_ENVIRONMENT);
     File buildPathEnvParcel = new File(getFile(parcelBuildDirectory).getAbsolutePath(),
-        getArtifactNameSansClassifierType() + PATH_ENVIRONMENT);
+      getArtifactNameSansClassifierType() + PATH_ENVIRONMENT);
     File buildPathManifest = new File(getFile(buildDirectory).getAbsolutePath(), FILE_MANIFEST);
     File sourcePath = getFile(parcelBuildDirectory);
     File sourceParcelPath = new File(getFile(parcelBuildDirectory).getAbsolutePath(), getArtifactNameSansClassifierType());
@@ -358,7 +431,7 @@ public class Parcel {
     try {
       if (buildMetaData) {
         if (validateMetaData) {
-          validateParcel(log, new String[] { "-d", sourceParcelPath.getAbsolutePath() });
+          validateParcel(log, new String[]{"-d", sourceParcelPath.getAbsolutePath()});
         }
         FileUtils.writeStringToFile(buildPathEnv, getEnvironmentString());
         FileUtils.writeStringToFile(buildPathEnvParcel, getEnvironmentString());
@@ -368,23 +441,23 @@ public class Parcel {
       archiver.setCompression(TarCompressionMethod.gzip);
       DefaultFileSet fileSet = new DefaultFileSet();
       fileSet.setDirectory(sourcePath);
-      fileSet.setFileSelectors(new FileSelector[] { new FileSelector() {
+      fileSet.setFileSelectors(new FileSelector[]{new FileSelector() {
         @Override
         public boolean isSelected(FileInfo fileInfo) throws IOException {
           return !fileInfo.isFile() || !new File(getFile(buildDirectory).getAbsolutePath(), fileInfo.getName()).canExecute();
         }
-      } });
+      }});
       archiver.addFileSet(fileSet);
       archiver.setFileMode(0755);
       fileSet = new DefaultFileSet();
       fileSet.setDirectory(sourcePath);
-      fileSet.setFileSelectors(new FileSelector[] { new FileSelector() {
+      fileSet.setFileSelectors(new FileSelector[]{new FileSelector() {
 
         @Override
         public boolean isSelected(FileInfo fileInfo) throws IOException {
           return fileInfo.isFile() && new File(getFile(buildDirectory).getAbsolutePath(), fileInfo.getName()).canExecute();
         }
-      } });
+      }});
       archiver.addFileSet(fileSet);
       archiver.setDestFile(buildPath);
       archiver.createArchive();
@@ -392,19 +465,19 @@ public class Parcel {
       if (buildMetaData) {
         executePythonScript(log, PATH_MAKE_MANIFEST, getFile(buildDirectory).getAbsolutePath());
         if (validateMetaData) {
-          validateParcel(log, new String[] { "-f", buildPath.getAbsolutePath() });
-          validateParcel(log, new String[] { "-m", buildPathManifest.getAbsolutePath() });
+          validateParcel(log, new String[]{"-f", buildPath.getAbsolutePath()});
+          validateParcel(log, new String[]{"-m", buildPathManifest.getAbsolutePath()});
         }
       }
     } catch (
 
-    Exception exception) {
+      Exception exception) {
       throw new MojoExecutionException(
-          "Failed to build artifact [" + getArtifactNamespace() + "] from [" + sourcePath + "] to [" + buildPath + "]", exception);
+        "Failed to build artifact [" + getArtifactNamespace() + "] from [" + sourcePath + "] to [" + buildPath + "]", exception);
     }
     return
 
-    assertSha1(log, buildPath, buildPathSha1, false);
+      assertSha1(log, buildPath, buildPathSha1, false);
   }
 
   public boolean install(Log log) throws MojoExecutionException {
@@ -423,8 +496,8 @@ public class Parcel {
       }
     } catch (Exception exception) {
       throw new MojoExecutionException(
-          "Failed to install artifact [" + getArtifactNamespace() + "] from [" + buildPath + "] to [" + repositoryRootPath + "]",
-          exception);
+        "Failed to install artifact [" + getArtifactNamespace() + "] from [" + buildPath + "] to [" + repositoryRootPath + "]",
+        exception);
     }
     return assertSha1(log, repositoryPath, repositoryPathSha1, false);
   }
@@ -436,10 +509,10 @@ public class Parcel {
     File buildPathSha1 = new File(getFile(buildDirectory).getAbsolutePath(), getArtifactName() + SUFFIX_SHA1);
     File buildPathManifest = new File(getFile(buildDirectory).getAbsolutePath(), FILE_MANIFEST);
     Matcher sshConnectMatcher = REGEXP_SCP_CONNECT
-        .matcher(distributionRepositoryUrl + (distributionRepositoryUrl.endsWith("/") ? "" : "/") + getVersionShort());
+      .matcher(distributionRepositoryUrl + (distributionRepositoryUrl.endsWith("/") ? "" : "/") + getVersionShort());
     if (!sshConnectMatcher.matches()) {
       throw new MojoExecutionException("Could not match [" + distributionRepositoryUrl + "] with regexp [" + REGEXP_SCP_CONNECT
-          + "], please check your ssh connect string and provide all values.");
+        + "], please check your ssh connect string and provide all values.");
     }
     Session session = null;
     ChannelExec channelSsh = null;
@@ -464,7 +537,7 @@ public class Parcel {
         String output = IOUtils.toString(readerSsh);
         if (!output.isEmpty()) {
           throw new MojoExecutionException("Failed to create deploy directory [" + sshConnectMatcher.group(5) + "] for artifact ["
-              + getArtifactNamespace() + "] on [" + sshConnectMatcher.group(0) + "] with error [" + output + "]");
+            + getArtifactNamespace() + "] on [" + sshConnectMatcher.group(0) + "] with error [" + output + "]");
         }
         channelScp = (ChannelSftp) session.openChannel("sftp");
         channelScp.connect();
@@ -476,19 +549,19 @@ public class Parcel {
         }
         if (log.isInfoEnabled()) {
           log.info("Deployed: " + buildPath + " ("
-              + FileUtils.byteCountToDisplaySize(
-                  buildPath.length() + buildPathSha1.length() + (buildMetaData ? buildPathManifest.length() : 0))
-              + " at "
-              + String.format("%.2f", (buildPath.length() + buildPathSha1.length() + (buildMetaData ? buildPathManifest.length() : 0))
-                  / ((System.currentTimeMillis() - time) * 1000D))
-              + " MB/sec)");
+            + FileUtils.byteCountToDisplaySize(
+            buildPath.length() + buildPathSha1.length() + (buildMetaData ? buildPathManifest.length() : 0))
+            + " at "
+            + String.format("%.2f", (buildPath.length() + buildPathSha1.length() + (buildMetaData ? buildPathManifest.length() : 0))
+            / ((System.currentTimeMillis() - time) * 1000D))
+            + " MB/sec)");
         }
         deployed = true;
       }
     } catch (Exception exception) {
       throw new MojoExecutionException(
-          "Failed to deploy artifact [" + getArtifactNamespace() + "] from [" + buildPath + "] to [" + sshConnectMatcher.group(0) + "]",
-          exception);
+        "Failed to deploy artifact [" + getArtifactNamespace() + "] from [" + buildPath + "] to [" + sshConnectMatcher.group(0) + "]",
+        exception);
     } finally {
       if (channelSsh != null) {
         channelSsh.disconnect();
@@ -501,19 +574,6 @@ public class Parcel {
       }
     }
     return deployed;
-  }
-
-  public static String getOsDescriptor() {
-    Map<String, String> osVersionDescriptor = OS_NAME_VERSION_DESCRIPTOR.get(System.getProperty("os.name"));
-    if (osVersionDescriptor != null) {
-      for (String versionRegEx : osVersionDescriptor.keySet())
-        if (System.getProperty("os.version").matches(versionRegEx)) {
-          return osVersionDescriptor.get(versionRegEx);
-        }
-    }
-    throw new RuntimeException("Could not determine OS descritor from system property os.name [" + System.getProperty("os.name")
-        + "] and os.version [" + System.getProperty("os.version") + "] from the regexp mapping " + OS_NAME_VERSION_DESCRIPTOR
-        + ". If your OS looks like a supported platform, you can overide this parcels [classifier]" + " on the command line.");
   }
 
   private Map<String, String> getEnvironmentMap() throws MojoExecutionException {
@@ -666,88 +726,6 @@ public class Parcel {
     return path.startsWith("/") ? new File(path) : new File(baseDirectory, path);
   }
 
-  private static final String SUFFIX_SHA1 = ".sha1";
-
-  private static final String FILE_MANIFEST = "manifest.json";
-  private static final String FILE_ENVIRONMENT = "parcel.env";
-
-  private static final String PATH_PARCEL = "/meta/parcel.json";
-  private static final String PATH_ENVIRONMENT = "/meta/" + FILE_ENVIRONMENT;
-  private static final String PATH_MAKE_MANIFEST = "/bin/make_manifest.py";
-
-  private static final Pattern REGEXP_SCP_CONNECT = Pattern.compile("^scp://(.*):(.*)@(.*):([0-9]*)(.*)");
-
-  private static final Map<String, ImmutableMap<String, String>> OS_NAME_VERSION_DESCRIPTOR = ImmutableMap.of(//
-      "Mac OS X", //
-      ImmutableMap.of(//
-          "10\\.11.*", "elcapitan", //
-          "10\\.12.*", "sierra"//
-      // TODO Replace line below with above when compilation of all parcels
-      // works on sierra
-      // "10\\.12.*", "sierra"//
-      ), //
-      "Linux", //
-      ImmutableMap.of(//
-          ".*\\.el6\\..*", "el6", //
-          ".*\\.el7\\..*", "el7", //
-          "4\\.2\\.0.*-generic", "trusty"//
-      )//
-  );
-
-  @Parameter(required = false, defaultValue = "com.cloudera.parcel")
-  private String groupId = "com.cloudera.parcel";
-
-  @Parameter(required = true)
-  private String artifactId;
-
-  @Parameter(required = true)
-  private String version;
-
-  @Parameter(required = false, defaultValue = "")
-  private String classifier = "";
-
-  @Parameter(required = false, defaultValue = "")
-  private String baseDirectory = "";
-
-  @Parameter(required = false, defaultValue = "src/main/parcel")
-  private String parcelResourcesDirectory = "src/main/parcel";
-
-  @Parameter(required = false, defaultValue = "target")
-  private String buildDirectory = "target";
-
-  @Parameter(required = false, defaultValue = "target/parcel")
-  private String parcelBuildDirectory = "target/parcel";
-
-  @Parameter(required = false, defaultValue = "")
-  private String outputDirectory = "";
-
-  @Parameter(required = false, defaultValue = "")
-  private String linkDirectory = "";
-
-  @Parameter(required = false, defaultValue = "")
-  private String repositoryUrl = "";
-
-  @Parameter(required = false, defaultValue = "")
-  private String distributionRepositoryUrl = "";
-
-  @Parameter(required = false, defaultValue = "/var/www/html")
-  private String distributionRepositoryRoot = "/var/www/html";
-
-  @Parameter(required = false, defaultValue = "")
-  private String localRepositoryDirectory = "";
-
-  @Parameter(required = false, defaultValue = "parcel")
-  private String type = "parcel";
-
-  @Parameter(required = false, defaultValue = "true")
-  private boolean buildMetaData = true;
-
-  @Parameter(required = false, defaultValue = "true")
-  private boolean validateMetaData = true;
-
-  public Parcel() {
-  }
-
   public String getGroupId() {
     return groupId;
   }
@@ -886,14 +864,14 @@ public class Parcel {
 
   public static class ParcelBuilder {
 
-    public static ParcelBuilder get() {
-      return new ParcelBuilder();
-    }
-
     private Parcel parcel;
 
     private ParcelBuilder() {
       parcel = new Parcel();
+    }
+
+    public static ParcelBuilder get() {
+      return new ParcelBuilder();
     }
 
     public ParcelBuilder groupId(String groupId) {

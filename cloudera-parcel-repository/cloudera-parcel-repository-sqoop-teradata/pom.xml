@@ -1,54 +1,56 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
-	<modelVersion>4.0.0</modelVersion>
-	<groupId>com.cloudera</groupId>
-	<artifactId>SQOOP_TERADATA_CONNECTOR</artifactId>
-	<version>1.4c5.BESPOKE</version>
-	<packaging>parcel</packaging>
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.cloudera</groupId>
+    <artifactId>SQOOP_TERADATA_CONNECTOR</artifactId>
+    <version>1.4c5.BESPOKE</version>
+    <packaging>parcel</packaging>
 
-	<parent>
-		<groupId>com.cloudera.parcel</groupId>
-		<artifactId>cloudera-parcel-repository</artifactId>
-		<version>0.7.8-SNAPSHOT</version>
-	</parent>
+    <parent>
+        <groupId>com.cloudera.parcel</groupId>
+        <artifactId>cloudera-parcel-repository</artifactId>
+        <version>0.7.8-SNAPSHOT</version>
+    </parent>
 
-	<properties>
-		<parcel.classifier>el6</parcel.classifier>
-		<parcel.distributionRepositoryUrl>scp://graham:/Users/graham/.ssh/id_rsa.pem@52.63.86.162:22/var/www/html/tmph3l7m2vv103/sbin/sqoop-connectors/parcels</parcel.distributionRepositoryUrl>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-	</properties>
+    <properties>
+        <parcel.classifier>el6</parcel.classifier>
+        <parcel.distributionRepositoryUrl>
+            scp://graham:/Users/graham/.ssh/id_rsa.pem@52.63.86.162:22/var/www/html/tmph3l7m2vv103/sbin/sqoop-connectors/parcels
+        </parcel.distributionRepositoryUrl>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
 
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>com.cloudera.parcel</groupId>
-				<artifactId>cloudera-parcel-plugin</artifactId>
-				<extensions>true</extensions>
-				<executions>
-					<execution>
-						<id>explode</id>
-						<phase>initialize</phase>
-						<goals>
-							<goal>explode</goal>
-						</goals>
-						<configuration>
-							<parcels>
-								<parcel>
-									<groupId>${project.groupId}</groupId>
-									<artifactId>${project.artifactId}</artifactId>
-									<version>1.4c5</version>
-									<classifier>el6</classifier>
-									<repositoryUrl>http://archive.cloudera.com/sqoop-connectors/parcels</repositoryUrl>
-									<outputDirectory>${project.build.directory}/parcel/${project.artifactId}-${project.version}</outputDirectory>
-								</parcel>
-							</parcels>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
-	</build>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>com.cloudera.parcel</groupId>
+                <artifactId>cloudera-parcel-plugin</artifactId>
+                <extensions>true</extensions>
+                <executions>
+                    <execution>
+                        <id>explode</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>explode</goal>
+                        </goals>
+                        <configuration>
+                            <parcels>
+                                <parcel>
+                                    <groupId>${project.groupId}</groupId>
+                                    <artifactId>${project.artifactId}</artifactId>
+                                    <version>1.4c5</version>
+                                    <classifier>el6</classifier>
+                                    <repositoryUrl>http://archive.cloudera.com/sqoop-connectors/parcels</repositoryUrl>
+                                    <outputDirectory>${project.build.directory}/parcel/${project.artifactId}-${project.version}</outputDirectory>
+                                </parcel>
+                            </parcels>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>
