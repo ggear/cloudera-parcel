@@ -95,10 +95,10 @@
                             <target>
                                 <delete includeEmptyDirs="true" quiet="false">
                                     <fileset dir="src/main/parcel" defaultexcludes="false">
-                                        <include name="**/*"/>
-                                        <exclude name="meta/**"/>
-                                        <exclude name="README"/>
-                                        <exclude name=".gitignore"/>
+                                        <include name="**/*" />
+                                        <exclude name="meta/**" />
+                                        <exclude name="README" />
+                                        <exclude name=".gitignore" />
                                     </fileset>
                                 </delete>
                                 <!-- TODO: Build CDH parcel, copy Impala and Kudu -->

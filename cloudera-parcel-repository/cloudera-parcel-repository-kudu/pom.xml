@@ -6,7 +6,7 @@
     <groupId>com.cloudera.parcel</groupId>
     <artifactId>KUDU</artifactId>
     <packaging>parcel</packaging>
-    <version>1.1.0-1.kudu1.1.0.p0.5</version>
+    <version>1.2.0-1.cdh5.10.1.p0.66</version>
 
     <parent>
         <groupId>com.cloudera.parcel</groupId>
@@ -16,8 +16,7 @@
 
     <properties>
         <parcel.buildMetaData>false</parcel.buildMetaData>
-        <parcel.distributionRepositoryUrl>scp://graham:/Users/graham/.ssh/id_rsa.pem@52.63.86.162:22/var/www/html/tmph3l7m2vv103/sbin/kudu/parcels
-        </parcel.distributionRepositoryUrl>
+        <parcel.distributionRepositoryUrl>scp://graham:/Users/graham/.ssh/id_rsa.pem@52.63.86.162:22/var/www/html/tmph3l7m2vv103/sbin/kudu/parcels</parcel.distributionRepositoryUrl>
     </properties>
 
     <build>
@@ -50,47 +49,45 @@
                         <configuration>
                             <target>
                                 <exec executable="git" dir="src/main/external" error="/dev/null">
-                                    <arg line="clone git@github.com:apache/kudu.git"/>
+                                    <arg line="clone git@github.com:apache/kudu.git" />
                                 </exec>
                                 <exec executable="sh">
-                                    <arg value="-c"/>
+                                    <arg value="-c" />
                                     <arg value="
 											cd src/main/external/kudu;
 											git checkout master;
 											git pull --all;
+											git checkout ${short.version};
 											git checkout .;
 											git clean -df;
-											git status"/>
+											git status" />
                                 </exec>
-                                <!-- Build from master while 1.1.0 remains broken on MacOS: git checkout ${short.version}; -->
                                 <!-- Some releases require a clean start: git clean -fdx -->
                                 <exec executable="thirdparty/build-if-necessary.sh" dir="src/main/external/kudu" failonerror="true"></exec>
-                                <delete dir="src/main/external/kudu/build" quiet="true"/>
-                                <mkdir dir="src/main/external/kudu/build/release"/>
+                                <delete dir="src/main/external/kudu/build" quiet="true" />
+                                <mkdir dir="src/main/external/kudu/build/release" />
                                 <exec executable="cmake" dir="src/main/external/kudu/build/release" failonerror="true">
-                                    <arg value="-DCMAKE_BUILD_TYPE=release"/>
-                                    <arg value="-DOPENSSL_ROOT_DIR=/usr/local/opt/openssl"/>
-                                    <arg value="-DNO_TESTS=1"/>
-                                    <arg value="../.."/>
+                                    <arg value="-DCMAKE_BUILD_TYPE=release" />
+                                    <arg value="-DOPENSSL_ROOT_DIR=/usr/local/opt/openssl" />
+                                    <arg value="-DNO_TESTS=1" />
+                                    <arg value="../.." />
                                 </exec>
                                 <exec executable="make" dir="src/main/external/kudu/build/release" failonerror="true">
-                                    <arg value="-j4"/>
+                                    <arg value="-j4" />
                                 </exec>
-                                <mkdir dir="target/parcel/KUDU-${project.version}"/>
+                                <mkdir dir="target/parcel/KUDU-${project.version}" />
                                 <delete includeEmptyDirs="true">
-                                    <fileset dir="target/parcel" includes="KUDU-${project.version}/bin/**"/>
+                                    <fileset dir="target/parcel" includes="KUDU-${project.version}/bin/**" />
                                 </delete>
                                 <delete includeEmptyDirs="true">
-                                    <fileset dir="target/parcel" includes="KUDU-${project.version}/lib/**"/>
+                                    <fileset dir="target/parcel" includes="KUDU-${project.version}/lib/**" />
                                 </delete>
-                                <exec executable="sh">
-                                    <arg value="-c"/>
-                                    <arg value="
-											cp -rvf \
-											src/main/external/kudu/build/release/bin \
-											src/main/external/kudu/build/release/lib \
-											target/parcel/KUDU-${project.version}"/>
-                                </exec>
+                                <copy todir="target/parcel/KUDU-${project.version}">
+                                    <fileset dir="src/main/external/kudu/build/release/bin" excludes="tpch*" />
+                                </copy>
+                                <copy todir="target/parcel/KUDU-${project.version}">
+                                    <fileset dir="src/main/external/kudu/build/release/lib" includes="*" />
+                                </copy>
                             </target>
                             <skip>${maven.parcel-compile.skip}</skip>
                         </configuration>

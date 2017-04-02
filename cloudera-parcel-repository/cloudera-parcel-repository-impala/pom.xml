@@ -51,10 +51,10 @@
                         <configuration>
                             <target>
                                 <exec executable="git" dir="src/main/external" error="/dev/null">
-                                    <arg line="clone https://github.com/cloudera/Impala.git"/>
+                                    <arg line="clone https://github.com/cloudera/Impala.git" />
                                 </exec>
                                 <exec executable="sh">
-                                    <arg value="-c"/>
+                                    <arg value="-c" />
                                     <arg
                                             value="
 											cd src/main/external/Impala; 
@@ -63,30 +63,30 @@
 											git checkout ${short.version};
 											git checkout .;
 											git clean -df;
-											git status"/>
+											git status" />
                                 </exec>
-                                <delete dir="src/main/external/Impala/be/build/debug"/>
+                                <delete dir="src/main/external/Impala/be/build/debug" />
                                 <!-- TODO: Provide OS-X build script -->
                                 <exec executable="sh" os="Linux">
-                                    <arg value="-c"/>
+                                    <arg value="-c" />
                                     <arg
                                             value="
 										source src/main/external/Impala/bin/impala-config.sh;
-										${IMPALA_HOME}/buildall.sh -build_shared_libs -noclean -notests"/>
+										${IMPALA_HOME}/buildall.sh -build_shared_libs -noclean -notests" />
                                 </exec>
                                 <delete includeEmptyDirs="true">
-                                    <fileset dir="target/parcel" includes="IMPALA-${project.version}/bin/**"/>
+                                    <fileset dir="target/parcel" includes="IMPALA-${project.version}/bin/**" />
                                 </delete>
-                                <mkdir dir="target/parcel/IMPALA-${project.version}/bin"/>
+                                <mkdir dir="target/parcel/IMPALA-${project.version}/bin" />
                                 <exec executable="sh" error="/dev/null">
-                                    <arg value="-c"/>
+                                    <arg value="-c" />
                                     <arg
                                             value="
 											cp -rvf \
 											src/main/external/Impala/be/build/debug/service/impalad \
 											src/main/external/Impala/be/build/debug/catalog/catalogd \
 											src/main/external/Impala/be/build/debug/statestore/statestored \
-											target/parcel/IMPALA-${project.version}/bin"/>
+											target/parcel/IMPALA-${project.version}/bin" />
                                 </exec>
                             </target>
                             <skip>${maven.parcel-compile.skip}</skip>

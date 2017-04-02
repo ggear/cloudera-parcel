@@ -1,4 +1,4 @@
-#Cloudera Parcel
+# Cloudera Parcel
 
 A module to help mananage Cloudera Parcels, including a Maven plugin to bridge between JAR and Parcel artifacts and their repositories, giving the ability to affect the full lifecycle of parcel operations:
 
@@ -14,14 +14,14 @@ Additional modules are included to provide the meta data to drive parcel builds 
 * Kudu OS-X
 * Impala OS-X
 
-##Requirements
+## Requirements
 
 To compile, build and package from source, this project requires:
 
 * JDK 1.7
 * Maven 3
 
-##Install
+## Install
 
 This project can be installed to a local repository as per:
 
@@ -60,11 +60,11 @@ Alternatively, the module can be included as a binary dependency in maven, for e
 	</build>
 ```
 
-##Usage
+## Usage
 
 The plugin can be used as per the [integration tests](https://github.com/ggear/cloudera-parcel/tree/master/cloudera-parcel-plugin/src/it), the embedded [example](https://github.com/ggear/cloudera-parcel/tree/master/cloudera-parcel-repository/cloudera-parcel-repository-sqoop-teradata) and [cloudera-framework](https://github.com/ggear/cloudera-framework).
 
-##Release
+## Release
 
 To perform a release:
 
