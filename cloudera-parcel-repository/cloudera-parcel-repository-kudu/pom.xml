@@ -82,12 +82,14 @@
                                 <delete includeEmptyDirs="true">
                                     <fileset dir="target/parcel" includes="KUDU-${project.version}/lib/**" />
                                 </delete>
-                                <copy todir="target/parcel/KUDU-${project.version}">
-                                    <fileset dir="src/main/external/kudu/build/release/bin" excludes="tpch*" />
-                                </copy>
-                                <copy todir="target/parcel/KUDU-${project.version}">
-                                    <fileset dir="src/main/external/kudu/build/release/lib" includes="*" />
-                                </copy>
+                                <exec executable="sh">
+                                    <arg value="-c"/>
+                                    <arg value="
+											cp -rvf \
+											src/main/external/kudu/build/release/bin \
+											src/main/external/kudu/build/release/lib \
+											target/parcel/KUDU-${project.version} 2> /dev/null"/>
+                                </exec>
                             </target>
                             <skip>${maven.parcel-compile.skip}</skip>
                         </configuration>
