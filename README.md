@@ -69,7 +69,7 @@ The plugin can be used as per the [integration tests](https://github.com/ggear/c
 To perform a release:
 
 ```bash
-# Change the following variables to appropriate values for your target environment
+# Change the following variables to appropriate values for your target release
 export CP_VERSION_RELEASE=0.7.8
 export CP_VERSION_HEAD=0.7.9
 mvn release:prepare -B -DreleaseVersion=$CP_VERSION_RELEASE -DdevelopmentVersion=$CP_VERSION_HEAD-SNAPSHOT
