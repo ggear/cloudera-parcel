@@ -26,7 +26,7 @@ assert !parcelBuildManifest.isFile()
 assert parcelInstall.isFile()
 assert parcelSha1Install.isFile()
 
-File repo = new File(basedir, "../../local-repo")
+File repo = new File(basedir, "../../local-repo/com/cloudera/SQOOP_TERADATA_CONNECTOR")
 repo.deleteDir()
 repo.mkdirs()
 
