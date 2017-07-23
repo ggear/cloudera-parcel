@@ -70,18 +70,19 @@ public class Parcel {
 
   private static final Pattern REGEXP_SCP_CONNECT = Pattern.compile("^scp://(.*):(.*)@(.*):([0-9]*)(.*)");
 
-  private static final Map<String, ImmutableMap<String, String>> OS_NAME_VERSION_DESCRIPTOR = ImmutableMap.of(//
+  private static final ImmutableMap<String, ImmutableMap<String, String>> OS_NAME_VERSION_DESCRIPTOR = ImmutableMap.of(//
     "Mac OS X", //
     ImmutableMap.of(//
       "10\\.11.*", "elcapitan", //
-      "10\\.12.*", "sierra"//
+      "10\\.12.*", "sierra" //
     ), //
     "Linux", //
     ImmutableMap.of(//
-      ".*\\.el6\\..*", "el6", //
-      ".*\\.el7\\..*", "el7", //
-      "4\\.2\\.0.*-generic", "trusty"//
-    )//
+      "6\\..*", "el6", //
+      "7\\..*", "el7", //
+      "14\\.04.*", "trusty", //
+      "16\\.04.*", "xenial" //
+    )
   );
 
   @Parameter(required = false, defaultValue = "com.cloudera.parcel")
@@ -139,16 +140,49 @@ public class Parcel {
   }
 
   public static String getOsDescriptor() {
-    Map<String, String> osVersionDescriptor = OS_NAME_VERSION_DESCRIPTOR.get(System.getProperty("os.name"));
-    if (osVersionDescriptor != null) {
-      for (String versionRegEx : osVersionDescriptor.keySet())
-        if (System.getProperty("os.version").matches(versionRegEx)) {
-          return osVersionDescriptor.get(versionRegEx);
+    return getOsDescriptor(null);
+  }
+
+  protected static String getOsDescriptor(String lsbRelease) {
+    Exception thrown = null;
+    try {
+      List<String> versions = new ArrayList<>();
+      if (System.getProperty("os.name").equals("Linux")) {
+        if (lsbRelease == null) {
+          lsbRelease = IOUtils.toString(new ProcessBuilder().command("lsb_release", "-a").start().getInputStream());
         }
+        for (String lsbReleaseLines : lsbRelease.split("\n")) {
+          Pattern regex = Pattern.compile("^Release:\\s+(.*)");
+          Matcher regexMatcher = regex.matcher(lsbReleaseLines);
+          if (regexMatcher.find()) {
+            versions.add(regexMatcher.group(1));
+          }
+        }
+      } else {
+        versions.add(System.getProperty("os.version"));
+      }
+      Map<String, String> osVersionDescriptor = OS_NAME_VERSION_DESCRIPTOR.get(System.getProperty("os.name"));
+      if (osVersionDescriptor != null) {
+        for (String versionRegEx : osVersionDescriptor.keySet()) {
+          for (String version : versions) {
+            if (version.matches(versionRegEx)) {
+              return osVersionDescriptor.get(versionRegEx);
+            }
+          }
+        }
+      }
+    } catch (Exception exception) {
+      thrown = exception;
     }
-    throw new RuntimeException("Could not determine OS descritor from system property os.name [" + System.getProperty("os.name")
+    String message = "Could not determine OS descritor from system property os.name [" + System.getProperty("os.name")
       + "] and os.version [" + System.getProperty("os.version") + "] from the regexp mapping " + OS_NAME_VERSION_DESCRIPTOR
-      + ". If your OS looks like a supported platform, you can overide this parcels [classifier]" + " on the command line.");
+      + " and output of 'lsb_release -a'. If your OS looks like a supported platform, you can overide this parcels [classifier]" +
+      " on the command line.";
+    if (thrown == null) {
+      throw new RuntimeException(message);
+    } else {
+      throw new RuntimeException(message, thrown);
+    }
   }
 
   public boolean isValid() throws MojoExecutionException {
@@ -212,7 +246,7 @@ public class Parcel {
         if (underscoreIndex == 0 || underscoreIndex + 1 == nameShort.length()) {
           nameShort = nameShort.replaceFirst("_", "");
         } else {
-          int dotIndex = nameShort.indexOf(".") == -1 ? 0 : nameShort.indexOf(".") + 1;
+          int dotIndex = !nameShort.contains(".") ? 0 : nameShort.indexOf(".") + 1;
           nameShort = (nameShort.substring(0, dotIndex) + nameShort.charAt(dotIndex) + nameShort.substring(underscoreIndex))
             .replaceFirst("_", ".");
         }
@@ -250,7 +284,7 @@ public class Parcel {
   }
 
   public String getVersionShort() {
-    int index = 0;
+    int index;
     for (index = 0; index < version.length(); index++) {
       if (!Character.isDigit(version.charAt(index)) && version.charAt(index) != '.') {
         break;
@@ -264,7 +298,7 @@ public class Parcel {
     int lastDash = version.lastIndexOf('-');
     if (firstDash != -1 && firstDash != lastDash) {
       return version.substring(firstDash + 1, lastDash);
-    } else if (firstDash != -1 && firstDash == lastDash && version.length() > 0 && Character.isLowerCase(version.charAt(firstDash + 1))) {
+    } else if (firstDash != -1 && version.length() > 0 && Character.isLowerCase(version.charAt(firstDash + 1))) {
       return version.substring(firstDash + 1, version.length());
     } else {
       return getName().toLowerCase() + getVersionShort();
@@ -392,7 +426,7 @@ public class Parcel {
       throw new MojoExecutionException("Failed to sym link to exploded artifact [" + getArtifactNamespace() + "] from [" + explodedPathRoot
         + "] to [" + linkDirectory + "]", exception);
     }
-    return exploded;
+    return true;
   }
 
   public boolean prepare(Log log) throws MojoExecutionException {
@@ -659,7 +693,7 @@ public class Parcel {
       MessageDigest messageDigest = MessageDigest.getInstance("SHA-1");
       input = new FileInputStream(file);
       byte[] buffer = new byte[8192];
-      int len = 0;
+      int len;
       while ((len = input.read(buffer)) != -1) {
         messageDigest.update(buffer, 0, len);
       }
@@ -727,7 +761,7 @@ public class Parcel {
   }
 
   private void validateParcel(Log log, String[] arguments) throws IOException {
-    int validationCode = 0;
+    int validationCode;
     ByteArrayOutputStream validatorOut = new ByteArrayOutputStream();
     ByteArrayOutputStream validatorErr = new ByteArrayOutputStream();
     validationCode = new Main(Main.class.getCanonicalName(), validatorOut, validatorErr).run(arguments);

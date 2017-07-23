@@ -45,10 +45,10 @@ public class Install extends AbstractMojo {
   public void execute() throws MojoExecutionException {
     if (!skip) {
       if (parcels == null) {
-        parcels = Arrays.asList(new Parcel[]{ParcelBuilder.get().groupId(project.getGroupId()).artifactId(project.getArtifactId())
+        parcels = Arrays.asList(ParcelBuilder.get().groupId(project.getGroupId()).artifactId(project.getArtifactId())
           .version(project.getVersion()).classifier(StringUtils.isEmpty(parcelClassifier) ? Parcel.getOsDescriptor() : parcelClassifier)
           .baseDirectory(project.getBasedir().getAbsolutePath()).buildDirectory(buildDirectory).type(project.getPackaging())
-          .buildMetaData(buildMetaData).validateMetaData(validateMetaData).build()});
+          .buildMetaData(buildMetaData).validateMetaData(validateMetaData).build());
 
       }
       for (Parcel parcel : parcels) {
