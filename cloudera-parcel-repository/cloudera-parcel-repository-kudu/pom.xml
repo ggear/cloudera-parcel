@@ -83,12 +83,12 @@
                                     <fileset dir="target/parcel" includes="KUDU-${project.version}/lib/**" />
                                 </delete>
                                 <exec executable="sh">
-                                    <arg value="-c"/>
+                                    <arg value="-c" />
                                     <arg value="
 											cp -rvf \
 											src/main/external/kudu/build/release/bin \
 											src/main/external/kudu/build/release/lib \
-											target/parcel/KUDU-${project.version} 2> /dev/null"/>
+											target/parcel/KUDU-${project.version} 2> /dev/null" />
                                 </exec>
                             </target>
                             <skip>${maven.parcel-compile.skip}</skip>

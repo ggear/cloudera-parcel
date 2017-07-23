@@ -12,11 +12,11 @@ File parcelBuildManifest = new File(basedir, "target/manifest.json");
 File parcelInstall = new File(basedir, "../../local-repo/com/cloudera/SQOOP_TERADATA_CONNECTOR/1.4c5.BESPOKE/SQOOP_TERADATA_CONNECTOR-1.4c5.BESPOKE-el6.parcel");
 File parcelSha1Install = new File(basedir, "../../local-repo/com/cloudera/SQOOP_TERADATA_CONNECTOR/1.4c5.BESPOKE/SQOOP_TERADATA_CONNECTOR-1.4c5.BESPOKE-el6.parcel.sha1");
 
-assert parcelDownload.isFile()
-assert parcelSha1Download.isFile()
+assert !parcelDownload.exists()
+assert !parcelSha1Download.exists()
 assert parcelExplodeTarget.isFile()
-assert parcelExplodeRepo.isFile()
-assert parcelExplodeLink.isFile()
+assert !parcelExplodeRepo.exists()
+assert !parcelExplodeLink.exists()
 assert parcelPrepare.isFile()
 assert parcelBuild.isFile()
 assert parcelBuildSha1.isFile()

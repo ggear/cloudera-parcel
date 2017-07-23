@@ -60,20 +60,21 @@ import org.python.util.PythonInterpreter;
 public class Parcel {
 
   private static final String SUFFIX_SHA1 = ".sha1";
+
   private static final String FILE_MANIFEST = "manifest.json";
   private static final String FILE_ENVIRONMENT = "parcel.env";
+
   private static final String PATH_PARCEL = "/meta/parcel.json";
   private static final String PATH_ENVIRONMENT = "/meta/" + FILE_ENVIRONMENT;
   private static final String PATH_MAKE_MANIFEST = "/bin/make_manifest.py";
+
   private static final Pattern REGEXP_SCP_CONNECT = Pattern.compile("^scp://(.*):(.*)@(.*):([0-9]*)(.*)");
+
   private static final Map<String, ImmutableMap<String, String>> OS_NAME_VERSION_DESCRIPTOR = ImmutableMap.of(//
     "Mac OS X", //
     ImmutableMap.of(//
       "10\\.11.*", "elcapitan", //
       "10\\.12.*", "sierra"//
-      // TODO Replace line below with above when compilation of all parcels
-      // works on sierra
-      // "10\\.12.*", "sierra"//
     ), //
     "Linux", //
     ImmutableMap.of(//
@@ -82,38 +83,55 @@ public class Parcel {
       "4\\.2\\.0.*-generic", "trusty"//
     )//
   );
+
   @Parameter(required = false, defaultValue = "com.cloudera.parcel")
   private String groupId = "com.cloudera.parcel";
+
   @Parameter(required = true)
   private String artifactId;
+
   @Parameter(required = true)
   private String version;
+
   @Parameter(required = false, defaultValue = "")
   private String classifier = "";
+
   @Parameter(required = false, defaultValue = "")
   private String baseDirectory = "";
+
   @Parameter(required = false, defaultValue = "src/main/parcel")
   private String parcelResourcesDirectory = "src/main/parcel";
+
   @Parameter(required = false, defaultValue = "target")
   private String buildDirectory = "target";
+
   @Parameter(required = false, defaultValue = "target/parcel")
   private String parcelBuildDirectory = "target/parcel";
+
   @Parameter(required = false, defaultValue = "")
   private String outputDirectory = "";
+
   @Parameter(required = false, defaultValue = "")
   private String linkDirectory = "";
+
   @Parameter(required = false, defaultValue = "")
   private String repositoryUrl = "";
+
   @Parameter(required = false, defaultValue = "")
   private String distributionRepositoryUrl = "";
+
   @Parameter(required = false, defaultValue = "/var/www/html")
   private String distributionRepositoryRoot = "/var/www/html";
+
   @Parameter(required = false, defaultValue = "")
   private String localRepositoryDirectory = "";
+
   @Parameter(required = false, defaultValue = "parcel")
   private String type = "parcel";
+
   @Parameter(required = false, defaultValue = "true")
   private boolean buildMetaData = true;
+
   @Parameter(required = false, defaultValue = "true")
   private boolean validateMetaData = true;
 
@@ -463,7 +481,12 @@ public class Parcel {
       archiver.createArchive();
       FileUtils.writeStringToFile(buildPathSha1, calculateSha1(buildPath) + "\n");
       if (buildMetaData) {
-        executePythonScript(log, PATH_MAKE_MANIFEST, getFile(buildDirectory).getAbsolutePath());
+        String buildDirectoryFile = getFile(buildDirectory).getAbsolutePath();
+        executePythonScript(log, PATH_MAKE_MANIFEST, buildDirectoryFile, buildDirectoryFile);
+        File buildPathManifestRoot = new File(getFile(buildDirectory).getAbsolutePath() + "/..", FILE_MANIFEST);
+        if (buildPathManifestRoot.exists() && !buildPathManifest.exists()) {
+          buildPathManifestRoot.renameTo(buildPathManifest);
+        }
         if (validateMetaData) {
           validateParcel(log, new String[]{"-f", buildPath.getAbsolutePath()});
           validateParcel(log, new String[]{"-m", buildPathManifest.getAbsolutePath()});
@@ -673,8 +696,9 @@ public class Parcel {
     }
   }
 
-  private void executePythonScript(Log log, String script, String... arguments) {
+  private void executePythonScript(Log log, String script, String working, String... arguments) {
     PySystemState state = new PySystemState();
+    state.setCurrentWorkingDir(working);
     state.argv.clear();
     state.argv.append(new PyString(script));
     for (String argument : arguments) {

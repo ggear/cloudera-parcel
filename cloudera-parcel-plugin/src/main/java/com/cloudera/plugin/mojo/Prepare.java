@@ -34,22 +34,27 @@ public class Prepare extends AbstractMojo {
   @Parameter(defaultValue = "${parcel.validateMetaData}", required = false, readonly = true)
   private boolean validateMetaData = true;
 
+  @Parameter(defaultValue = "${parcel.skip}", required = false, readonly = true)
+  private boolean skip = false;
+
   @Parameter(required = false)
   private List<Parcel> parcels;
 
   @Override
   public void execute() throws MojoExecutionException {
-    if (parcels == null) {
-      parcels = Arrays.asList(new Parcel[]{ParcelBuilder.get().groupId(project.getGroupId()).artifactId(project.getArtifactId())
-        .version(project.getVersion()).classifier(StringUtils.isEmpty(parcelClassifier) ? Parcel.getOsDescriptor() : parcelClassifier)
-        .baseDirectory(project.getBasedir().getAbsolutePath()).parcelResourcesDirectory(parcelResourcesDirectory)
-        .parcelBuildDirectory(parcelBuildDirectory).type(project.getPackaging()).buildMetaData(buildMetaData)
-        .validateMetaData(validateMetaData).build()});
+    if (!skip) {
+      if (parcels == null) {
+        parcels = Arrays.asList(new Parcel[]{ParcelBuilder.get().groupId(project.getGroupId()).artifactId(project.getArtifactId())
+          .version(project.getVersion()).classifier(StringUtils.isEmpty(parcelClassifier) ? Parcel.getOsDescriptor() : parcelClassifier)
+          .baseDirectory(project.getBasedir().getAbsolutePath()).parcelResourcesDirectory(parcelResourcesDirectory)
+          .parcelBuildDirectory(parcelBuildDirectory).type(project.getPackaging()).buildMetaData(buildMetaData)
+          .validateMetaData(validateMetaData).build()});
 
-    }
-    for (Parcel parcel : parcels) {
-      parcel.setBaseDirectory(project.getBasedir().getAbsolutePath());
-      parcel.prepare(getLog());
+      }
+      for (Parcel parcel : parcels) {
+        parcel.setBaseDirectory(project.getBasedir().getAbsolutePath());
+        parcel.prepare(getLog());
+      }
     }
   }
 

@@ -27,18 +27,23 @@ public class Download extends AbstractMojo {
   @Parameter(defaultValue = "${parcel.validateMetaData}", required = false, readonly = true)
   private boolean validateMetaData = true;
 
+  @Parameter(defaultValue = "${parcel.skip}", required = false, readonly = true)
+  private boolean skip = false;
+
   @Parameter(required = false)
   private List<Parcel> parcels;
 
   @Override
   public void execute() throws MojoExecutionException {
-    if (parcels == null) {
-      parcels = new ArrayList<>();
-    }
-    for (Parcel parcel : parcels) {
-      parcel.setLocalRepositoryDirectory(localRepository.getBasedir());
-      parcel.setBaseDirectory(project.getBasedir().getAbsolutePath());
-      parcel.download(getLog());
+    if (!skip) {
+      if (parcels == null) {
+        parcels = new ArrayList<>();
+      }
+      for (Parcel parcel : parcels) {
+        parcel.setLocalRepositoryDirectory(localRepository.getBasedir());
+        parcel.setBaseDirectory(project.getBasedir().getAbsolutePath());
+        parcel.download(getLog());
+      }
     }
   }
 

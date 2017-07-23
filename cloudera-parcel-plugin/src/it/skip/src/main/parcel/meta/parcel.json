@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "name": "${parcel.name}",
+  "version": "${parcel.version}",
+  "extraVersionInfo": {
+    "fullVersion": "${parcel.version.full}",
+    "baseVersion": "${parcel.version.base}"
+  },
+  "setActiveSymlink": true,
+  "scripts": {
+    "defines": "sqoop_env.sh"
+  },
+  "packages": [],
+  "components": [],
+  "provides": [
+    "sqoop-plugin"
+  ],
+  "users": {},
+  "groups": []
+}

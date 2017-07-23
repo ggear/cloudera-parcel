@@ -26,4 +26,8 @@ assert !parcelBuildManifest.isFile()
 assert parcelInstall.isFile()
 assert parcelSha1Install.isFile()
 
+File repo = new File(basedir, "../../local-repo")
+repo.deleteDir()
+repo.mkdirs()
+
 return true;
