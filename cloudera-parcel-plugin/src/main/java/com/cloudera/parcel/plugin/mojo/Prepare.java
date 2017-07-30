@@ -1,10 +1,12 @@
-package com.cloudera.plugin.mojo;
+package com.cloudera.parcel.plugin.mojo;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
-import com.cloudera.plugin.Parcel;
-import com.cloudera.plugin.Parcel.ParcelBuilder;
+import com.cloudera.parcel.library.ParcelUtil;
+import com.cloudera.parcel.plugin.Parcel;
+import com.cloudera.parcel.plugin.Parcel.ParcelBuilder;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
@@ -44,8 +46,8 @@ public class Prepare extends AbstractMojo {
   public void execute() throws MojoExecutionException {
     if (!skip) {
       if (parcels == null) {
-        parcels = Arrays.asList(ParcelBuilder.get().groupId(project.getGroupId()).artifactId(project.getArtifactId())
-          .version(project.getVersion()).classifier(StringUtils.isEmpty(parcelClassifier) ? Parcel.getOsDescriptor() : parcelClassifier)
+        parcels = Collections.singletonList(ParcelBuilder.get().groupId(project.getGroupId()).artifactId(project.getArtifactId())
+          .version(project.getVersion()).classifier(StringUtils.isEmpty(parcelClassifier) ? ParcelUtil.getOsDescriptor() : parcelClassifier)
           .baseDirectory(project.getBasedir().getAbsolutePath()).parcelResourcesDirectory(parcelResourcesDirectory)
           .parcelBuildDirectory(parcelBuildDirectory).type(project.getPackaging()).buildMetaData(buildMetaData)
           .validateMetaData(validateMetaData).build());

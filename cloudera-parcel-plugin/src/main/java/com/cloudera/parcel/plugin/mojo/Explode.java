@@ -1,9 +1,9 @@
-package com.cloudera.plugin.mojo;
+package com.cloudera.parcel.plugin.mojo;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import com.cloudera.plugin.Parcel;
+import com.cloudera.parcel.plugin.Parcel;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -12,8 +12,8 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 
-@Mojo(name = "download", requiresProject = false, defaultPhase = LifecyclePhase.VALIDATE)
-public class Download extends AbstractMojo {
+@Mojo(name = "explode", requiresProject = false, defaultPhase = LifecyclePhase.VALIDATE)
+public class Explode extends AbstractMojo {
 
   @Parameter(defaultValue = "${project}", required = true, readonly = true)
   private MavenProject project;
@@ -42,7 +42,7 @@ public class Download extends AbstractMojo {
       for (Parcel parcel : parcels) {
         parcel.setLocalRepositoryDirectory(localRepository.getBasedir());
         parcel.setBaseDirectory(project.getBasedir().getAbsolutePath());
-        parcel.download(getLog());
+        parcel.explode(getLog());
       }
     }
   }

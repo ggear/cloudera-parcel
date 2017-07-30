@@ -122,6 +122,7 @@
     </profiles>
 
     <modules>
+        <module>cloudera-parcel-library</module>
         <module>cloudera-parcel-plugin</module>
     </modules>
 

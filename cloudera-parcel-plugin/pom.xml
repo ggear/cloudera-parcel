@@ -33,6 +33,11 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>com.cloudera.parcel</groupId>
+            <artifactId>cloudera-parcel-library</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.codehaus.plexus</groupId>
             <artifactId>plexus-utils</artifactId>
             <version>${plexus-utils.version}</version>

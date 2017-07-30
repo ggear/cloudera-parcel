@@ -1,10 +1,12 @@
-package com.cloudera.plugin.mojo;
+package com.cloudera.parcel.plugin.mojo;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
-import com.cloudera.plugin.Parcel;
-import com.cloudera.plugin.Parcel.ParcelBuilder;
+import com.cloudera.parcel.library.ParcelUtil;
+import com.cloudera.parcel.plugin.Parcel;
+import com.cloudera.parcel.plugin.Parcel.ParcelBuilder;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
@@ -13,8 +15,8 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.util.StringUtils;
 
-@Mojo(name = "build", requiresProject = true, defaultPhase = LifecyclePhase.PACKAGE)
-public class Build extends AbstractMojo {
+@Mojo(name = "deploy", requiresProject = true, defaultPhase = LifecyclePhase.DEPLOY)
+public class Deploy extends AbstractMojo {
 
   @Parameter(defaultValue = "${project}", required = true, readonly = true)
   private MavenProject project;
@@ -24,9 +26,6 @@ public class Build extends AbstractMojo {
 
   @Parameter(defaultValue = "${project.build.directory}", required = false, readonly = true)
   private String buildDirectory;
-
-  @Parameter(defaultValue = "${project.build.directory}/parcel", required = false, readonly = true)
-  private String parcelBuildDirectory;
 
   @Parameter(defaultValue = "${parcel.distributionRepositoryUrl}", required = false, readonly = true)
   private String distributionRepositoryUrl;
@@ -47,15 +46,15 @@ public class Build extends AbstractMojo {
   public void execute() throws MojoExecutionException {
     if (!skip) {
       if (parcels == null) {
-        parcels = Arrays.asList(ParcelBuilder.get().groupId(project.getGroupId()).artifactId(project.getArtifactId())
-          .version(project.getVersion()).classifier(StringUtils.isEmpty(parcelClassifier) ? Parcel.getOsDescriptor() : parcelClassifier)
-          .baseDirectory(project.getBasedir().getAbsolutePath()).buildDirectory(buildDirectory).parcelBuildDirectory(parcelBuildDirectory)
+        parcels = Collections.singletonList(ParcelBuilder.get().groupId(project.getGroupId()).artifactId(project.getArtifactId())
+          .version(project.getVersion()).classifier(StringUtils.isEmpty(parcelClassifier) ? ParcelUtil.getOsDescriptor() : parcelClassifier)
+          .baseDirectory(project.getBasedir().getAbsolutePath()).buildDirectory(buildDirectory)
           .distributionRepositoryUrl(distributionRepositoryUrl).type(project.getPackaging()).buildMetaData(buildMetaData)
           .validateMetaData(validateMetaData).build());
       }
       for (Parcel parcel : parcels) {
         parcel.setBaseDirectory(project.getBasedir().getAbsolutePath());
-        parcel.build(getLog());
+        parcel.deploy(getLog());
       }
     }
   }
