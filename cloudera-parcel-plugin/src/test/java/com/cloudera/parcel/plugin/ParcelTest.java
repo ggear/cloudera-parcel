@@ -23,6 +23,10 @@ public class ParcelTest {
   private static final String PARCEL_GROUP_ID = "com.cloudera.parcel";
   private static final String PARCEL_REPO_URL = "http://archive.cloudera.com/sqoop-connectors/parcels";
 
+  private static final String PARCEL_VERSION_SHORT_ALT = "2.2.0";
+  private static final String PARCEL_ARTIFACT_ID_ALT = "SPARK2";
+  private static final String PARCEL_VERSION_LONG_ALT = "2.2.0.cloudera1-1.cdh5.12.0.p0.142354";
+
   private static final String PATH_EXPLODE = new File(".").getAbsolutePath() + "/target/test-sqoop-runtime";
   private static final String PATH_EXPLODE_LINK = new File(".").getAbsolutePath() + "/target/test-sqoop-runtime-link";
   private static final String PATH_WORKING = new File(".").getAbsolutePath().substring(0, new File(".").getAbsolutePath().length() - 2);
@@ -118,6 +122,10 @@ public class ParcelTest {
         .getVersionShort());
     Assert.assertEquals(PARCEL_VERSION_SHORT,
       ParcelBuilder.get().groupId(PARCEL_GROUP_ID).artifactId(PARCEL_ARTIFACT_ID).version(PARCEL_VERSION_LONG)
+        .classifier(PARCEL_CLASSIFIER).baseDirectory(PATH_WORKING).outputDirectory(PATH_EXPLODE).linkDirectory(PATH_EXPLODE_LINK)
+        .type(PARCEL_TYPE).build().getVersionShort());
+    Assert.assertEquals(PARCEL_VERSION_SHORT_ALT,
+      ParcelBuilder.get().groupId(PARCEL_GROUP_ID).artifactId(PARCEL_ARTIFACT_ID_ALT).version(PARCEL_VERSION_LONG_ALT)
         .classifier(PARCEL_CLASSIFIER).baseDirectory(PATH_WORKING).outputDirectory(PATH_EXPLODE).linkDirectory(PATH_EXPLODE_LINK)
         .type(PARCEL_TYPE).build().getVersionShort());
   }

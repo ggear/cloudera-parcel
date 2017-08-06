@@ -230,7 +230,11 @@ public class Parcel {
         break;
       }
     }
-    return version.substring(0, index);
+    String versionShort = version.substring(0, index);
+    while (versionShort.endsWith(".")) {
+      versionShort = versionShort.substring(0, versionShort.length() - 1);
+    }
+    return versionShort;
   }
 
   public String getVersionBase() throws MojoExecutionException {
