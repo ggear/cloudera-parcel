@@ -6,12 +6,12 @@
     <groupId>com.cloudera.parcel</groupId>
     <artifactId>KUDU</artifactId>
     <packaging>parcel</packaging>
-    <version>1.4.0-1.cdh5.12.0.p0.25</version>
+    <version>1.4.0-1.cdh5.12.1.p0.10</version>
 
     <parent>
         <groupId>com.cloudera.parcel</groupId>
         <artifactId>cloudera-parcel-repository</artifactId>
-        <version>0.8.0-SNAPSHOT</version>
+        <version>0.8.2-SNAPSHOT</version>
     </parent>
 
     <properties>

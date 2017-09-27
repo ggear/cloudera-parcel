@@ -526,7 +526,8 @@ public class Parcel {
         }
         long time = System.currentTimeMillis();
         JSch jsch = new JSch();
-        jsch.addIdentity(sshConnectMatcher.group(2));
+        jsch.addIdentity(sshConnectMatcher.group(2).startsWith("/") ?
+          sshConnectMatcher.group(2) : (System.getenv("HOME") + "/" + sshConnectMatcher.group(2)));
         session = jsch.getSession(sshConnectMatcher.group(1), sshConnectMatcher.group(3), Integer.parseInt(sshConnectMatcher.group(4)));
         Properties config = new java.util.Properties();
         config.put("StrictHostKeyChecking", "no");
