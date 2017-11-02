@@ -5,7 +5,7 @@
     <groupId>com.cloudera</groupId>
     <artifactId>cloudera-parcel</artifactId>
     <packaging>pom</packaging>
-    <version>0.8.3</version>
+    <version>0.8.4-SNAPSHOT</version>
 
     <prerequisites>
         <maven>3.3</maven>
@@ -15,7 +15,7 @@
         <connection>scm:git:git@github.com:ggear/cloudera-parcel.git</connection>
         <url>scm:git:git@github.com:ggear/cloudera-parcel.git</url>
         <developerConnection>scm:git:git@github.com:ggear/cloudera-parcel.git</developerConnection>
-        <tag>cloudera-parcel-0.8.3</tag>
+        <tag>cloudera-parcel-0.7.8</tag>
     </scm>
 
     <distributionManagement>
