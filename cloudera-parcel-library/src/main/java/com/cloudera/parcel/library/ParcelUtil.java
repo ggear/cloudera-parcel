@@ -11,18 +11,19 @@ import org.apache.commons.io.IOUtils;
 
 public class ParcelUtil {
 
-  private static final ImmutableMap<String, ImmutableMap<String, String>> OS_NAME_VERSION_DESCRIPTOR = ImmutableMap.of(//
-    "Mac OS X", //
-    ImmutableMap.of(//
-      "10\\.11.*", "elcapitan", //
-      "10\\.12.*", "sierra" //
+  private static final ImmutableMap<String, ImmutableMap<String, String>> OS_NAME_VERSION_DESCRIPTOR = ImmutableMap.of(
+    "Mac OS X",
+    ImmutableMap.of(
+      "10\\.11.*", "elcapitan",
+      "10\\.12.*", "sierra",
+      "10\\.13.*", "sierra" // Hack while awaiting compilation of Kudu for High Sierra
     ), //
-    "Linux", //
-    ImmutableMap.of(//
-      "6\\..*", "el6", //
-      "7\\..*", "el7", //
-      "14\\.04.*", "trusty", //
-      "16\\.04.*", "xenial" //
+    "Linux",
+    ImmutableMap.of(
+      "6\\..*", "el6",
+      "7\\..*", "el7",
+      "14\\.04.*", "trusty",
+      "16\\.04.*", "xenial"
     )
   );
 

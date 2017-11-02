@@ -6,7 +6,7 @@
     <groupId>com.cloudera.parcel</groupId>
     <artifactId>KUDU</artifactId>
     <packaging>parcel</packaging>
-    <version>1.4.0-1.cdh5.12.1.p0.10</version>
+    <version>1.5.0-cdh5.13.0</version>
 
     <parent>
         <groupId>com.cloudera.parcel</groupId>

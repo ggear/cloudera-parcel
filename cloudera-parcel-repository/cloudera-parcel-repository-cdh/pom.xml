@@ -6,7 +6,7 @@
     <groupId>com.cloudera.parcel</groupId>
     <artifactId>CDH</artifactId>
     <packaging>parcel</packaging>
-    <version>5.7.1-1.cdh5.7.1.p0.11</version>
+    <version>5.13.0-1.cdh5.13.0.p0.29</version>
 
     <parent>
         <groupId>com.cloudera.parcel</groupId>
@@ -15,10 +15,9 @@
     </parent>
 
     <properties>
-        <impala.version>2.5.0</impala.version>
+        <kudu.version>1.5.0</kudu.version>
         <parcel.buildMetaData>false</parcel.buildMetaData>
-        <parcel.distributionRepositoryUrl>scp://graham:/Users/graham/.ssh/id_rsa.pem@52.63.86.162:22/var/www/html/tmph3l7m2vv103/sbin/cdh5/parcels
-        </parcel.distributionRepositoryUrl>
+        <parcel.distributionRepositoryUrl>scp://graham:/Users/graham/.ssh/id_rsa.pem@52.63.86.162:22/var/www/html/tmph3l7m2vv103/sbin/cdh5/parcels</parcel.distributionRepositoryUrl>
     </properties>
 
     <build>
@@ -65,24 +64,24 @@
                             </parcels>
                         </configuration>
                     </execution>
-                    <execution>
-                        <id>explode-impala</id>
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>explode</goal>
-                        </goals>
-                        <configuration>
-                            <parcels>
-                                <parcel>
-                                    <groupId>com.cloudera.parcel</groupId>
-                                    <artifactId>IMPALA</artifactId>
-                                    <version>${impala.version}-cdh${short.version}</version>
-                                    <repositoryUrl>http://52.63.86.162/tmph3l7m2vv103/sbin/impala/parcels</repositoryUrl>
-                                    <linkDirectory>${project.basedir}/src/main/external/IMPALA-${impala.version}-cdh${short.version}</linkDirectory>
-                                </parcel>
-                            </parcels>
-                        </configuration>
-                    </execution>
+                    <!--<execution>-->
+                        <!--<id>explode-kudu</id>-->
+                        <!--<phase>validate</phase>-->
+                        <!--<goals>-->
+                            <!--<goal>explode</goal>-->
+                        <!--</goals>-->
+                        <!--<configuration>-->
+                            <!--<parcels>-->
+                                <!--<parcel>-->
+                                    <!--<groupId>com.cloudera.parcel</groupId>-->
+                                    <!--<artifactId>KUDU</artifactId>-->
+                                    <!--<version>${kudu.version}-cdh${short.version}</version>-->
+                                    <!--<repositoryUrl>http://52.63.86.162/tmph3l7m2vv103/sbin/kudu/parcels</repositoryUrl>-->
+                                    <!--<linkDirectory>${project.basedir}/src/main/external/IMPALA-${kudu.version}-cdh${short.version}</linkDirectory>-->
+                                <!--</parcel>-->
+                            <!--</parcels>-->
+                        <!--</configuration>-->
+                    <!--</execution>-->
                 </executions>
             </plugin>
             <plugin>
@@ -101,7 +100,7 @@
                                         <exclude name=".gitignore" />
                                     </fileset>
                                 </delete>
-                                <!-- TODO: Build CDH parcel, copy Impala and Kudu -->
+                                <!-- TODO: Build CDH parcel, copy Impala and Kudu, remove m2 repo exploded version -->
                             </target>
                             <skip>${maven.parcel-compile.skip}</skip>
                         </configuration>
