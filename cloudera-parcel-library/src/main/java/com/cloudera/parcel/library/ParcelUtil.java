@@ -13,11 +13,14 @@ public class ParcelUtil {
 
   private static final ImmutableMap<String, ImmutableMap<String, String>> OS_NAME_VERSION_DESCRIPTOR = ImmutableMap.of(
     "Mac OS X",
-    ImmutableMap.of(
-      "10\\.11.*", "elcapitan",
-      "10\\.12.*", "sierra",
-      "10\\.13.*", "sierra" // Hack while awaiting compilation of Kudu for High Sierra
-    ), //
+    ImmutableMap.<String, String>builder()
+      .put("10\\.11.*", "elcapitan")
+      .put("10\\.12.*", "sierra")
+      .put("10\\.13.*", "sierra") // Hack while awaiting compilation of Kudu for High Sierra
+      .put("10\\.14.*", "sierra") // Hack while awaiting compilation of Kudu for Mojave
+      .put("10\\.15.*", "sierra") // Hack while awaiting compilation of Kudu for next MacOS
+      .put("10\\.16.*", "sierra") // Hack while awaiting compilation of Kudu for next next MacOS
+      .build(),
     "Linux",
     ImmutableMap.of(
       "6\\..*", "el6",
