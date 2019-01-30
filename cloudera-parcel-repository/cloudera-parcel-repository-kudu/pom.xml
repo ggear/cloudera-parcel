@@ -16,7 +16,7 @@
 
     <properties>
         <parcel.buildMetaData>false</parcel.buildMetaData>
-        <parcel.distributionRepositoryUrl>scp://graham:/Users/graham/.ssh/id_rsa.pem@52.63.86.162:22/var/www/html/tmph3l7m2vv103/sbin/kudu/parcels</parcel.distributionRepositoryUrl>
+        <parcel.distributionRepositoryUrl>scp://graham:/Users/graham/.ssh/id_rsa.pem@macmini-sheryl:22/var/www/html/tmph3l7m2vv103/sbin/kudu/parcels</parcel.distributionRepositoryUrl>
     </properties>
 
     <build>
