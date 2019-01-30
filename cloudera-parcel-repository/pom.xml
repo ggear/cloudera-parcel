@@ -6,12 +6,12 @@
     <groupId>com.cloudera.parcel</groupId>
     <artifactId>cloudera-parcel-repository</artifactId>
     <packaging>pom</packaging>
-    <version>0.8.5-SNAPSHOT</version>
+    <version>0.8.6-SNAPSHOT</version>
 
     <parent>
         <groupId>com.cloudera</groupId>
         <artifactId>cloudera-parcel</artifactId>
-        <version>0.8.5-SNAPSHOT</version>
+        <version>0.8.6-SNAPSHOT</version>
     </parent>
 
     <properties>
@@ -30,7 +30,7 @@
             <plugin>
                 <groupId>com.cloudera.parcel</groupId>
                 <artifactId>cloudera-parcel-plugin</artifactId>
-                <version>0.8.5-SNAPSHOT</version>
+                <version>0.8.6-SNAPSHOT</version>
                 <extensions>true</extensions>
             </plugin>
             <plugin>
