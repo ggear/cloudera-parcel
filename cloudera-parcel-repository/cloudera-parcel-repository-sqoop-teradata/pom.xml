@@ -17,7 +17,7 @@
     <properties>
         <parcel.classifier>el6</parcel.classifier>
         <parcel.distributionRepositoryUrl>
-            scp://graham:/Users/graham/.ssh/id_rsa.pem@macmini-sheryl:22/var/www/html/tmph3l7m2vv103/sbin/sqoop-connectors/parcels
+            scp://graham:/Users/graham/.ssh/id_rsa.pem@macmini-delila:22/var/www/html/tmph3l7m2vv103/sbin/sqoop-connectors/parcels
         </parcel.distributionRepositoryUrl>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>

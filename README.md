@@ -34,32 +34,6 @@ mvn install
 cd ..
 ```
 
-Alternatively, the module can be included as a binary dependency in maven, for example the plugin can be used as so:
-
-```xml
-	<pluginRepositories>
-		<pluginRepository>
-			<id>cloudera-framework-plugins</id>
-			<url>http://52.63.86.162:80/artifactory/plugins-release-local</url>
-			<snapshots>
-				<enabled>false</enabled>
-				<updatePolicy>never</updatePolicy>
-			</snapshots>
-		</pluginRepository>
-	</pluginRepositories>
-	<build>
-		<pluginManagement>
-			<plugins>
-				<plugin>
-					<groupId>com.cloudera.parcel</groupId>
-					<artifactId>cloudera-parcel-plugin</artifactId>
-					<version>0.8.6</version>
-				</plugin>
-			</plugins>
-		</pluginManagement>
-	</build>
-```
-
 ## Usage
 
 The plugin can be used as per the [integration tests](https://github.com/ggear/cloudera-parcel/tree/master/cloudera-parcel-plugin/src/it), the embedded [example](https://github.com/ggear/cloudera-parcel/tree/master/cloudera-parcel-repository/cloudera-parcel-repository-sqoop-teradata) and [cloudera-framework](https://github.com/ggear/cloudera-framework).
@@ -70,8 +44,8 @@ To perform a release:
 
 ```bash
 # Change the following variables to appropriate values for your target release
-export CP_VERSION_RELEASE=0.8.6
-export CP_VERSION_HEAD=0.8.7
+export CP_VERSION_RELEASE=0.8.7
+export CP_VERSION_HEAD=0.8.8
 mvn release:prepare -B -DreleaseVersion=$CP_VERSION_RELEASE -DdevelopmentVersion=$CP_VERSION_HEAD-SNAPSHOT
 mvn release:perform
 mvn release:clean clean

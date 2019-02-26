@@ -17,7 +17,7 @@
     <properties>
         <kudu.version>1.5.0</kudu.version>
         <parcel.buildMetaData>false</parcel.buildMetaData>
-        <parcel.distributionRepositoryUrl>scp://graham:/Users/graham/.ssh/id_rsa.pem@macmini-sheryl:22/var/www/html/tmph3l7m2vv103/sbin/cdh5/parcels</parcel.distributionRepositoryUrl>
+        <parcel.distributionRepositoryUrl>scp://graham:/Users/graham/.ssh/id_rsa.pem@macmini-delila:22/var/www/html/tmph3l7m2vv103/sbin/cdh5/parcels</parcel.distributionRepositoryUrl>
     </properties>
 
     <build>
