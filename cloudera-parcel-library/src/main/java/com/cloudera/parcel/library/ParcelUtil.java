@@ -7,6 +7,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.google.common.collect.ImmutableMap;
+
 import org.apache.commons.io.IOUtils;
 
 public class ParcelUtil {
@@ -26,7 +27,8 @@ public class ParcelUtil {
       "6\\..*", "el6",
       "7\\..*", "el7",
       "14\\.04.*", "trusty",
-      "16\\.04.*", "xenial"
+      "16\\.04.*", "xenial",
+      "4.9\\..*", "stretch"
     )
   );
 
