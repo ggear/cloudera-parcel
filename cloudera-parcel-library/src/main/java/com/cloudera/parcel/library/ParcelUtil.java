@@ -28,10 +28,11 @@ public class ParcelUtil {
       "7\\..*", "el7",
       "14\\.04.*", "trusty",
       "16\\.04.*", "xenial",
-      "4\\.9\\..*", "stretch"
+      "9\\..*", "stretch"
     )
   );
 
+  // TOOD: Improve to include Distribution check too to avoid version number overlap
   public static final Pattern REGEX_LSB_RELEASE = Pattern.compile("^Release:\\s+(.*)");
 
   /**

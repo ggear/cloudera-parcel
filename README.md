@@ -44,8 +44,8 @@ To perform a release:
 
 ```bash
 # Change the following variables to appropriate values for your target release
-export CP_VERSION_RELEASE=0.8.9
-export CP_VERSION_HEAD=0.9.0
+export CP_VERSION_RELEASE=0.9.0
+export CP_VERSION_HEAD=0.9.1
 mvn release:prepare -B -DreleaseVersion=$CP_VERSION_RELEASE -DdevelopmentVersion=$CP_VERSION_HEAD-SNAPSHOT
 mvn release:perform
 mvn release:clean clean
