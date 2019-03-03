@@ -28,7 +28,7 @@ public class ParcelUtil {
       "7\\..*", "el7",
       "14\\.04.*", "trusty",
       "16\\.04.*", "xenial",
-      "4.9\\..*", "stretch"
+      "4\\.9\\..*", "stretch"
     )
   );
 
